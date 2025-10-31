@@ -8,13 +8,14 @@ export default function CrosswordPage() {
   const user = JSON.parse(localStorage.getItem("user"));
   const startTime = Number(localStorage.getItem("startTime")) || Date.now();
 
-  // Keep preset letters visible, only empty ones editable
   const initialGrid = layout.map((row) =>
-    row.map((cell) => (cell === "" ? "" : cell))
+    row.map((cell) => (cell === "" ? "" : "")) 
   );
 
   const [grid, setGrid] = useState(initialGrid);
-  const [elapsed, setElapsed] = useState(Math.floor((Date.now() - startTime) / 1000));
+  const [elapsed, setElapsed] = useState(
+    Math.floor((Date.now() - startTime) / 1000)
+  );
   const [submitted, setSubmitted] = useState(false);
 
   useEffect(() => {
@@ -28,8 +29,10 @@ export default function CrosswordPage() {
     return () => clearInterval(timer);
   }, [startTime, navigate, user]);
 
-  const handleChange = (r, c, value) => {
-    if (layout[r][c] !== "") return; // prevent editing preset letters
+    const handleChange = (r, c, value) => {
+    const cell = layout[r][c];
+    if (cell === "") return; 
+
     const letter = value.slice(0, 1).toUpperCase();
     setGrid((g) => {
       const next = g.map((row) => [...row]);
@@ -38,19 +41,27 @@ export default function CrosswordPage() {
     });
   };
 
-  const handleSubmit = () => {
-    let total = 0, correct = 0;
+    const handleSubmit = () => {
+    let total = 0,
+      correct = 0;
     for (let r = 0; r < solution.length; r++) {
       for (let c = 0; c < solution[r].length; c++) {
         const sol = solution[r][c];
         if (sol && sol !== "") {
           total++;
-          if ((grid[r][c] || "").toUpperCase() === sol.toUpperCase()) correct++;
+          if ((grid[r][c] || "").toUpperCase() === sol.toUpperCase())
+            correct++;
         }
       }
     }
 
-    const entry = { name: user.name, time: elapsed, correct, total, timestamp: Date.now() };
+    const entry = {
+      name: user.name,
+      time: elapsed,
+      correct,
+      total,
+      timestamp: Date.now(),
+    };
     const leaderboard = JSON.parse(localStorage.getItem("leaderboard") || "[]");
     leaderboard.push(entry);
     leaderboard.sort((a, b) => a.time - b.time || b.correct - a.correct);
@@ -76,7 +87,9 @@ export default function CrosswordPage() {
       <header className="cw-header">
         <div className="cw-title">Crossword</div>
         <div className="cw-meta">
-          <div className="cw-user">Player: <strong>{user?.name}</strong></div>
+          <div className="cw-user">
+            Player: <strong>{user?.name}</strong>
+          </div>
           <div className="cw-timer">Time: {elapsed}s</div>
         </div>
       </header>
@@ -87,20 +100,24 @@ export default function CrosswordPage() {
             {grid.map((row, r) => (
               <div className="board-row" role="row" key={r}>
                 {row.map((cell, c) => {
-                  if (layout[r][c] === null) {
-                    return <div className="cell black" key={c} role="gridcell" />;
-                  }
+                  const isWordCell = layout[r][c] !== "";
                   return (
-                    <div className="cell white" key={c} role="gridcell">
-                      <input
-                        className="cell-input"
-                        maxLength={1}
-                        value={grid[r][c] || ""}
-                        onChange={(e) => handleChange(r, c, e.target.value)}
-                        disabled={submitted || layout[r][c] !== ""}
-                        autoComplete="off"
-                        aria-label={`Row ${r + 1} col ${c + 1}`}
-                      />
+                    <div
+                      key={c}
+                      className={`cell ${isWordCell ? "white" : "black"}`}
+                      role="gridcell"
+                    >
+                      {isWordCell && (
+                        <input
+                          className="cell-input"
+                          maxLength={1}
+                          value={grid[r][c] || ""}
+                          onChange={(e) => handleChange(r, c, e.target.value)}
+                          disabled={submitted}
+                          autoComplete="off"
+                          aria-label={`Row ${r + 1} col ${c + 1}`}
+                        />
+                      )}
                     </div>
                   );
                 })}
@@ -115,11 +132,13 @@ export default function CrosswordPage() {
             <div className="clue-group">
               <h4>Across</h4>
               <ul>
-                {clues.filter((c) => c.dir === "across").map((c) => (
-                  <li key={c.id}>
-                    <strong>{c.id}</strong> — {c.clue}
-                  </li>
-                ))}
+                {clues
+                  .filter((c) => c.dir === "across")
+                  .map((c) => (
+                    <li key={c.id}>
+                      <strong>{c.id}</strong> — {c.clue}
+                    </li>
+                  ))}
               </ul>
             </div>
 
@@ -142,13 +161,20 @@ export default function CrosswordPage() {
           </div>
 
           <div className="actions">
-            <button className="btn primary" onClick={handleSubmit} disabled={submitted}>
+            <button
+              className="btn primary"
+              onClick={handleSubmit}
+              disabled={submitted}
+            >
               Submit Answers
             </button>
             <button className="btn muted" onClick={resetPuzzle}>
               Restart
             </button>
-            <button className="btn ghost" onClick={() => navigate("/leaderboard")}>
+            <button
+              className="btn ghost"
+              onClick={() => navigate("/leaderboard")}
+            >
               View Leaderboard
             </button>
           </div>

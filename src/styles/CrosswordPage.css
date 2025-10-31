@@ -6,7 +6,7 @@
   background-position: center;
   background-attachment: fixed;
   font-family: "Poppins", sans-serif;
-  color: #0f172a;
+  color: #f8fafc;
   position: relative;
 }
 
@@ -14,10 +14,11 @@
   content: "";
   position: absolute;
   inset: 0;
-  background: rgba(255, 255, 255, 0.8);
+  background: rgba(15, 23, 42, 0.92);
   z-index: 0;
 }
 
+/* HEADER */
 .cw-header {
   display: flex;
   justify-content: space-between;
@@ -30,15 +31,17 @@
 .cw-title {
   font-weight: 700;
   font-size: 1.6rem;
+  color: #ffffff;
 }
 
 .cw-meta {
   display: flex;
   gap: 18px;
   align-items: center;
-  color: #374151;
+  color: #e2e8f0;
 }
 
+/* MAIN LAYOUT */
 .cw-main {
   display: flex;
   gap: 24px;
@@ -47,6 +50,7 @@
   z-index: 1;
 }
 
+/* BOARD */
 .cw-board {
   flex: 0 1 720px;
   display: flex;
@@ -54,10 +58,13 @@
 }
 
 .board-grid {
-  background: #fff;
+  background: #1e293b;
   padding: 16px;
   border-radius: 16px;
-  box-shadow: 0 8px 30px rgba(2, 6, 23, 0.15);
+  box-shadow: 0 8px 30px rgba(0, 0, 0, 0.4);
+  display:flex;
+  flex-direction: column;
+  gap: 4px;
 }
 
 .board-row {
@@ -80,9 +87,12 @@
 }
 
 .cell.white {
-  background: #fff;
-  border: 1px solid rgba(15, 23, 42, 0.2);
-  position: relative;
+  background: #facc15;
+  color: #111;
+  font-weight: bold;
+  border-radius: 7px;
+  cursor: default;
+
 }
 
 .cell-input {
@@ -92,52 +102,66 @@
   outline: none;
   text-align: center;
   font-weight: 700;
-  font-size: 20px;
+  font-size: 20px; 
   text-transform: uppercase;
   background: transparent;
-  color: #111827;
+  color: black;
+  background: #facc15;
+  border-radius: 7px;
 }
 
-.cell-number {
-  position: absolute;
-  top: 2px;
-  left: 4px;
-  font-size: 10px;
-  color: #6b7280;
-  pointer-events: none;
+.cell-input[disabled] {
+  
+  color: #111;
+  font-weight: bold;
+  border-radius: inherit;
+  cursor: default;
 }
 
+/* SIDEBAR */
 .cw-side {
-  width: 340px;
+  width: 460px;
   display: flex;
   flex-direction: column;
-  gap: 12px;
+  gap: 18px;
 }
 
 .clues {
-  background: #fff;
-  padding: 14px;
-  border-radius: 12px;
-  box-shadow: 0 8px 30px rgba(2, 6, 23, 0.1);
-  max-height: 440px;
+  background: #1e293b;
+  padding: 22px;
+  border-radius: 16px;
+  box-shadow: 0 8px 35px rgba(0, 0, 0, 0.5);
+  max-height: 600px;
   overflow-y: auto;
 }
 
+.clues h3,
+.clues h4,
+.clues li,
+.cw-user,
+.cw-timer,
+.progress-card {
+  color: #ffffff;
+}
+
 .clue-group h4 {
-  margin-bottom: 6px;
+  margin-bottom: 10px;
+  font-size: 1.2rem;
+  font-weight: 700;
 }
 
 .clue-group ul {
-  padding-left: 16px;
+  padding-left: 20px;
   margin: 0;
-  color: #374151;
+  font-size: 1.05rem;
+  line-height: 1.6;
 }
 
+/* BUTTONS */
 .actions {
   display: flex;
   flex-direction: column;
-  gap: 8px;
-  margin-top: 8px;
+  gap: 12px;
 }
 
 .btn {
@@ -146,6 +170,7 @@
   border: none;
   font-weight: 600;
   cursor: pointer;
+  font-size: 1rem;
 }
 
 .btn.primary {
@@ -154,43 +179,116 @@
 }
 
 .btn.muted {
-  background: #f3f4f6;
-  color: #0f172a;
+  background: #334155;
+  color: #f8fafc;
 }
 
 .btn.ghost {
   background: transparent;
-  border: 1px solid rgba(15, 23, 42, 0.1);
-  color: #111827;
+  border: 1px solid rgba(255, 255, 255, 0.3);
+  color: #f8fafc;
 }
 
+/* PROGRESS CARD */
 .progress-card {
-  padding: 12px;
-  background: #fff;
-  border-radius: 8px;
-  box-shadow: 0 8px 20px rgba(2, 6, 23, 0.08);
-}
-.cell-input[disabled] {
-  background: #f9e0a8;
-  color: #111;
-  font-weight: bold;
-  border-radius: inherit;
-  cursor: default;
+  padding: 16px;
+  background: #1e293b;
+  border-radius: 10px;
+  box-shadow: 0 8px 25px rgba(0, 0, 0, 0.45);
+  color: #f8fafc;
+  font-size: 1.05rem;
 }
 
-
-@media (max-width: 980px) {
+/* Tablet */
+@media (max-width: 1024px) {
   .cw-main {
     flex-direction: column;
     align-items: center;
   }
+
   .cw-side {
     width: 100%;
+    max-width: 600px;
   }
+
   .cw-board {
     width: 100%;
+    justify-content: center;
   }
+
   .board-grid {
-    transform: scale(0.9);
+    transform: scale(0.95);
+  }
+}
+
+@media (max-width: 768px) {
+  .cw-root {
+    padding: 12px;
+  }
+
+  .cw-header {
+    flex-direction: column;
+    gap: 8px;
+    text-align: center;
+  }
+
+  .cw-title {
+    font-size: 1.4rem;
+  }
+
+  .cw-main {
+    flex-direction: column;
+    align-items: center;
+    gap: 16px;
+  }
+
+  .cw-board {
+    width: 100%;
+    display: flex;
+    justify-content: center;
+  }
+
+  .board-grid {
+    transform: scale(0.75);
+    transform-origin: top center;
+  }
+
+  .cw-side {
+    width: 100%;
+    max-width: 100%;
+  }
+
+  .clues {
+    max-height: none;
+    padding: 16px;
+  }
+
+  .clue-group ul {
+    font-size: 0.95rem;
+  }
+
+  .btn {
+    font-size: 1rem;
+    padding: 8px 10px;
+  }
+
+  .progress-card {
+    font-size: 0.95rem;
+    padding: 12px;
+  }
+}
+
+/* Extra small devices (≤480px) */
+@media (max-width: 480px) {
+  .board-grid {
+    transform: scale(0.65);
+  }
+
+  .clue-group ul {
+    font-size: 0.9rem;
+  }
+
+  .cw-title {
+    font-size: 1.2rem;
   }
 }
