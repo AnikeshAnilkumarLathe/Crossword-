@@ -1,23 +1,28 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useMemo } from "react";
 import { useNavigate } from "react-router-dom";
 import { layout, clues, solution } from "../data/crosswordData";
 import "../styles/CrosswordPage.css";
+import GateTransition from "./GateTransition";
 
 export default function CrosswordPage() {
   const navigate = useNavigate();
   const user = JSON.parse(localStorage.getItem("user"));
   const startTime = Number(localStorage.getItem("startTime")) || Date.now();
+  const [loading, setLoading] = useState(false);
+  const [submitted, setSubmitted] = useState(false);
 
-  const initialGrid = layout.map((row) =>
-    row.map((cell) => (cell === "" ? "" : "")) 
+  // 🧠 Build the crossword grid only once for better performance
+  const initialGrid = useMemo(
+    () => layout.map((row) => row.map((cell) => (cell === "" ? "" : ""))),
+    []
   );
 
   const [grid, setGrid] = useState(initialGrid);
   const [elapsed, setElapsed] = useState(
     Math.floor((Date.now() - startTime) / 1000)
   );
-  const [submitted, setSubmitted] = useState(false);
 
+  // 🕒 Timer
   useEffect(() => {
     if (!user) {
       navigate("/");
@@ -29,28 +34,28 @@ export default function CrosswordPage() {
     return () => clearInterval(timer);
   }, [startTime, navigate, user]);
 
-    const handleChange = (r, c, value) => {
-    const cell = layout[r][c];
-    if (cell === "") return; 
-
+  // 🧩 Handle input change
+  const handleChange = (r, c, value) => {
+    if (layout[r][c] === "") return;
     const letter = value.slice(0, 1).toUpperCase();
-    setGrid((g) => {
-      const next = g.map((row) => [...row]);
+    setGrid((prev) => {
+      const next = prev.map((row) => [...row]);
       next[r][c] = letter;
       return next;
     });
   };
 
-    const handleSubmit = () => {
+  // 🚀 Handle puzzle submission
+  const handleSubmit = () => {
     let total = 0,
       correct = 0;
+
     for (let r = 0; r < solution.length; r++) {
       for (let c = 0; c < solution[r].length; c++) {
         const sol = solution[r][c];
         if (sol && sol !== "") {
           total++;
-          if ((grid[r][c] || "").toUpperCase() === sol.toUpperCase())
-            correct++;
+          if ((grid[r][c] || "").toUpperCase() === sol.toUpperCase()) correct++;
         }
       }
     }
@@ -62,6 +67,8 @@ export default function CrosswordPage() {
       total,
       timestamp: Date.now(),
     };
+
+    // Update leaderboard
     const leaderboard = JSON.parse(localStorage.getItem("leaderboard") || "[]");
     leaderboard.push(entry);
     leaderboard.sort((a, b) => a.time - b.time || b.correct - a.correct);
@@ -69,10 +76,14 @@ export default function CrosswordPage() {
     localStorage.setItem("lastResult", JSON.stringify(entry));
 
     setSubmitted(true);
-    setTimeout(() => {
-      alert(`Submitted — ${correct}/${total} correct • ${elapsed}s`);
-      navigate("/leaderboard");
-    }, 300);
+    alert(`Submitted — ${correct}/${total} correct • ${elapsed}s`);
+
+    setLoading(true);
+    setTimeout(() => navigate("/leaderboard"), 700);
+  };
+
+  const handleGateComplete = () => {
+    setLoading(false);
   };
 
   const resetPuzzle = () => {
@@ -84,6 +95,8 @@ export default function CrosswordPage() {
 
   return (
     <div className="cw-root">
+      {loading && <GateTransition loading={loading} onComplete={handleGateComplete} />}
+
       <header className="cw-header">
         <div className="cw-title">Crossword</div>
         <div className="cw-meta">
@@ -95,6 +108,7 @@ export default function CrosswordPage() {
       </header>
 
       <main className="cw-main">
+        {/* Crossword Grid */}
         <section className="cw-board">
           <div className="board-grid" role="grid" aria-label="Crossword grid">
             {grid.map((row, r) => (
@@ -126,9 +140,11 @@ export default function CrosswordPage() {
           </div>
         </section>
 
+        {/* Clues + Controls */}
         <aside className="cw-side">
           <div className="clues">
             <h3>Clues</h3>
+
             <div className="clue-group">
               <h4>Across</h4>
               <ul>
