@@ -233,29 +233,31 @@
   }
 
   .cw-title {
-    font-size: 1.4rem;
+    font-size: 5rem;
   }
 
   .cw-main {
     flex-direction: column;
     align-items: center;
-    gap: 16px;
+    gap: 0;
   }
 
   .cw-board {
     width: 100%;
     display: flex;
     justify-content: center;
+    padding:0;
   }
 
   .board-grid {
-    transform: scale(0.75);
+    transform: scale(0.8);
     transform-origin: top center;
   }
 
   .cw-side {
     width: 100%;
     max-width: 100%;
+    margin-top: -100px;
   }
 
   .clues {
@@ -280,8 +282,24 @@
 
 /* Extra small devices (≤480px) */
 @media (max-width: 480px) {
+  .cw-main {
+    flex-direction: column;
+    align-items: center;
+    gap: 0; /* no gap between board and clues */
+  }
+
+  .cw-board {
+    margin-bottom: 0; /* no margin between board and side */
+  }
+
   .board-grid {
-    transform: scale(0.65);
+    transform: scale(0.7);
+    transform-origin: top center;
+    padding-bottom: 0px; /* remove bottom internal space */
+  }
+
+  .cw-side {
+    margin-top: -200px; /* pull clues slightly upward */
   }
 
   .clue-group ul {
