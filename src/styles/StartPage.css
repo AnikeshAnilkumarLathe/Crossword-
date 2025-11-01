@@ -1,9 +1,11 @@
+/* 🌟 Global Reset */
 * {
   margin: 0;
   padding: 0;
   box-sizing: border-box;
 }
 
+/* 🌄 Root Container */
 .start-root {
   position: relative;
   height: 100vh;
@@ -14,9 +16,9 @@
   justify-content: center;
   font-family: "Poppins", sans-serif;
   color: #fff;
-
 }
 
+/* 🎥 Background Video */
 .bg-video {
   position: fixed;
   top: 0;
@@ -27,15 +29,17 @@
   z-index: -2;
 }
 
+/* 📦 Content Container */
 .content-container {
   display: flex;
-  justify-content: right;
+  justify-content: flex-end;
   align-items: center;
   height: 100%;
   width: 100%;
   padding-right: 2%;
 }
 
+/* 💫 Left Section Card */
 .start-left {
   background: rgba(0, 0, 0, 0.55);
   padding: 42px 50px;
@@ -54,6 +58,7 @@
   box-shadow: 0 0 35px rgba(255, 220, 120, 0.25);
 }
 
+/* ✨ Brand / Title */
 .brand {
   margin-bottom: 20px;
 }
@@ -72,6 +77,7 @@
   margin-top: 8px;
 }
 
+/* 🪄 Auth Box */
 .auth-card {
   background: rgba(0, 0, 0, 0.6);
   padding: 22px;
@@ -108,6 +114,7 @@
   background: rgba(50, 50, 50, 0.85);
 }
 
+/* 🧈 Buttons */
 .btn {
   padding: 10px 16px;
   border-radius: 10px;
@@ -140,6 +147,7 @@
   color: #fff8e0;
 }
 
+/* 🧑‍💼 Username Display */
 .username {
   font-size: 1.05rem;
   color: #ffe8b3;
@@ -148,6 +156,7 @@
   font-weight: 700;
 }
 
+/* 🔗 Button Row */
 .row {
   display: flex;
   justify-content: center;
@@ -155,17 +164,122 @@
   margin-top: 12px;
 }
 
-@media (max-width: 768px) {
+/* 🌐 MEDIA QUERIES */
+
+/* 💻 Medium Devices (Tablets / Small Laptops) */
+@media (max-width: 1024px) {
+  .content-container {
+    justify-content: center;
+    padding-right: 0;
+  }
+
   .start-left {
-    padding: 30px;
-    width: 92%;
+    padding: 36px 40px;
+    max-width: 420px;
+  }
+
+  .site-title {
+    font-size: 2rem;
+  }
+
+  .tagline {
+    font-size: 0.95rem;
+  }
+
+  .auth-card {
+    padding: 18px;
+  }
+
+  .btn {
+    font-size: 0.9rem;
+  }
+}
+
+/* 📱 Small Devices (Phones up to 768px) */
+@media (max-width: 768px) {
+  .content-container {
+    justify-content: center;
+    padding: 0 5%;
+  }
+
+  .start-left {
+    padding: 30px 26px;
+    width: 95%;
+    max-width: 400px;
+    border-radius: 16px;
   }
 
   .site-title {
     font-size: 1.8rem;
   }
 
+  .tagline {
+    font-size: 0.9rem;
+  }
+
+  .auth-title {
+    font-size: 1.05rem;
+  }
+
   .auth-card {
     padding: 16px;
+  }
+
+  .auth-card input {
+    padding: 10px;
+    font-size: 0.9rem;
+  }
+
+  .btn {
+    padding: 8px 14px;
+    font-size: 0.9rem;
+  }
+
+  .row {
+    flex-direction: column;
+    gap: 10px;
+  }
+}
+
+/* 📞 Extra Small Devices (Under 480px) */
+@media (max-width: 480px) {
+  .content-container {
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    padding: 0 4%;
+  }
+
+  .start-left {
+    width: 100%;
+    padding: 24px 18px;
+    border-radius: 14px;
+  }
+
+  .site-title {
+    font-size: 1.6rem;
+  }
+
+  .tagline {
+    font-size: 0.85rem;
+  }
+
+  .auth-title {
+    font-size: 0.95rem;
+  }
+
+  .auth-card input {
+    padding: 9px;
+    font-size: 0.85rem;
+  }
+
+  .btn {
+    font-size: 0.85rem;
+    padding: 8px 12px;
+  }
+
+  .row {
+    flex-direction: column;
+    width: 100%;
   }
 }
