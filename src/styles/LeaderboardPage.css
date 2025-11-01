@@ -1,3 +1,4 @@
+/* 🌸 Base Styles */
 .lb-root {
   min-height: 100vh;
   display: flex;
@@ -9,6 +10,7 @@
   padding: 70px 30%;
 }
 
+/* 🎥 Background Video */
 .lb-video-bg {
   position: fixed;
   top: 0;
@@ -19,6 +21,7 @@
   z-index: -1;
 }
 
+/* 💎 Content Wrapper */
 .lb-content {
   position: relative;
   z-index: 2;
@@ -31,6 +34,7 @@
   border: 1px solid rgba(255, 192, 203, 0.3);
 }
 
+/* 🪞 Header */
 .lb-header {
   display: flex;
   justify-content: space-between;
@@ -51,7 +55,7 @@
   gap: 10px;
 }
 
-
+/* 🔘 Buttons */
 .lb-root .btn {
   padding: 10px 16px;
   border-radius: 10px;
@@ -83,6 +87,7 @@
   background: rgba(255, 255, 255, 0.1);
 }
 
+/* 🩷 Main Section */
 .lb-main {
   display: flex;
   flex-direction: column;
@@ -92,6 +97,7 @@
   width: 100%;
 }
 
+/* 🪄 Last Card */
 .last-card {
   background: rgba(255, 240, 246, 0.12);
   backdrop-filter: blur(12px);
@@ -108,6 +114,7 @@
   font-weight: 700;
 }
 
+/* 📊 Table */
 .lb-table {
   width: 100%;
   border-collapse: collapse;
@@ -146,4 +153,103 @@
   background: linear-gradient(90deg, rgba(249, 168, 212, 0.25), rgba(244, 114, 182, 0.35));
   font-weight: 600;
   color: #fff0f6;
-}   
+}
+
+/* 🌐 MEDIA QUERIES */
+
+/* 🧩 Medium Devices (Tablets) */
+@media (max-width: 1024px) {
+  .lb-root {
+    padding: 60px 15%;
+  }
+
+  .lb-content {
+    padding: 32px 24px;
+  }
+
+  .lb-header h2 {
+    font-size: 2.2rem;
+  }
+
+  .lb-table th,
+  .lb-table td {
+    padding: 12px 14px;
+    font-size: 0.95rem;
+  }
+}
+
+/* 📱 Small Devices (Phones) */
+@media (max-width: 768px) {
+  .lb-root {
+    padding: 50px 10%;
+  }
+
+  .lb-content {
+    padding: 28px 18px;
+  }
+
+  .lb-header {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 12px;
+  }
+
+  .lb-header h2 {
+    font-size: 1.8rem;
+  }
+
+  .lb-actions {
+    width: 100%;
+    justify-content: flex-start;
+    flex-wrap: wrap;
+    gap: 8px;
+  }
+
+  .lb-root .btn {
+    font-size: 0.9rem;
+    padding: 8px 14px;
+  }
+
+  .lb-table th,
+  .lb-table td {
+    font-size: 0.9rem;
+    padding: 10px 12px;
+  }
+
+  .last-card {
+    padding: 14px 16px;
+    font-size: 0.9rem;
+  }
+}
+
+/* 📞 Extra Small Devices (Phones under 480px) */
+@media (max-width: 480px) {
+  .lb-root {
+    padding: 40px 6%;
+  }
+
+  .lb-header h2 {
+    font-size: 1.5rem;
+    text-align: center;
+    width: 100%;
+  }
+
+  .lb-actions {
+    justify-content: center;
+  }
+
+  .lb-content {
+    border-radius: 14px;
+    padding: 20px 14px;
+  }
+
+  .lb-table th,
+  .lb-table td {
+    font-size: 0.85rem;
+    padding: 8px 10px;
+  }
+
+  .last-card {
+    padding: 12px;
+  }
+}
