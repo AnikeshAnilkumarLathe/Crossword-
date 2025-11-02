@@ -11,7 +11,6 @@ export default function CrosswordPage() {
   const [loading, setLoading] = useState(false);
   const [submitted, setSubmitted] = useState(false);
 
-  // 🧠 Build the crossword grid only once for better performance
   const initialGrid = useMemo(
     () => layout.map((row) => row.map((cell) => (cell === "" ? "" : ""))),
     []
@@ -22,7 +21,7 @@ export default function CrosswordPage() {
     Math.floor((Date.now() - startTime) / 1000)
   );
 
-  // 🕒 Timer
+  // Timer
   useEffect(() => {
     if (!user) {
       navigate("/");
@@ -34,7 +33,7 @@ export default function CrosswordPage() {
     return () => clearInterval(timer);
   }, [startTime, navigate, user]);
 
-  // 🧩 Handle input change
+  // Handle input change
   const handleChange = (r, c, value) => {
     if (layout[r][c] === "") return;
     const letter = value.slice(0, 1).toUpperCase();
@@ -79,7 +78,7 @@ export default function CrosswordPage() {
     alert(`Submitted — ${correct}/${total} correct • ${elapsed}s`);
 
     setLoading(true);
-    setTimeout(() => navigate("/leaderboard"), 700);
+    setTimeout(() => navigate("/leaderboard"), 1000);
   };
 
   const handleGateComplete = () => {
@@ -188,11 +187,16 @@ export default function CrosswordPage() {
               Restart
             </button>
             <button
-              className="btn ghost"
-              onClick={() => navigate("/leaderboard")}
-            >
-              View Leaderboard
-            </button>
+  className="btn ghost"
+  onClick={() => {
+    setLoading(true);
+    setTimeout(() => {
+      navigate("/leaderboard");
+    }, 1000);
+  }}
+>
+  View Leaderboard
+</button>
           </div>
 
           <div className="progress-card">
