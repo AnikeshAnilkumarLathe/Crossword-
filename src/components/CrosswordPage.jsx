@@ -11,7 +11,6 @@ export default function CrosswordPage() {
   const [loading, setLoading] = useState(false);
   const [submitted, setSubmitted] = useState(false);
 
-  // 🧠 Build the crossword grid only once for better performance
   const initialGrid = useMemo(
     () => layout.map((row) => row.map((cell) => (cell === "" ? "" : ""))),
     []
@@ -22,7 +21,7 @@ export default function CrosswordPage() {
     Math.floor((Date.now() - startTime) / 1000)
   );
 
-  // 🕒 Timer
+
   useEffect(() => {
     if (!user) {
       navigate("/");
@@ -45,7 +44,6 @@ export default function CrosswordPage() {
     });
   };
 
-  // 🚀 Handle puzzle submission
   const handleSubmit = () => {
     let total = 0,
       correct = 0;
@@ -86,12 +84,6 @@ export default function CrosswordPage() {
     setLoading(false);
   };
 
-  const resetPuzzle = () => {
-    setGrid(initialGrid);
-    localStorage.setItem("startTime", Date.now().toString());
-    setElapsed(0);
-    setSubmitted(false);
-  };
 
   return (
     <div className="cw-root">
@@ -183,9 +175,6 @@ export default function CrosswordPage() {
               disabled={submitted}
             >
               Submit Answers
-            </button>
-            <button className="btn muted" onClick={resetPuzzle}>
-              Restart
             </button>
             <button
               className="btn ghost"
