@@ -1,3 +1,4 @@
+/* ✅ ROOT CONTAINER */
 .cw-root {
   min-height: 100vh;
   padding: 20px 28px;
@@ -18,8 +19,8 @@
   z-index: 0;
 }
 
-/* HEADER */
-.cw-header {
+/* ✅ HEADER */
+.cw-root .cw-header {
   display: flex;
   justify-content: space-between;
   align-items: center;
@@ -28,105 +29,117 @@
   z-index: 1;
 }
 
-.cw-title {
+.cw-root .cw-title {
   font-weight: 700;
   font-size: 1.6rem;
   color: #ffffff;
 }
 
-.cw-meta {
+.cw-root .cw-meta {
   display: flex;
   gap: 18px;
   align-items: center;
   color: #e2e8f0;
 }
 
-/* MAIN LAYOUT */
-.cw-main {
+/* ✅ MAIN LAYOUT */
+.cw-root .cw-main {
   display: flex;
-  gap: 24px;
+  justify-content: center;
   align-items: flex-start;
+  gap: 24px;
   position: relative;
   z-index: 1;
+  min-height: calc(100vh - 100px);
 }
 
-/* BOARD */
-.cw-board {
+/* ✅ BOARD STYLING */
+.cw-root .cw-board {
   flex: 0 1 720px;
   display: flex;
   justify-content: center;
 }
 
-.board-grid {
+.cw-root .board-grid {
   background: #1e293b;
-  padding: 16px;
+  padding: 20px;
   border-radius: 16px;
   box-shadow: 0 8px 30px rgba(0, 0, 0, 0.4);
-  display:flex;
+  display: flex;
   flex-direction: column;
+  gap: 4px;
+  border: 2px solid #475569;
+}
+
+/* Each Row */
+.cw-root .board-row {
+  display: flex;
   gap: 4px;
 }
 
-.board-row {
-  display: flex;
-  gap: 5px;
-}
-
-.cell {
-  width: 50px;
-  height: 50px;
+/* ✅ Individual Cell */
+.cw-root .cell {
+  width: 45px;
+  height: 45px;
   display: flex;
   align-items: center;
   justify-content: center;
-  border-radius: 6px;
+  border-radius: 5px;
+  border: 1px solid #334155;
   position: relative;
+  box-sizing: border-box;
 }
 
-.cell.black {
+/* Black (Blocked) Cell */
+.cw-root .cell.black {
   background: #0f172a;
+  border: 1px solid #1e293b;
 }
 
-.cell.white {
+/* White (Active) Cell */
+.cw-root .cell.white {
   background: #facc15;
   color: #111;
   font-weight: bold;
-  border-radius: 7px;
-  cursor: default;
-
+  border: 1px solid #fef08a;
+  cursor: text;
+  transition: transform 0.1s ease-in-out;
 }
 
-.cell-input {
+.cw-root .cell.white:focus-within {
+  transform: scale(1.08);
+  box-shadow: 0 0 8px rgba(250, 204, 21, 0.6);
+}
+
+/* Input inside cell */
+.cw-root .cell-input {
   width: 100%;
   height: 100%;
   border: none;
   outline: none;
   text-align: center;
   font-weight: 700;
-  font-size: 20px; 
+  font-size: 20px;
   text-transform: uppercase;
   background: transparent;
-  color: black;
-  background: #facc15;
+  color: #111;
   border-radius: 7px;
 }
 
-.cell-input[disabled] {
-  
+.cw-root .cell-input[disabled] {
   color: #111;
-  font-weight: bold;
-  border-radius: inherit;
-  cursor: default;
+  cursor: not-allowed;
 }
 
-/* SIDEBAR */
-.cw-side {
+/* ✅ SIDEBAR */
+.cw-root .cw-side {
   width: 460px;
   display: flex;
   flex-direction: column;
   gap: 18px;
 }
 
-.clues {
+.cw-root .clues {
   background: #1e293b;
   padding: 22px;
   border-radius: 16px;
@@ -135,62 +148,69 @@
   overflow-y: auto;
 }
 
-.clues h3,
-.clues h4,
-.clues li,
-.cw-user,
-.cw-timer,
-.progress-card {
+.cw-root .clues h3,
+.cw-root .clues h4,
+.cw-root .clues li,
+.cw-root .cw-user,
+.cw-root .cw-timer,
+.cw-root .progress-card {
   color: #ffffff;
 }
 
-.clue-group h4 {
+.cw-root .clue-group h4 {
   margin-bottom: 10px;
   font-size: 1.2rem;
   font-weight: 700;
 }
 
-.clue-group ul {
+.cw-root .clue-group ul {
   padding-left: 20px;
   margin: 0;
   font-size: 1.05rem;
   line-height: 1.6;
 }
 
-/* BUTTONS */
-.actions {
+/* ✅ BUTTONS */
+.cw-root .actions {
   display: flex;
   flex-direction: column;
   gap: 12px;
 }
 
-.btn {
+.cw-root .btn {
   padding: 10px 14px;
   border-radius: 8px;
   border: none;
   font-weight: 600;
   cursor: pointer;
   font-size: 1rem;
+  transition: all 0.2s ease-in-out;
 }
 
-.btn.primary {
+.cw-root .btn.primary {
   background: linear-gradient(90deg, #06b6d4, #10b981);
   color: white;
+  box-shadow: 0 0 10px rgba(6, 182, 212, 0.4);
 }
 
-.btn.muted {
+.cw-root .btn.primary:hover {
+  box-shadow: 0 0 15px rgba(16, 185, 129, 0.8);
+  transform: scale(1.02);
+}
+
+.cw-root .btn.muted {
   background: #334155;
   color: #f8fafc;
 }
 
-.btn.ghost {
+.cw-root .btn.ghost {
   background: transparent;
   border: 1px solid rgba(255, 255, 255, 0.3);
   color: #f8fafc;
 }
 
-/* PROGRESS CARD */
-.progress-card {
+/* ✅ PROGRESS CARD */
+.cw-root .progress-card {
   padding: 16px;
   background: #1e293b;
   border-radius: 10px;
@@ -199,24 +219,24 @@
   font-size: 1.05rem;
 }
 
-/* Tablet */
+/* ✅ RESPONSIVE */
 @media (max-width: 1024px) {
-  .cw-main {
+  .cw-root .cw-main {
     flex-direction: column;
     align-items: center;
   }
 
-  .cw-side {
+  .cw-root .cw-side {
     width: 100%;
     max-width: 600px;
   }
 
-  .cw-board {
+  .cw-root .cw-board {
     width: 100%;
     justify-content: center;
   }
 
-  .board-grid {
+  .cw-root .board-grid {
     transform: scale(0.95);
   }
 }
@@ -226,88 +246,46 @@
     padding: 12px;
   }
 
-  .cw-header {
+  .cw-root .cw-header {
     flex-direction: column;
     gap: 8px;
     text-align: center;
   }
 
-  .cw-title {
-    font-size: 5rem;
-  }
-
-  .cw-main {
+  .cw-root .cw-main {
     flex-direction: column;
     align-items: center;
     gap: 0;
   }
 
-  .cw-board {
-    width: 100%;
-    display: flex;
-    justify-content: center;
-    padding:0;
-  }
-
-  .board-grid {
-    transform: scale(0.8);
+  .cw-root .board-grid {
+    transform: scale(0.85);
     transform-origin: top center;
   }
 
-  .cw-side {
+  .cw-root .cw-side {
     width: 100%;
     max-width: 100%;
-    margin-top: -100px;
-  }
-
-  .clues {
-    max-height: none;
-    padding: 16px;
-  }
-
-  .clue-group ul {
-    font-size: 0.95rem;
-  }
-
-  .btn {
-    font-size: 1rem;
-    padding: 8px 10px;
-  }
-
-  .progress-card {
-    font-size: 0.95rem;
-    padding: 12px;
+    margin-top: -80px;
   }
 }
 
-/* Extra small devices (≤480px) */
 @media (max-width: 480px) {
-  .cw-main {
-    flex-direction: column;
-    align-items: center;
-    gap: 0; /* no gap between board and clues */
-  }
-
-  .cw-board {
-    margin-bottom: 0; /* no margin between board and side */
-  }
-
-  .board-grid {
+  .cw-root .board-grid {
     transform: scale(0.7);
     transform-origin: top center;
-    padding-bottom: 0px; /* remove bottom internal space */
   }
 
-  .cw-side {
-    margin-top: -200px; /* pull clues slightly upward */
-  }
-
-  .clue-group ul {
-    font-size: 0.9rem;
+  .cw-root .cw-side {
+    margin-top: -180px;
   }
 
   .cw-title {
     font-size: 2rem;
-    color:rgb(234, 213, 49);
+    color: rgb(234, 213, 49);
+  }
+
+  .cw-root .cw-title {
+    font-size: 1.2rem;
   }
 }
