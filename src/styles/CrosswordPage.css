@@ -288,7 +288,11 @@
   .cw-root .cw-side {
     margin-top: -180px;
   }
-
+  .cw-root .cell.white:focus-within {
+  transform: scale(1.08);
+  box-shadow: 0 0 8px rgba(156, 15, 24, 0.6);
+  background:rgb(206, 9, 110)
+}
   .cw-title {
     font-size: 2rem;
     color: rgb(234, 213, 49);
