@@ -64,7 +64,7 @@
   background: #1e293b;
   padding: 20px;
   border-radius: 16px;
-  box-shadow: 0 8px 30px rgba(0, 0, 0, 0.4);
+  
   display: flex;
   flex-direction: column;
   gap: 4px;
@@ -108,7 +108,8 @@
 
 .cw-root .cell.white:focus-within {
   transform: scale(1.08);
-  box-shadow: 0 0 8px rgba(250, 204, 21, 0.6);
+  box-shadow: 0 0 8px rgba(156, 15, 24, 0.6);
+  background:rgb(206, 9, 110)
 }
 
 /* Input inside cell */
@@ -236,9 +237,17 @@
     justify-content: center;
   }
 
-  .cw-root .board-grid {
-    transform: scale(0.95);
-  }
+  .board-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(20px, 1fr));
+  justify-content: center;
+  align-items: center;
+  padding-bottom: 0;
+  margin-bottom: 0;
+  transform: scale(0.95);
+  transform-origin: top center;
+  height: auto;
+}
 }
 
 @media (max-width: 768px) {
