@@ -86,28 +86,26 @@ export default function StartPage({ videoSrc = "/o.mp4" }) {
     });
   }, []);
 
-  // New: Send token to /auth/google
+  // Google Sign-In: send token directly to /auth/google
   const handleCredentialResponse = useCallback(
     async (response) => {
       if (!response || !response.credential) {
         setError("No credential returned from Google.");
         return;
       }
-
       setError(null);
       setLoading(true);
 
       try {
-        // Send ID token to backend (no need to parse JWT in frontend)
+        // This sends only the token (not extracted user data)
         const result = await apiFetch("/auth/google", {
           method: "POST",
           body: JSON.stringify({ token: response.credential }),
         });
 
-        // Display the user info from backend response
+        // Backend returns { user: ..., token: ... }
         const serverJwt = result?.token || result?.jwt || null;
         const serverUser = result?.user;
-
         if (serverJwt) {
           localStorage.setItem("jwt", serverJwt);
         }
@@ -117,7 +115,7 @@ export default function StartPage({ videoSrc = "/o.mp4" }) {
         }
         setError(null);
       } catch (err) {
-        console.error("auth error", err);
+        console.error("auth error", err, err?.body);
         setError(err?.body?.message || err.message || "Authentication failed.");
       } finally {
         setLoading(false);
@@ -144,21 +142,16 @@ export default function StartPage({ videoSrc = "/o.mp4" }) {
       setLoading(false);
       return;
     }
-
     let cancelled = false;
-
     async function init() {
       setLoading(true);
       await ensureScriptLoaded();
-
       if (cancelled) return;
-
       if (!(window.google && window.google.accounts && window.google.accounts.id)) {
         setError("Failed to load Google Sign-In.");
         setLoading(false);
         return;
       }
-
       if (!initializedRef.current) {
         try {
           window.google.accounts.id.initialize({
@@ -172,9 +165,7 @@ export default function StartPage({ videoSrc = "/o.mp4" }) {
           return;
         }
       }
-
       createChildDivIfNeeded();
-
       if (!user) {
         try {
           window.google.accounts.id.renderButton(childDivRef.current, {
@@ -186,12 +177,9 @@ export default function StartPage({ videoSrc = "/o.mp4" }) {
           // ignore render errors
         }
       }
-
       setLoading(false);
     }
-
     init();
-
     return () => {
       cancelled = true;
       try {
@@ -222,7 +210,6 @@ export default function StartPage({ videoSrc = "/o.mp4" }) {
     } catch (err) {
       console.warn("Failed to remove user info from localStorage:", err);
     }
-
     setUser(null);
     initializedRef.current = false;
     setLoading(true);
@@ -237,14 +224,12 @@ export default function StartPage({ videoSrc = "/o.mp4" }) {
         <source src={videoSrc} type="video/mp4" />
         Your browser does not support the video tag.
       </video>
-
       <div className="content-container">
         <div className="start-left">
           <div className="brand">
             <h1 className="site-title">Crossword Challenge</h1>
             <p className="tagline">Presented by CC & EPC</p>
           </div>
-
           <div className="auth-card">
             {!user ? (
               <>
