@@ -354,7 +354,7 @@ export default function CrosswordPage() {
               Submit Answers
             </button>
           </div>
-          <div className="actions">
+          <div className="btn-ghost">
             <button className="btn primary" onClick={()=>navigate("/leaderboard")}>
               Leaderboard
             </button>
