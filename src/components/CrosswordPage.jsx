@@ -22,34 +22,27 @@ export default function CrosswordPage() {
 
   // Fetch crossword data from backend
   useEffect(() => {
-  const fetchCrossword = async () => {
-    setLoading(true);
-    try {
-      const res = await fetch("https://crosswordbackend.onrender.com/crossword");
-      const data = await res.json();
-      console.log("Fetched crossword:", data);
+    const fetchCrossword = async () => {
+      setLoading(true);
+      try {
+        const res = await fetch("https://crosswordbackend.onrender.com/crossword");
+        const data = await res.json();
+        console.log(data);
+        setCrossword(data);
 
-      if (!data || !Array.isArray(data.Grid)) {
-        console.error("❌ Unexpected data format:", data);
-        setCrossword(null);
-        return;
+        // Build initial empty grid (null = black, "" = input cell)
+        const g = data.Grid.map((row) =>
+          row.map((cell) => (cell.IsBlank ? null : ""))
+        );
+        setGrid(g);
+      } catch (err) {
+        console.error("Error fetching crossword:", err);
+      } finally {
+        setLoading(false);
       }
-
-      setCrossword(data);
-
-      const g = data.Grid.map((row) =>
-        row.map((cell) => (cell?.IsBlank ? null : ""))
-      );
-      setGrid(g);
-    } catch (err) {
-      console.error("Error fetching crossword:", err);
-    } finally {
-      setLoading(false);
-    }
-  };
-  fetchCrossword();
-}, []);
-
+    };
+    fetchCrossword();
+  }, []);
 
   // Start countdown timer
   useEffect(() => {
