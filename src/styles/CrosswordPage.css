@@ -107,7 +107,7 @@
 }
 
 .cw-root .cell.white:focus-within {
-  transform: scale(1.08);
+  transform: scale(1.1);
   box-shadow: 0 0 8px rgba(242, 198, 21, 0.6);
   background:rgb(244, 210, 58)
 }
@@ -382,8 +382,8 @@
   }
   .cw-root .cell.white:focus-within {
   transform: scale(1.08);
-  box-shadow: 0 0 8px rgba(156, 15, 24, 0.6);
-  background:rgb(206, 9, 110)
+  box-shadow: 0 0 8px rgba(242, 198, 21, 0.6);
+  background:rgb(242, 208, 16)
 }
   .cw-title {
     font-size: 2rem;
