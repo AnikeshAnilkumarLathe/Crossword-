@@ -1,9 +1,8 @@
 import React, { useEffect, useState, useCallback, useRef } from "react";
 import { useNavigate } from "react-router-dom";
 import "../styles/StartPage.css";
-console.log(window.location.protocol);
 
-// backend base
+// backend base URL
 const BACKEND_BASE = "https://crosswordbackend.onrender.com";
 
 export default function StartPage({ videoSrc = "/o.mp4" }) {
@@ -15,10 +14,9 @@ export default function StartPage({ videoSrc = "/o.mp4" }) {
   const childDivRef = useRef(null);
   const initializedRef = useRef(false);
 
-  const CLIENT_ID =
-    "919062485527-9hno8iqrqs35samoaub3reobf03pq3du.apps.googleusercontent.com";
+  const CLIENT_ID = "919062485527-9hno8iqrqs35samoaub3reobf03pq3du.apps.googleusercontent.com";
 
-  // helper: call backend and auto-attach JWT if present
+  // Helper function to call backend with JWT if present
   const apiFetch = useCallback(async (path, opts = {}) => {
     const headers = (opts.headers = opts.headers || {});
     const stored = localStorage.getItem("jwt");
@@ -45,6 +43,7 @@ export default function StartPage({ videoSrc = "/o.mp4" }) {
     return json;
   }, []);
 
+  // Create child div for Google sign-in button if needed
   const createChildDivIfNeeded = useCallback(() => {
     if (childDivRef.current) return childDivRef.current;
     const el = document.createElement("div");
@@ -54,6 +53,7 @@ export default function StartPage({ videoSrc = "/o.mp4" }) {
     return el;
   }, []);
 
+  // Remove Google sign-in child div if exists
   const removeChildDivIfExists = useCallback(() => {
     if (!childDivRef.current && !googleContainerRef.current) return;
     if (childDivRef.current && childDivRef.current.parentNode) {
@@ -66,6 +66,7 @@ export default function StartPage({ videoSrc = "/o.mp4" }) {
     childDivRef.current = null;
   }, []);
 
+  // Load Google Sign-In client library script dynamically
   const ensureScriptLoaded = useCallback(async () => {
     const src = "https://accounts.google.com/gsi/client";
     if (window.google && window.google.accounts && window.google.accounts.id) return;
@@ -86,7 +87,7 @@ export default function StartPage({ videoSrc = "/o.mp4" }) {
     });
   }, []);
 
-  // Google Sign-In: send token directly to /auth/google
+  // Handle Google credential response by sending token to /auth/google
   const handleCredentialResponse = useCallback(
     async (response) => {
       if (!response || !response.credential) {
@@ -97,13 +98,10 @@ export default function StartPage({ videoSrc = "/o.mp4" }) {
       setLoading(true);
 
       try {
-        // This sends only the token (not extracted user data)
         const result = await apiFetch("/auth/google", {
           method: "POST",
           body: JSON.stringify({ token: response.credential }),
         });
-
-        // Backend returns { user: ..., token: ... }
         const serverJwt = result?.token || result?.jwt || null;
         const serverUser = result?.user;
         if (serverJwt) {
@@ -125,6 +123,7 @@ export default function StartPage({ videoSrc = "/o.mp4" }) {
     [apiFetch, removeChildDivIfExists]
   );
 
+  // On mount, load user from localStorage if exists
   useEffect(() => {
     const stored = localStorage.getItem("user");
     if (stored) {
@@ -136,6 +135,7 @@ export default function StartPage({ videoSrc = "/o.mp4" }) {
     }
   }, []);
 
+  // Set up Google One Tap on mount or user change
   useEffect(() => {
     if (user) {
       removeChildDivIfExists();
@@ -183,26 +183,16 @@ export default function StartPage({ videoSrc = "/o.mp4" }) {
     return () => {
       cancelled = true;
       try {
-        if (
-          window.google &&
-          window.google.accounts &&
-          window.google.accounts.id &&
-          window.google.accounts.id.cancel
-        ) {
+        if (window.google && window.google.accounts && window.google.accounts.id && window.google.accounts.id.cancel) {
           window.google.accounts.id.cancel();
         }
       } catch {
         // ignore
       }
     };
-  }, [
-    user,
-    ensureScriptLoaded,
-    handleCredentialResponse,
-    createChildDivIfNeeded,
-    removeChildDivIfExists,
-  ]);
+  }, [user, ensureScriptLoaded, handleCredentialResponse, createChildDivIfNeeded, removeChildDivIfExists]);
 
+  // Logout user and clear local storage
   const handleLogout = useCallback(() => {
     try {
       localStorage.removeItem("user");
