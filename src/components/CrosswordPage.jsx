@@ -4,20 +4,6 @@ import { useNavigate } from "react-router-dom";
 import "../styles/CrosswordPage.css";
 import GateTransition from "./GateTransition";
 
-/**
- * Expectations about backend response (example shape your screenshot showed):
- * {
- *   CrosswordID: 1,
- *   Rows: 14,
- *   Columns: 13,
- *   Grid: [ [ { IsBlank: true, NumberAssociated: -1 }, ... ], ... ],
- *   Clues: { Across: [ { ClueID:1, ClueText: "..."}, ... ], Down: [...] }
- * }
- *
- * This component transforms Grid -> layout where blocked cell => "" and
- * fillable cell => "." (any non-empty value works).
- */
-
 export default function CrosswordPage() {
   const navigate = useNavigate();
   const user = JSON.parse(localStorage.getItem("user"));
@@ -48,7 +34,7 @@ export default function CrosswordPage() {
     const fetchCrossword = async () => {
       setLoading(true);
       try {
-        const res = await fetch("https://crosswordbackend.onrender.com/crossword/1"); // adjust URL if needed
+        const res = await fetch("https://crosswordbackend.onrender.com/crossword"); 
         // Some servers might return non-JSON or wrapped JSON; attempt parse carefully
         const text = await res.text();
         let data;
@@ -67,9 +53,6 @@ export default function CrosswordPage() {
         // Transform Grid -> layout
         const transformedLayout = data.Grid.map((row) =>
           row.map((cellObj) => {
-            // backend cell object might use IsBlank boolean
-            // treat IsBlank true as blocked
-            // if the backend uses other keys, adjust accordingly
             if (cellObj && typeof cellObj === "object") {
               return cellObj.IsBlank ? "" : "."; // "" = blocked, "." = fillable (non-empty)
             } else {
@@ -104,15 +87,12 @@ export default function CrosswordPage() {
     };
 
     fetchCrossword();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  // When layout changes (after fetch), ensure grid is initialized
   useEffect(() => {
     if (layout && layout.length) {
       setGrid(initialGridFromLayout(layout));
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [layout]);
 
   // Timer and auto-submit
