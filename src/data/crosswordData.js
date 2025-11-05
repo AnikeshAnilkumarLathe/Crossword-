@@ -1,8 +1,8 @@
 // crossword100x50.js
 // Generates a 100×50 crossword structure and exports layout, clues, solution
 
-const ROWS = 100;
-const COLS = 100;
+const ROWS = 40;
+const COLS = 40;
 
 // simple helper
 const createGrid = (rows, cols, fill = "") =>

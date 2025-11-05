@@ -8,45 +8,58 @@ export default function CrosswordPage() {
   const navigate = useNavigate();
   const user = JSON.parse(localStorage.getItem("user"));
   const startTime = Number(localStorage.getItem("startTime")) || Date.now();
-
+  const [crossword, setCrossword] = useState([]);
   const [loading, setLoading] = useState(false);
   const [submitted, setSubmitted] = useState(false);
+  const TOTAL_TIME = 180; // 3 minutes = 180 seconds
+  const [remaining, setRemaining] = useState(TOTAL_TIME);
+  const [popup, setPopup] = useState({ open: false, title: "", message: "", success: false });
 
-  // Validate shape
   useEffect(() => {
-    if (!layout || !Array.isArray(layout) || layout.length === 0) {
-      console.warn("Crossword layout is empty or invalid");
-    }
-    if (
-      solution &&
-      (solution.length !== layout.length || solution[0].length !== layout[0].length)
-    ) {
-      console.warn("Layout and solution dimensions differ — ensure same shape");
-    }
+    const fetchCrossword = async () => {
+      setLoading(true);
+      try {
+        const res = await fetch("https://crosswordbackend.onrender.com/crossword");
+        const data = await res.json();
+        console.log(data);
+        setCrossword(data || []);
+      } catch (error) {
+        console.log(error);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchCrossword();
   }, []);
 
-  // Build initial grid: null = blocked (black), "" = editable
+  // Build initial grid
   const initialGrid = useMemo(() => {
-    return layout.map((row) =>
-      row.map((cell) => (cell === "" ? null : ""))
-    );
+    return layout.map((row) => row.map((cell) => (cell === "" ? null : "")));
   }, []);
 
   const [grid, setGrid] = useState(initialGrid);
 
-  // Timer
-  const [elapsed, setElapsed] = useState(Math.floor((Date.now() - startTime) / 1000));
-
   useEffect(() => {
-    if (!user) {
-      navigate("/");
-      return;
-    }
+    if (submitted) return;
     const timer = setInterval(() => {
-      setElapsed(Math.floor((Date.now() - startTime) / 1000));
+      setRemaining((prev) => {
+        if (prev <= 1) {
+          clearInterval(timer);
+          handleSubmit();
+          return 0;
+        }
+        return prev - 1;
+      });
     }, 1000);
     return () => clearInterval(timer);
-  }, [startTime, navigate, user]);
+  }, [submitted]);
+
+  const formatTime = (seconds) => {
+    const mins = Math.floor(seconds / 60);
+    const secs = seconds % 60;
+    return `${mins}:${secs.toString().padStart(2, "0")}`;
+  };
 
   const inputRefs = useRef({});
   const keyFor = (r, c) => `${r}-${c}`;
@@ -167,15 +180,21 @@ export default function CrosswordPage() {
     }
   };
 
-  // Generate numbering map (across or down start)
+  // Generate numbering map
   const getNumberingMap = useMemo(() => {
     const map = {};
     let num = 1;
     for (let r = 0; r < layout.length; r++) {
       for (let c = 0; c < layout[r].length; c++) {
         if (layout[r][c] === "") continue;
-        const startAcross = (c === 0 || layout[r][c - 1] === "") && c + 1 < layout[r].length && layout[r][c + 1] !== "";
-        const startDown = (r === 0 || layout[r - 1][c] === "") && r + 1 < layout.length && layout[r + 1][c] !== "";
+        const startAcross =
+          (c === 0 || layout[r][c - 1] === "") &&
+          c + 1 < layout[r].length &&
+          layout[r][c + 1] !== "";
+        const startDown =
+          (r === 0 || layout[r - 1][c] === "") &&
+          r + 1 < layout.length &&
+          layout[r + 1][c] !== "";
         if (startAcross || startDown) {
           map[`${r}-${c}`] = num++;
         }
@@ -184,38 +203,76 @@ export default function CrosswordPage() {
     return map;
   }, [layout]);
 
-  // Submit answers
-  const handleSubmit = () => {
-    let total = 0, correct = 0;
-    for (let r = 0; r < solution.length; r++) {
-      for (let c = 0; c < solution[r].length; c++) {
-        const sol = solution[r][c];
-        if (sol && sol !== "") {
-          total++;
-          if ((grid[r][c] || "").toUpperCase() === sol.toUpperCase()) correct++;
-        }
+  // Handle submission
+  // Handle submission
+const handleSubmit = async () => {
+  if (submitted) return;
+
+  // 1️⃣ Construct user answers in backend format
+  const userAnswers = clues.map((clue, index) => {
+    let word = "";
+
+    if (clue.dir === "across") {
+      for (let i = 0; i < clue.length; i++) {
+        const char = grid[clue.row][clue.col + i];
+        word += char ? char.toUpperCase() : "";
+      }
+    } else if (clue.dir === "down") {
+      for (let i = 0; i < clue.length; i++) {
+        const char = grid[clue.row + i]?.[clue.col];
+        word += char ? char.toUpperCase() : "";
       }
     }
 
-    const entry = {
-      name: user?.name || "Player",
-      time: Math.floor((Date.now() - startTime) / 1000),
-      correct,
-      total,
-      timestamp: Date.now(),
+    return {
+      clueID: index + 1,
+      clueText: word.trim(),
     };
+  });
 
-    const leaderboard = JSON.parse(localStorage.getItem("leaderboard") || "[]");
-    leaderboard.push(entry);
-    leaderboard.sort((a, b) => a.time - b.time || b.correct - a.correct);
-    localStorage.setItem("leaderboard", JSON.stringify(leaderboard));
-    localStorage.setItem("lastResult", JSON.stringify(entry));
+  // 2️⃣ Payload for backend
+  const payload = {
+    crossword_id: 1, // or dynamic crosswordId from API
+    answers: userAnswers,
+  };
+
+  try {
+    const res = await fetch("https://crosswordbackend.onrender.com/submit", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(payload),
+    });
+
+    const result = await res.json();
+
+    if (res.ok) {
+      setPopup({
+        open: true,
+        title: "✅ Submission Successful!",
+        message: result.message || "Your answers have been submitted successfully.",
+        success: true,
+      });
+    } else {
+      setPopup({
+        open: true,
+        title: "❌ Submission Failed",
+        message: result.message || "Something went wrong. Please try again.",
+        success: false,
+      });
+    }
 
     setSubmitted(true);
-    alert(`Submitted — ${correct}/${total} correct • ${entry.time}s`);
-    setLoading(true);
-    setTimeout(() => navigate("/leaderboard"), 900);
-  };
+  } catch (error) {
+    setPopup({
+      open: true,
+      title: "⚠️ Network Error",
+      message: "Unable to connect to the server. Please try again later.",
+      success: false,
+    });
+  }
+};
+
+
 
   const handleGateComplete = () => setLoading(false);
 
@@ -225,8 +282,12 @@ export default function CrosswordPage() {
       <header className="cw-header">
         <div className="cw-title">Crossword</div>
         <div className="cw-meta">
-          <div className="cw-user">Player: <strong>{user?.name || "Guest"}</strong></div>
-          <div className="cw-timer">Time: {elapsed}s</div>
+          <div className="cw-user">
+            Player: <strong>{user?.name || "Guest"}</strong>
+          </div>
+          <div className="cw-timer">
+            ⏳ Time Left: <strong>{formatTime(remaining)}</strong>
+          </div>
         </div>
       </header>
 
@@ -275,40 +336,79 @@ export default function CrosswordPage() {
             <div className="clue-group">
               <h4>Across</h4>
               <ul>
-                {clues.filter((c) => c.dir === "across").map((c) => (
-                  <li key={c.id}><strong>{c.id}</strong> — {c.clue}</li>
-                ))}
+                {clues
+                  .filter((c) => c.dir === "across")
+                  .map((c) => (
+                    <li key={c.id}>
+                      <strong>{c.id}</strong> — {c.clue}
+                    </li>
+                  ))}
               </ul>
             </div>
             <div className="clue-group">
               <h4>Down</h4>
               <ul>
-                {clues.filter((c) => c.dir === "down").map((c) => (
-                  <li key={c.id}><strong>{c.id}</strong> — {c.clue}</li>
-                ))}
+                {clues
+                  .filter((c) => c.dir === "down")
+                  .map((c) => (
+                    <li key={c.id}>
+                      <strong>{c.id}</strong> — {c.clue}
+                    </li>
+                  ))}
               </ul>
             </div>
           </div>
 
           <div className="actions">
-            <button className="btn primary" onClick={handleSubmit} disabled={submitted}>
+            <button
+              className="btn primary"
+              onClick={handleSubmit}
+              disabled={submitted}
+            >
               Submit Answers
             </button>
-            <button className="btn ghost" onClick={() => {
-              setLoading(true);
-              setTimeout(() => navigate("/leaderboard"), 900);
-            }}>
+            <button
+              className="btn ghost"
+              onClick={() => {
+                setLoading(true);
+                setTimeout(() => navigate("/leaderboard"), 900);
+              }}
+            >
               View Leaderboard
             </button>
           </div>
 
           <div className="progress-card">
             <h4>Progress</h4>
-            <p>Filled: <strong>{grid.flat().filter(Boolean).length}</strong></p>
-            <p>Words: <strong>{clues.length}</strong></p>
+            <p>
+              Filled: <strong>{grid.flat().filter(Boolean).length}</strong>
+            </p>
+            <p>
+              Words: <strong>{clues.length}</strong>
+            </p>
           </div>
         </aside>
       </main>
+      {popup.open && (
+  <div className="popup-overlay">
+    <div className="popup-box">
+      <h2>{popup.title}</h2>
+      <p>{popup.message}</p>
+      <div className="popup-actions">
+        <button
+          className="btn primary"
+          onClick={() => {
+            setPopup({ open: false });
+            if (popup.success) navigate("/leaderboard");
+          }}
+        >
+          {popup.success ? "Go to Leaderboard" : "Close"}
+        </button>
+      </div>
+    </div>
+  </div>
+)}
+
     </div>
   );
 }
