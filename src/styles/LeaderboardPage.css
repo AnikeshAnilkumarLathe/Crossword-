@@ -88,16 +88,6 @@
   box-shadow: 0 4px 12px rgba(255, 105, 180, 0.35);
 }
 
-.btn.ghost {
-  background: transparent;
-  color: #ff7eb9;
-  border: 2px solid #ff7eb9;
-}
-
-.btn.ghost:hover {
-  background: rgba(255, 126, 185, 0.15);
-}
-
 /* Content card and table */
 .lb-content, .lb-main, .last-card, .lb-table {
   z-index: 2;
