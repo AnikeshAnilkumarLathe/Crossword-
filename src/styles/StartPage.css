@@ -156,6 +156,13 @@
   font-weight: 700;
 }
 
+.userscore{
+  font-size: 0.5rem;
+  color: #ffe8b3;
+  display: block;
+  margin-bottom: 10px;
+}
+
 /* 🔗 Button Row */
 .row {
   display: flex;
