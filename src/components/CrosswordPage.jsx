@@ -252,9 +252,6 @@ export default function CrosswordPage() {
             <button className="btn primary" onClick={handleSubmit} disabled={submitted}>
               Submit Answers
             </button>
-            <button className="btn muted" onClick={() => navigate("/progress")}>
-              📊 View Progress
-            </button>
             <button className="btn ghost" onClick={() => navigate("/leaderboard")}>
               🏆 Leaderboard
             </button>
