@@ -2,12 +2,14 @@ import React, { useEffect, useState, useCallback, useRef } from "react";
 import { useNavigate } from "react-router-dom";
 import "../styles/StartPage.css";
 
+// backend base
+const BACKEND_BASE = "https://crosswordbackend.onrender.com";
+
 export default function StartPage({ videoSrc = "/o.mp4" }) {
   const navigate = useNavigate();
   const [error, setError] = useState(null);
   const [loading, setLoading] = useState(true);
   const [user, setUser] = useState(null);
-
   const googleContainerRef = useRef(null);
   const childDivRef = useRef(null);
   const initializedRef = useRef(false);
@@ -15,6 +17,34 @@ export default function StartPage({ videoSrc = "/o.mp4" }) {
   const CLIENT_ID =
     "919062485527-9hno8iqrqs35samoaub3reobf03pq3du.apps.googleusercontent.com";
 
+  // helper: call backend and auto-attach JWT if present
+  const apiFetch = useCallback(async (path, opts = {}) => {
+    const headers = (opts.headers = opts.headers || {});
+    const stored = localStorage.getItem("jwt");
+    if (stored) headers["Authorization"] = `Bearer ${stored}`;
+    headers["Content-Type"] = headers["Content-Type"] || "application/json";
+    const res = await fetch(BACKEND_BASE + path, {
+      credentials: "omit",
+      ...opts,
+      headers,
+    });
+    const text = await res.text();
+    let json;
+    try {
+      json = text ? JSON.parse(text) : null;
+    } catch {
+      json = text;
+    }
+    if (!res.ok) {
+      const err = new Error(json?.message || `HTTP ${res.status}`);
+      err.status = res.status;
+      err.body = json;
+      throw err;
+    }
+    return json;
+  }, []);
+
+  // decode JWT (used only to get basic claims if needed)
   const parseJwt = useCallback((token) => {
     try {
       const base64Url = token.split(".")[1];
@@ -55,7 +85,6 @@ export default function StartPage({ videoSrc = "/o.mp4" }) {
   const ensureScriptLoaded = useCallback(async () => {
     const src = "https://accounts.google.com/gsi/client";
     if (window.google && window.google.accounts && window.google.accounts.id) return;
-
     await new Promise((resolve) => {
       const existing = document.querySelector(`script[src="${src}"]`);
       if (existing) {
@@ -73,48 +102,51 @@ export default function StartPage({ videoSrc = "/o.mp4" }) {
     });
   }, []);
 
+  // This function sends the Google ID token to your backend
   const handleCredentialResponse = useCallback(
-    (response) => {
+    async (response) => {
       if (!response || !response.credential) {
         setError("No credential returned from Google.");
         return;
       }
 
-      const decoded = parseJwt(response.credential);
-      if (!decoded || !decoded.email) {
-        setError("Failed to decode token.");
-        return;
-      }
-
-      if (!decoded.email.endsWith("@pilani.bits-pilani.ac.in")) {
-        setError("Please sign in with your BITS Pilani email ID.");
-        return;
-      }
-
-      const cleanUser = {
-        name: decoded.name || decoded.given_name || decoded.email.split("@")[0],
-        email: decoded.email,
-      };
+      setError(null);
+      setLoading(true);
 
       try {
-        localStorage.setItem("user", JSON.stringify(cleanUser));
-      } catch {
-        // ignore localStorage errors
-      }
+        // parse Google token to extract user info
+        const decoded = parseJwt(response.credential);
+        const userData = {
+          email: decoded?.email,
+          username: decoded?.name || decoded?.email?.split?.("@")?.[0] || "User",
+          score: 0,
+        };
 
-      setUser(cleanUser);
-      removeChildDivIfExists();
-      setError(null);
+        // Call your backend's working endpoint (wrap data in 'user' field)
+        const result = await apiFetch("/users/register", {
+          method: "POST",
+          body: JSON.stringify({ user: userData }),
+        });
 
-      if (window.google && window.google.accounts && window.google.accounts.id && window.google.accounts.id.disableAutoSelect) {
-        try {
-          window.google.accounts.id.disableAutoSelect();
-        } catch {
-          /* ignore */
+        // Handle server response
+        const serverJwt = result?.token || result?.jwt || null;
+        const serverUser = result?.user || userData;
+
+        if (serverJwt) {
+          localStorage.setItem("jwt", serverJwt);
         }
+        localStorage.setItem("user", JSON.stringify(serverUser));
+        setUser(serverUser);
+        setError(null);
+      } catch (err) {
+        console.error("auth error", err);
+        setError(err?.body?.message || err.message || "Authentication failed.");
+      } finally {
+        setLoading(false);
+        removeChildDivIfExists();
       }
     },
-    [parseJwt, removeChildDivIfExists]
+    [apiFetch, parseJwt, removeChildDivIfExists]
   );
 
   useEffect(() => {
@@ -197,9 +229,11 @@ export default function StartPage({ videoSrc = "/o.mp4" }) {
   const handleLogout = useCallback(() => {
     try {
       localStorage.removeItem("user");
-    } catch {
-      // ignore
+      localStorage.removeItem("jwt");
+    } catch (err) {
+      console.warn("Failed to remove user info from localStorage:", err);
     }
+
     setUser(null);
     initializedRef.current = false;
     setLoading(true);
@@ -225,7 +259,7 @@ export default function StartPage({ videoSrc = "/o.mp4" }) {
           <div className="auth-card">
             {!user ? (
               <>
-                <p className="auth-title">Sign in with your BITS Email</p>
+                <p className="auth-title">Sign in with your Email</p>
                 <div
                   id="googleSignInDiv"
                   ref={googleContainerRef}
@@ -241,7 +275,7 @@ export default function StartPage({ videoSrc = "/o.mp4" }) {
               </>
             ) : (
               <>
-                <p className="username">Hi, {user.name}</p>
+                <p className="username">Hi, {user.username}</p>
                 <div className="row">
                   <button className="btn primary" onClick={handleStartGame}>
                     Start Game

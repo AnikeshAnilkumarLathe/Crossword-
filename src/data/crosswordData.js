@@ -1,37 +1,63 @@
-export const layout = [
-  ["S", "", "", "", "", "M", "", "", "", "A"],
-  ["U", "", "", "", "", "O", "", "", "", "N"],
-  ["N", "", "R", "", "", "U", "", "", "", "I"],
-  ["", "", "A", "", "", "N", "", "C", "A", "T"],
-  ["", "", "I", "", "", "", "", "", "", ""],
-  ["", "O", "C", "E", "A", "N", "", "", "", ""],
-  ["", "", "", "", "R", "", "", "S", "", ""],
-  ["", "", "", "", "A", "", "", "U", "", ""],
-  ["", "", "", "", "Y", "", "", "N", "", ""],
-  ["", "", "", "", "", "", "", "", "", ""],
+// crossword100x50.js
+// Generates a 100×50 crossword structure and exports layout, clues, solution
+
+const ROWS = 100;
+const COLS = 100;
+
+// simple helper
+const createGrid = (rows, cols, fill = "") =>
+  Array.from({ length: rows }, () => Array(cols).fill(fill));
+
+// some example words; extend freely
+const WORDS = [
+  "SUN", "MOON", "EARTH", "MARS", "VENUS", "JUPITER",
+  "SATURN", "URANUS", "NEPTUNE", "PLUTO",
+  "STAR", "GALAXY", "COMET", "ASTEROID", "ORBIT",
+  "OCEAN", "FOREST", "RIVER", "MOUNTAIN", "CLOUD",
+  "RAIN", "STORM", "SPACE", "PLANET", "LIGHT", "ENERGY"
 ];
 
-export const clues = [
-  { id: "A1", dir: "across", row: 0, col: 0, length: 3, clue: "Star at the center of our solar system" },
-  { id: "A2", dir: "across", row: 0, col: 5, length: 4, clue: "Earth’s natural satellite" },
-  { id: "A3", dir: "across", row: 5, col: 1, length: 5, clue: "Large body of salt water" },
-  { id: "A4", dir: "across", row: 3, col: 7, length: 3, clue: "A small pet that purrs" },
+// initialise arrays
+const layout = createGrid(ROWS, COLS);
+const solution = createGrid(ROWS, COLS);
+const clues = [];
 
-  { id: "D1", dir: "down", row: 0, col: 0, length: 3, clue: "Opposite of daughter" },
-  { id: "D2", dir: "down", row: 2, col: 2, length: 3, clue: "A musical note" },
-  { id: "D3", dir: "down", row: 5, col: 4, length: 3, clue: "Color of the sky" },
-  { id: "D4", dir: "down", row: 3, col: 7, length: 3, clue: "Furry pet, also a Pokémon type" },
-];
+// simple placement: lay words horizontally with gaps
+WORDS.forEach((word, i) => {
+  const row = (i * 2) % ROWS;                // spread vertically
+  const col = (i * 5) % (COLS - word.length); // spread horizontally
+  for (let j = 0; j < word.length; j++) {
+    layout[row][col + j] = word[j];
+    solution[row][col + j] = word[j];
+  }
+  clues.push({
+    id: `A${i + 1}`,
+    dir: "across",
+    row,
+    col,
+    length: word.length,
+    clue: `Word related to space/nature (${i + 1})`
+  });
+});
 
-export const solution = [
-  ["S", "U", "N", "", "", "M", "O", "O", "N", "A"],
-  ["U", "", "", "", "", "O", "", "", "", "N"],
-  ["N", "", "R", "", "", "U", "", "", "", "I"],
-  ["", "", "A", "", "", "N", "", "C", "A", "T"],
-  ["", "", "I", "", "", "", "", "", "", ""],
-  ["", "O", "C", "E", "A", "N", "", "", "", ""],
-  ["", "", "", "", "R", "", "", "S", "", ""],
-  ["", "", "", "", "A", "", "", "U", "", ""],
-  ["", "", "", "", "Y", "", "", "N", "", ""],
-  ["", "", "", "", "", "", "", "", "", ""],
-];
+// simple downward words for variety
+WORDS.slice(0, 10).forEach((word, i) => {
+  const row = (i * 3) % (ROWS - word.length);
+  const col = (i * 9) % COLS;
+  for (let j = 0; j < word.length; j++) {
+    layout[row + j][col] = word[j];
+    solution[row + j][col] = word[j];
+  }
+  clues.push({
+    id: `D${i + 1}`,
+    dir: "down",
+    row,
+    col,
+    length: word.length,
+    clue: `Vertical word (${i + 1})`
+  });
+});
+
+// export same as your format
+export { layout, clues, solution };
+
