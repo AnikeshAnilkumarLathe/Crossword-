@@ -45,23 +45,6 @@ export default function StartPage({ videoSrc = "/o.mp4" }) {
     return json;
   }, []);
 
-  // decode JWT (used only to get basic claims if needed)
-  const parseJwt = useCallback((token) => {
-    try {
-      const base64Url = token.split(".")[1];
-      const base64 = base64Url.replace(/-/g, "+").replace(/_/g, "/");
-      const jsonPayload = decodeURIComponent(
-        atob(base64)
-          .split("")
-          .map((c) => "%" + ("00" + c.charCodeAt(0).toString(16)).slice(-2))
-          .join("")
-      );
-      return JSON.parse(jsonPayload);
-    } catch {
-      return null;
-    }
-  }, []);
-
   const createChildDivIfNeeded = useCallback(() => {
     if (childDivRef.current) return childDivRef.current;
     const el = document.createElement("div");
@@ -103,7 +86,7 @@ export default function StartPage({ videoSrc = "/o.mp4" }) {
     });
   }, []);
 
-  // This function sends the Google ID token to your backend
+  // New: Send token to /auth/google
   const handleCredentialResponse = useCallback(
     async (response) => {
       if (!response || !response.credential) {
@@ -115,29 +98,23 @@ export default function StartPage({ videoSrc = "/o.mp4" }) {
       setLoading(true);
 
       try {
-        // parse Google token to extract user info
-        const decoded = parseJwt(response.credential);
-        const userData = {
-          email: decoded?.email,
-          username: decoded?.name || decoded?.email?.split?.("@")?.[0] || "User",
-          score: 0,
-        };
-
-        // Call your backend's working endpoint (wrap data in 'user' field)
-        const result = await apiFetch("/users/register", {
+        // Send ID token to backend (no need to parse JWT in frontend)
+        const result = await apiFetch("/auth/google", {
           method: "POST",
-          body: JSON.stringify({ user: userData }),
+          body: JSON.stringify({ token: response.credential }),
         });
 
-        // Handle server response
+        // Display the user info from backend response
         const serverJwt = result?.token || result?.jwt || null;
-        const serverUser = result?.user || userData;
+        const serverUser = result?.user;
 
         if (serverJwt) {
           localStorage.setItem("jwt", serverJwt);
         }
-        localStorage.setItem("user", JSON.stringify(serverUser));
-        setUser(serverUser);
+        if (serverUser) {
+          localStorage.setItem("user", JSON.stringify(serverUser));
+          setUser(serverUser);
+        }
         setError(null);
       } catch (err) {
         console.error("auth error", err);
@@ -147,7 +124,7 @@ export default function StartPage({ videoSrc = "/o.mp4" }) {
         removeChildDivIfExists();
       }
     },
-    [apiFetch, parseJwt, removeChildDivIfExists]
+    [apiFetch, removeChildDivIfExists]
   );
 
   useEffect(() => {
@@ -218,14 +195,25 @@ export default function StartPage({ videoSrc = "/o.mp4" }) {
     return () => {
       cancelled = true;
       try {
-        if (window.google && window.google.accounts && window.google.accounts.id && window.google.accounts.id.cancel) {
+        if (
+          window.google &&
+          window.google.accounts &&
+          window.google.accounts.id &&
+          window.google.accounts.id.cancel
+        ) {
           window.google.accounts.id.cancel();
         }
       } catch {
         // ignore
       }
     };
-  }, [user, ensureScriptLoaded, handleCredentialResponse, createChildDivIfNeeded, removeChildDivIfExists]);
+  }, [
+    user,
+    ensureScriptLoaded,
+    handleCredentialResponse,
+    createChildDivIfNeeded,
+    removeChildDivIfExists,
+  ]);
 
   const handleLogout = useCallback(() => {
     try {
@@ -264,12 +252,25 @@ export default function StartPage({ videoSrc = "/o.mp4" }) {
                 <div
                   id="googleSignInDiv"
                   ref={googleContainerRef}
-                  style={{ display: "flex", justifyContent: "center", alignItems: "center", minHeight: 48 }}
+                  style={{
+                    display: "flex",
+                    justifyContent: "center",
+                    alignItems: "center",
+                    minHeight: 48,
+                  }}
                 >
                   {loading && <div>Loading Google Sign-In…</div>}
                 </div>
                 {error && (
-                  <p className="error" role="alert" style={{ color: "crimson", marginTop: 10, fontWeight: 600 }}>
+                  <p
+                    className="error"
+                    role="alert"
+                    style={{
+                      color: "crimson",
+                      marginTop: 10,
+                      fontWeight: 600,
+                    }}
+                  >
                     {error}
                   </p>
                 )}
@@ -277,6 +278,7 @@ export default function StartPage({ videoSrc = "/o.mp4" }) {
             ) : (
               <>
                 <p className="username">Hi, {user.username}</p>
+                <p className="userscore">Score: {user.score}</p>
                 <div className="row">
                   <button className="btn primary" onClick={handleStartGame}>
                     Start Game
