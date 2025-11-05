@@ -1,3 +1,9 @@
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
 .lb-root {
   position: relative;
   min-height: 100vh;
@@ -9,7 +15,6 @@
   overflow-x: hidden;
   padding: 70px 10%;
   box-sizing: border-box;
-  
 }
 
 .lb-video-bg {
@@ -24,7 +29,6 @@
   pointer-events: none;
 }
 
-/* Navbar */
 .lb-navbar {
   position: fixed;
   top: 0;
@@ -37,7 +41,7 @@
   background: rgba(255, 192, 203, 0.5);
   backdrop-filter: blur(8px);
   box-shadow: 0 2px 12px rgba(185, 58, 128, 0.2);
-  border-bottom: 2px solid rgba(255, 105, 180, 0.4); /* navbar bottom border */
+  border-bottom: 2px solid rgba(255, 105, 180, 0.4);
   z-index: 3;
   color: #701a48;
   box-sizing: border-box;
@@ -62,7 +66,6 @@
   transition: all 0.25s ease-in-out;
 }
 
-/* Home button */
 .lb-navbar .nav-right .home-btn {
   background: transparent;
   color: #ff69b4;
@@ -71,12 +74,12 @@
   padding: 10px 18px;
   box-shadow: 0 2px 6px rgba(255, 105, 180, 0.3);
 }
+
 .lb-navbar .nav-right .home-btn:hover {
-  transform: scale(1.2); /* pop effect for laptop */
+  transform: scale(1.2);
   box-shadow: 0 6px 20px rgba(255, 105, 180, 0.5);
 }
 
-/* Other Buttons */
 .btn.primary {
   background: linear-gradient(45deg, #ff7eb9, #ff65a3);
   color: #fff;
@@ -88,15 +91,13 @@
   box-shadow: 0 4px 12px rgba(255, 105, 180, 0.35);
 }
 
-/* Content card and table */
 .lb-content, .lb-main, .last-card, .lb-table {
   z-index: 2;
   position: relative;
   width: 60%;
-  margin: 30px auto 0 auto; /* center horizontally */
+  margin: 30px auto 0 auto;
 }
 
-/* Last result card */
 .last-card {
   background: rgba(255, 240, 246, 0.25);
   backdrop-filter: blur(10px);
@@ -115,7 +116,6 @@
   font-weight: 700;
 }
 
-/* Table */
 .lb-table {
   width: 100%;
   border-collapse: collapse;
@@ -151,12 +151,11 @@
 }
 
 .lb-table tbody tr.top {
-  background: linear-gradient(90deg, #ff69b4, #ff1493);
+  background: none;
   font-weight: 600;
   color: #fff;
 }
 
-/* Responsive adjustments */
 @media (max-width: 768px) {
   .lb-navbar {
     flex-direction: row;
@@ -187,7 +186,7 @@
 
   .lb-root {
     padding: 50px 5%;
-    gap: 25px; /* increase vertical spacing for mobiles */
+    gap: 25px;
   }
 
   .last-card {
@@ -202,7 +201,7 @@
 
   .lb-table th,
   .lb-table td {
-    font-size: 1.05rem; /* slightly bigger for readability */
+    font-size: 1.05rem;
   }
 }
 
@@ -216,8 +215,7 @@
   }
 
   .lb-navbar .nav-right button,
-  .btn.primary,
-  .btn.ghost {
+  .btn.primary {
     font-size: 0.9rem;
     padding: 8px 12px;
   }
@@ -229,7 +227,7 @@
 
   .lb-table th,
   .lb-table td {
-    font-size: 0.95rem; /* increased for leaderboard on mobile */
+    font-size: 0.95rem;
     padding: 8px 10px;
   }
 
