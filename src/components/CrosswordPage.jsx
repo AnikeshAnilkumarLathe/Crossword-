@@ -22,27 +22,32 @@ export default function CrosswordPage() {
 
   // Fetch crossword data from backend
   useEffect(() => {
-    const fetchCrossword = async () => {
-      setLoading(true);
-      try {
-        const res = await fetch("https://crosswordbackend.onrender.com/crossword");
-        const data = await res.json();
-        console.log(data);
-        setCrossword(data);
+  const fetchCrossword = async () => {
+    setLoading(true);
+    try {
+      const token = localStorage.getItem("token");
+      const res = await fetch("https://crosswordbackend.onrender.com/crossword", {
+        headers: token ? { Authorization: `Bearer ${token}` } : {},
+      });
+      if (!res.ok) throw new Error(`HTTP ${res.status}`);
+      const data = await res.json();
+      console.log("Fetched crossword:", data);
+      setCrossword(data);
 
-        // Build initial empty grid (null = black, "" = input cell)
-        const g = data.Grid.map((row) =>
-          row.map((cell) => (cell.IsBlank ? null : ""))
-        );
-        setGrid(g);
-      } catch (err) {
-        console.error("Error fetching crossword:", err);
-      } finally {
-        setLoading(false);
-      }
-    };
-    fetchCrossword();
-  }, []);
+      // Adapt based on backend structure
+      const g = data.Grid.map((row) =>
+        row.map((cell) => (cell.IsBlank ? null : ""))
+      );
+      setGrid(g);
+    } catch (err) {
+      console.error("Error fetching crossword:", err);
+    } finally {
+      setLoading(false);
+    }
+  };
+  fetchCrossword();
+}, []);
+
 
   // Start countdown timer
   useEffect(() => {
@@ -212,7 +217,6 @@ export default function CrosswordPage() {
   if (!crossword || submitted) return;
 
   const token = localStorage.getItem("token");
-
   if (!token) {
     setPopup({
       open: true,
@@ -223,7 +227,6 @@ export default function CrosswordPage() {
     return;
   }
 
-  // Flatten clues from backend
   const allClues = [
     ...(crossword.Clues?.Across || []).map((c) => ({ ...c, dir: "across" })),
     ...(crossword.Clues?.Down || []).map((c) => ({ ...c, dir: "down" })),
@@ -244,7 +247,7 @@ export default function CrosswordPage() {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
-        Authorization: `Bearer ${token}`, // ✅ attach JWT
+        Authorization: `Bearer ${token}`,
       },
       body: JSON.stringify(payload),
     });
