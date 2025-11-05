@@ -340,27 +340,49 @@ export default function CrosswordPage() {
             <button className="btn primary" onClick={handleSubmit} disabled={submitted}>
               Submit Answers
             </button>
-          </div>
-        </aside>
-      </main>
+          <button
+  className="btn ghost"
+  onClick={() => {
+    setLoading(true);
+    setTimeout(() => navigate("/leaderboard"), 900);
+  }}
+>
+  View Leaderboard
+</button>
 
-      {popup.open && (
-        <div className="popup-overlay">
-          <div className="popup-box">
-            <h2>{popup.title}</h2>
-            <p>{popup.message}</p>
-            <button
-              className="btn primary"
-              onClick={() => {
-                setPopup({ open: false });
-                if (popup.success) navigate("/leaderboard");
-              }}
-            >
-              {popup.success ? "Go to Leaderboard" : "Close"}
-            </button>
-          </div>
-        </div>
-      )}
+</div>
+
+<div className="progress-card">
+  <h4>Progress</h4>
+  <p>
+    Filled: <strong>{grid.flat().filter(Boolean).length}</strong>
+  </p>
+  <p>
+    Words: <strong>{clues.length}</strong>
+  </p>
+</div>
+</aside>
+</main>
+
+{popup.open && (
+  <div className="popup-overlay">
+    <div className="popup-box">
+      <h2>{popup.title}</h2>
+      <p>{popup.message}</p>
+      <div className="popup-actions">
+        <button
+          className="btn primary"
+          onClick={() => {
+            setPopup({ open: false });
+            if (popup.success) navigate("/leaderboard");
+          }}
+        >
+          {popup.success ? "Go to Leaderboard" : "Close"}
+        </button>
+      </div>
     </div>
-  );
+  </div>
+)}
+</div>
+);
 }
