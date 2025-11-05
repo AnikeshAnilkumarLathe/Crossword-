@@ -128,44 +128,31 @@
 }
 
 .btn.primary {
-  background: linear-gradient(90deg, #23272b 0%, #494949 100%);
-  color: #d3d6db;
-  font-weight: 900;
-  letter-spacing: 0.04em;
-  border: 1.5px solid #8ccaff60;
-  box-shadow: 0 0 15px 2px #98c8ff33;
-  outline: none;
-  transition: 
-    background 0.17s,
-    color 0.17s,
-    box-shadow 0.13s,
-    border 0.11s,
-    transform 0.21s cubic-bezier(.79,-0.5,.21,1.55);
+  background: linear-gradient(90deg, #1E2A3A 0%, #3A506B 100%);
+  color: #F3F6F9;
+  border: 1.5px solid #7EC8F9;
+  box-shadow: 0 0 20px 2px rgba(126, 200, 249, 0.3);
 }
+
 .btn.primary:hover {
-  background: linear-gradient(90deg, #2b3540 0%, #6e7081 100%);
-  color: #e5f2fd;
-  border: 1.7px solid #6bbcff;
-  box-shadow: 0 0 22px 7px #b3e6ff66, 0 0 11px 2px #18445b44;
-  transform: scale(1.045) translateY(-2px);
+  background: linear-gradient(90deg, #3A506B 0%, #607D8B 100%);
+  color: #E4F6FF;
+  border: 1.7px solid #4C9AD1;
+  box-shadow: 0 0 20px 5px rgba(126, 200, 249, 0.5), 0 0 12px 2px rgba(72, 92, 119, 0.5);
+  transform: scale(1.05);
 }
-
 .btn.muted {
-  background: rgba(24,26,28,0.67);
-  color: #b3bbc9;
-  border: 1.5px solid #7d8a9760;
-  transition: 
-    background 0.14s,
-    color 0.14s,
-    border 0.09s,
-    transform 0.13s;
-}
-.btn.muted:hover {
-  background: #32343a;
-  color: #e0e0e0;
-  border: 1.4px solid #b3e5ff88;
+  background: rgba(30, 35, 40, 0.75);
+  color: #B0BCC9;
+  border: 1.5px solid #5A6B7A;
 }
 
+.btn.muted:hover {
+  background: #3A434C;
+  color: #E0E0E0;
+  border: 1.5px solid #7D9BB7;
+  transform: scale(1.05);
+}
 
 /* Spinner */
 .spinner {
@@ -200,6 +187,13 @@
   margin-top: 12px;
   flex-wrap: wrap;
 }
+.btn {
+  transition: background-color 0.3s ease, transform 0.2s ease, box-shadow 0.3s ease;
+}
+.username, .userscore {
+  font-weight: bold;
+}
+
 
 /* Presented By EPC (spacing) */
 .presented-by {

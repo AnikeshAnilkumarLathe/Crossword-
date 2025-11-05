@@ -69,7 +69,7 @@ export default function LeaderboardPage() {
             {loading ? (
               <tr><td colSpan="3">Loading…</td></tr>
             ) : list.length === 0 ? (
-              <tr><td colSpan="3">No results yet — they will be announced tomorrow!</td></tr>
+              <tr><td colSpan="3">No results yet — they will be announced soon!</td></tr>
             ) : (
               list.map((user, i) => (
                 <tr key={user.id || i} className={i < 3 ? "top" : ""}>

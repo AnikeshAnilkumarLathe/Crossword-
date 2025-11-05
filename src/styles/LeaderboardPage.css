@@ -119,8 +119,9 @@
   padding: 14px 16px;
   border-bottom: 1px solid rgba(255, 255, 255, 0.15);
   text-align: left;
-  color: #3b0a45;
+  color: #ffffff;
   font-size: 1.05rem;
+  font-weight: 500;
 }
 
 .lb-table th {
@@ -129,7 +130,6 @@
   font-size: 1.15rem;
   color: #fff;
   text-shadow: 0 0 4px rgba(255, 182, 193, 0.35);
-  
 }
 
 .lb-table tbody tr:nth-child(even) {
