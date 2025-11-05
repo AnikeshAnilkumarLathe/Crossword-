@@ -2,7 +2,7 @@
   position: fixed;
   inset: 0;
   z-index: 9999;
-  background-image: url(gate.webp);
+  background-image: url(gate.jpg);
   display: flex;
   align-items: stretch;
   justify-content: space-between;

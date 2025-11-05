@@ -13,7 +13,6 @@ export default function LeaderboardPage() {
       try {
         const res = await fetch("https://crosswordbackend.onrender.com/leaderboard");
         const data = await res.json();
-        // Sort descending by score
         setList(Array.isArray(data) ? data.sort((a, b) => b.score - a.score) : []);
       } catch (err) {
         console.error("Failed to fetch leaderboard:", err);
@@ -37,19 +36,24 @@ export default function LeaderboardPage() {
         playsInline
       />
 
-      <header className="lb-header">
-        <h2>Leaderboard</h2>
-        <div className="lb-actions">
-          <button className="btn ghost" onClick={() => navigate("/")}>Home</button>
-          <button className="btn primary" onClick={() => navigate("/crossword")}>Play Again</button>
+      <nav className="lb-navbar">
+        <div className="nav-left">
+          Crossword by <strong>CC</strong> and <strong>EPC</strong>
         </div>
-      </header>
+        <div className="nav-center">
+          Leaderboard
+        </div>
+        <div className="nav-right">
+          <button className="btn primary" onClick={() => navigate("/")}>Home</button>
+          <button className="btn primary" onClick={() => navigate("/crossword")}>Resume</button>
+        </div>
+      </nav>
 
       <main className="lb-main">
         {last && (
           <div className="last-card">
             <strong>Last Result:</strong>
-            <div>{last.name} — {last.correct}/{last.total} — {last.time}s</div>
+            <div>{last.name} — {last.correct}/{last.total}</div>
           </div>
         )}
 
@@ -63,12 +67,12 @@ export default function LeaderboardPage() {
           </thead>
           <tbody>
             {loading ? (
-              <tr><td colSpan="4">Loading…</td></tr>
+              <tr><td colSpan="3">Loading…</td></tr>
             ) : list.length === 0 ? (
-              <tr><td colSpan="4">No results yet — they will be announced tomorrow!</td></tr>
+              <tr><td colSpan="3">No results yet — they will be announced tomorrow!</td></tr>
             ) : (
               list.map((user, i) => (
-                <tr key={user.id} className={i < 3 ? "top" : ""}>
+                <tr key={user.id || i} className={i < 3 ? "top" : ""}>
                   <td>{i + 1}</td>
                   <td>{user.username}</td>
                   <td>{user.score}</td>

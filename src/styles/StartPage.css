@@ -1,245 +1,228 @@
-/* 🌟 Global Reset */
 * {
   margin: 0;
   padding: 0;
   box-sizing: border-box;
 }
 
-/* 🌄 Root Container */
 .start-root {
   position: relative;
   height: 100vh;
   width: 100%;
   overflow: hidden;
   display: flex;
-  align-items: center;
-  justify-content: center;
+  align-items: flex-end;
+  justify-content: flex-end;
   font-family: "Poppins", sans-serif;
   color: #fff;
+  padding: 2rem;
 }
 
 /* 🎥 Background Video */
 .bg-video {
-  position: fixed;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
+  position: absolute; 
+  top: 50%;
+  left: 50%;
+  width: 100vw;
+  height: 100vh;
+  min-width: 100%;
+  min-height: 100%;
+  transform: translate(-50%, -50%);
   object-fit: cover;
-  z-index: -2;
+  z-index: -1;
+  filter: brightness(0.6) contrast(1.1);
 }
 
-/* 📦 Content Container */
+/* Main container */
 .content-container {
   display: flex;
   justify-content: flex-end;
-  align-items: center;
-  height: 100%;
+  align-items: flex-end;
   width: 100%;
-  padding-right: 2%;
+  height: 100%;
+  margin-right: 0;
+  padding-right: 0;
 }
 
-/* 💫 Left Section Card */
+/* Login Box */
 .start-left {
-  background: rgba(0, 0, 0, 0.55);
-  padding: 42px 50px;
-  border-radius: 20px;
-  box-shadow: 0 0 25px rgba(255, 220, 120, 0.12);
+  background: rgba(15, 15, 15, 0.6);
+  padding: clamp(1.2rem, 2.5vw, 2.5rem) clamp(1.8rem, 4vw, 3rem);
+  border-radius: 1.25rem;
+  box-shadow: 0 0 25px rgba(255, 255, 255, 0.15);
   text-align: center;
-  max-width: 440px;
-  width: 88%;
+  max-width: 420px;
+  width: 100%;
   backdrop-filter: blur(8px);
-  border: 1px solid rgba(255, 220, 120, 0.2);
+  border: 1px solid rgba(255, 255, 255, 0.2);
   transition: all 0.3s ease;
+  padding-right: auto;
 }
 
 .start-left:hover {
   transform: translateY(-4px);
-  box-shadow: 0 0 35px rgba(255, 220, 120, 0.25);
+  box-shadow: 0 0 35px rgba(255, 255, 255, 0.3);
 }
 
-/* ✨ Brand / Title */
-.brand {
-  margin-bottom: 20px;
-}
-
+/* Site Title & Tagline */
 .site-title {
-  font-size: 2.3rem;
+  font-size: clamp(1.6rem, 4vw, 2.3rem);
   font-weight: 800;
-  color: #ffe58f;
-  text-shadow: 0 0 25px rgba(255, 225, 140, 0.5), 0 0 55px rgba(255, 225, 140, 0.2);
+  color: #f3f3f3;
+  text-shadow: 0 0 25px rgba(255, 255, 255, 0.4);
 }
 
 .tagline {
-  font-size: 1rem;
-  color: #f7e8cf;
+  font-size: clamp(0.85rem, 2vw, 1rem);
+  color: #dcdcdc;
   opacity: 0.95;
-  margin-top: 8px;
+  margin-top: 0.5rem;
 }
 
-/* 🪄 Auth Box */
+/* Auth Card */
 .auth-card {
-  background: rgba(0, 0, 0, 0.6);
-  padding: 22px;
-  border-radius: 12px;
-  box-shadow: inset 0 0 20px rgba(255, 220, 120, 0.08);
-  border: 1px solid rgba(255, 220, 120, 0.15);
+  background: rgba(10, 10, 10, 0.7);
+  padding: clamp(0.8rem, 2vw, 1.2rem);
+  border-radius: 0.75rem;
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  box-shadow: inset 0 0 20px rgba(255, 255, 255, 0.08);
+  margin-top: 2.5vh;
 }
 
 .auth-title {
-  font-size: 1.2rem;
-  color: #ffe58f;
-  margin-bottom: 14px;
+  font-size: clamp(1rem, 2vw, 1.1rem);
+  color: #f1f1f1;
+  margin-bottom: 0.5rem;
   font-weight: 700;
 }
 
+/* Input Fields */
 .auth-card input {
   width: 100%;
-  padding: 12px;
-  margin: 8px 0;
-  border-radius: 8px;
-  border: 1px solid rgba(255, 220, 120, 0.25);
-  background: rgba(30, 30, 30, 0.7);
+  padding: clamp(0.5rem, 1.3vw, 0.7rem);
+  margin: 0.4rem 0;
+  border-radius: 0.5rem;
+  border: 1px solid rgba(255, 255, 255, 0.25);
+  background: rgba(30, 30, 30, 0.8);
   color: #fff;
-  font-size: 0.95rem;
+  font-size: clamp(0.8rem, 1.6vw, 0.9rem);
 }
 
 .auth-card input::placeholder {
-  color: rgba(255, 230, 180, 0.65);
+  color: rgba(220, 220, 220, 0.6);
 }
 
 .auth-card input:focus {
-  border-color: rgba(255, 220, 120, 0.45);
-  box-shadow: 0 0 15px rgba(255, 220, 120, 0.25);
-  background: rgba(50, 50, 50, 0.85);
+  border-color: rgba(255, 255, 255, 0.45);
+  box-shadow: 0 0 15px rgba(255, 255, 255, 0.2);
 }
 
-/* 🧈 Buttons */
+/* Buttons */
 .btn {
-  padding: 10px 16px;
-  border-radius: 10px;
+  padding: clamp(0.4rem, 1vw, 0.55rem) clamp(0.7rem, 1.5vw, 0.9rem); /* smaller button */
+  border-radius: 0.625rem;
   border: none;
   cursor: pointer;
   font-weight: 700;
-  font-size: 0.95rem;
+  font-size: clamp(0.8rem, 1.8vw, 0.9rem);
   transition: all 0.25s ease;
 }
 
 .btn.primary {
-  background: linear-gradient(90deg, #ffdd7a, #d6a53b);
+  background: linear-gradient(90deg, #dcdcdc, #a0a0a0);
   color: #111;
-  box-shadow: 0 0 22px rgba(255, 220, 120, 0.25), 0 0 45px rgba(255, 210, 90, 0.15);
+  box-shadow: 0 0 25px rgba(255, 255, 255, 0.3);
 }
 
 .btn.primary:hover {
-  transform: translateY(-3px);
-  box-shadow: 0 0 40px rgba(255, 220, 120, 0.4), 0 0 80px rgba(255, 220, 120, 0.25);
+  transform: translateY(-2px);
+  box-shadow: 0 0 35px rgba(255, 255, 255, 0.5);
 }
 
 .btn.muted {
   background: transparent;
-  border: 1px solid rgba(255, 220, 120, 0.25);
-  color: #ffe8b3;
+  border: 1px solid rgba(255, 255, 255, 0.25);
+  color: #f1f1f1;
 }
 
 .btn.muted:hover {
-  background: rgba(255, 220, 120, 0.12);
-  color: #fff8e0;
+  background: rgba(255, 255, 255, 0.12);
 }
 
-/* 🧑‍💼 Username Display */
-.username {
-  font-size: 1.05rem;
-  color: #ffe8b3;
-  display: block;
-  margin-bottom: 10px;
-  font-weight: 700;
+/* Spinner */
+.spinner {
+  width: 32px; /* bigger and more visible */
+  height: 32px;
+  border: 4px solid rgba(255, 255, 255, 0.3);
+  border-top-color: #fff;
+  border-radius: 50%;
+  animation: spin 0.8s linear infinite;
 }
 
-.userscore{
-  font-size: 0.5rem;
-  color: #ffe8b3;
-  display: block;
-  margin-bottom: 10px;
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
 }
 
-/* 🔗 Button Row */
+/* Google Sign-In */
+#googleSignInDiv {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 16px; /* larger spacing */
+  margin-top: 1rem;
+}
+
+/* Row Layout */
 .row {
   display: flex;
   justify-content: center;
-  gap: 12px;
+  gap: 16px;
   margin-top: 12px;
+  flex-wrap: wrap;
 }
 
-/* 🌐 MEDIA QUERIES */
+/* Presented By EPC (spacing) */
+.presented-by {
+  margin-bottom: 1.5rem; /* clear gap between EPC text and login container */
+  font-size: 0.9rem;
+  opacity: 0.7;
+  text-align: center;
+}
 
-/* 💻 Medium Devices (Tablets / Small Laptops) */
+/* Responsive Adjustments */
+
+/* Tablet */
 @media (max-width: 1024px) {
   .content-container {
-    justify-content: center;
-    padding-right: 0;
-  }
-
-  .start-left {
-    padding: 36px 40px;
-    max-width: 420px;
-  }
-
-  .site-title {
-    font-size: 2rem;
-  }
-
-  .tagline {
-    font-size: 0.95rem;
-  }
-
-  .auth-card {
-    padding: 18px;
-  }
-
-  .btn {
-    font-size: 0.9rem;
+    justify-content: flex-end;
+    align-items: flex-end;
+    margin-right: 4vw;
   }
 }
 
-/* 📱 Small Devices (Phones up to 768px) */
+/* Mobile */
 @media (max-width: 768px) {
+  .start-root {
+    align-items: flex-end; /* move to bottom-left */
+    justify-content: flex-start;
+    padding: 0 1rem 2rem 1rem;
+  }
+
   .content-container {
-    justify-content: center;
-    padding: 0 5%;
+    justify-content: flex-start;
+    align-items: flex-end;
+    margin: 0;
   }
 
   .start-left {
-    padding: 30px 26px;
-    width: 95%;
-    max-width: 400px;
-    border-radius: 16px;
+    margin: 0;
+    width: 90%;
+    max-width: 380px;
   }
 
-  .site-title {
-    font-size: 1.8rem;
-  }
-
-  .tagline {
-    font-size: 0.9rem;
-  }
-
-  .auth-title {
-    font-size: 1.05rem;
-  }
-
-  .auth-card {
-    padding: 16px;
-  }
-
-  .auth-card input {
-    padding: 10px;
-    font-size: 0.9rem;
-  }
-
-  .btn {
-    padding: 8px 14px;
-    font-size: 0.9rem;
+  .bg-video {
+    transform: translate(-50%, -50%) scale(1.1);
   }
 
   .row {
@@ -248,45 +231,27 @@
   }
 }
 
-/* 📞 Extra Small Devices (Under 480px) */
+/* Small Phones */
 @media (max-width: 480px) {
-  .content-container {
-    flex-direction: column;
-    justify-content: center;
-    align-items: center;
-    padding: 0 4%;
+  .start-root {
+    align-items: flex-end;
+    justify-content: flex-start;
+    padding: 0 0.8rem 1.5rem 0.8rem;
+  }
+
+  .bg-video{
+    transform: translate(-50%, -50%) scale(1.05);
   }
 
   .start-left {
-    width: 100%;
-    padding: 24px 18px;
-    border-radius: 14px;
+    width: 75%;
+    padding: 1rem 1.2rem;
+    margin-bottom: 50%;
   }
 
-  .site-title {
-    font-size: 1.6rem;
+  .content-container {
+    align-items: flex-end;
+    justify-content: flex-start;
   }
-
-  .tagline {
-    font-size: 0.85rem;
-  }
-
-  .auth-title {
-    font-size: 0.95rem;
-  }
-
-  .auth-card input {
-    padding: 9px;
-    font-size: 0.85rem;
-  }
-
-  .btn {
-    font-size: 0.85rem;
-    padding: 8px 12px;
-  }
-
-  .row {
-    flex-direction: column;
-    width: 100%;
-  }
+  
 }

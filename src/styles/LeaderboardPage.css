@@ -1,16 +1,17 @@
-/* 🌸 Base Styles */
 .lb-root {
+  position: relative;
   min-height: 100vh;
   display: flex;
   flex-direction: column;
   align-items: center;
   justify-content: flex-start;
   color: #3b0a45;
-  overflow: hidden;
-  padding: 70px 30%;
+  overflow-x: hidden;
+  padding: 70px 10%;
+  box-sizing: border-box;
+  
 }
 
-/* 🎥 Background Video */
 .lb-video-bg {
   position: fixed;
   top: 0;
@@ -18,110 +19,119 @@
   width: 100%;
   height: 100%;
   object-fit: cover;
+  transform: scale(1.05);
   z-index: -1;
+  pointer-events: none;
 }
 
-/* 💎 Content Wrapper */
-.lb-content {
-  position: relative;
-  z-index: 2;
-  width: 90%;
-  max-width: 800px;
-  background: rgba(255, 220, 235, 0.3);
-  border-radius: 20px;
-  box-shadow: 0 8px 40px rgba(185, 58, 128, 0.25);
-  padding: 40px 30px;
-  border: 1px solid rgba(255, 192, 203, 0.3);
-}
-
-/* 🪞 Header */
-.lb-header {
+/* Navbar */
+.lb-navbar {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
   display: flex;
   justify-content: space-between;
   align-items: center;
-  width: 100%;
-  margin-bottom: 24px;
-}
-
-.lb-header h2 {
-  font-size: 2.6rem;
-  font-weight: 700;
+  padding: 15px 7%;
+  background: rgba(255, 192, 203, 0.5);
+  backdrop-filter: blur(8px);
+  box-shadow: 0 2px 12px rgba(185, 58, 128, 0.2);
+  border-bottom: 2px solid rgba(255, 105, 180, 0.4); /* navbar bottom border */
+  z-index: 3;
   color: #701a48;
-  text-shadow: 0 0 10px rgba(255, 182, 193, 0.35);
+  box-sizing: border-box;
 }
 
-.lb-actions {
-  display: flex;
-  gap: 10px;
-}
-
-/* 🔘 Buttons */
-.lb-root .btn {
-  padding: 10px 16px;
-  border-radius: 10px;
-  border: none;
+.lb-navbar .nav-left {
   font-weight: 600;
-  font-size: 0.95rem;
-  transition: all 0.25s ease;
+  font-size: 1.15rem;
+}
+
+.lb-navbar .nav-center {
+  font-weight: 700;
+  font-size: 1.75rem;
+}
+
+.lb-navbar .nav-right button {
+  margin-left: 10px;
+  font-weight: 600;
+  border-radius: 8px;
+  padding: 8px 14px;
   cursor: pointer;
+  transition: all 0.25s ease-in-out;
 }
 
-.lb-root .btn.primary {
-  background: linear-gradient(90deg, #f472b6, #ec4899);
-  color: #fff0f6;
-  box-shadow: 0 3px 10px rgba(236, 72, 153, 0.35);
-}
-
-.lb-root .btn.primary:hover {
-  transform: translateY(-2px);
-  box-shadow: 0 6px 16px rgba(236, 72, 153, 0.45);
-}
-
-.lb-root .btn.ghost {
+/* Home button */
+.lb-navbar .nav-right .home-btn {
   background: transparent;
-  border: 1.5px solid rgba(255, 255, 255, 0.4);
-  color: #fff0f6;
+  color: #ff69b4;
+  border: 2px solid #fff;
+  font-size: 1rem;
+  padding: 10px 18px;
+  box-shadow: 0 2px 6px rgba(255, 105, 180, 0.3);
+}
+.lb-navbar .nav-right .home-btn:hover {
+  transform: scale(1.2); /* pop effect for laptop */
+  box-shadow: 0 6px 20px rgba(255, 105, 180, 0.5);
 }
 
-.lb-root .btn.ghost:hover {
-  background: rgba(255, 255, 255, 0.1);
+/* Other Buttons */
+.btn.primary {
+  background: linear-gradient(45deg, #ff7eb9, #ff65a3);
+  color: #fff;
+  border: none;
 }
 
-/* 🩷 Main Section */
-.lb-main {
-  display: flex;
-  flex-direction: column;
-  gap: 20px;
-  align-items: center;
-  justify-content: flex-start;
-  width: 100%;
+.btn.primary:hover {
+  transform: scale(1.05);
+  box-shadow: 0 4px 12px rgba(255, 105, 180, 0.35);
 }
 
-/* 🪄 Last Card */
+.btn.ghost {
+  background: transparent;
+  color: #ff7eb9;
+  border: 2px solid #ff7eb9;
+}
+
+.btn.ghost:hover {
+  background: rgba(255, 126, 185, 0.15);
+}
+
+/* Content card and table */
+.lb-content, .lb-main, .last-card, .lb-table {
+  z-index: 2;
+  position: relative;
+  width: 60%;
+  margin: 30px auto 0 auto; /* center horizontally */
+}
+
+/* Last result card */
 .last-card {
-  background: rgba(255, 240, 246, 0.12);
-  backdrop-filter: blur(12px);
+  background: rgba(255, 240, 246, 0.25);
+  backdrop-filter: blur(10px);
   padding: 16px 20px;
   border-radius: 12px;
   width: 100%;
-  border-left: 5px solid #f9a8d4;
+  border-left: 5px solid #ff69b4;
   box-shadow: 0 4px 20px rgba(255, 105, 180, 0.25);
   color: #3b0a45;
+  box-sizing: border-box;
+  margin-bottom: 20px;
 }
 
 .last-card strong {
-  color: #9d174d;
+  color: #d81b60;
   font-weight: 700;
 }
 
-/* 📊 Table */
+/* Table */
 .lb-table {
   width: 100%;
   border-collapse: collapse;
-  background: rgba(255, 255, 255, 0.08);
+  background: rgba(255, 192, 203, 0.15);
   border-radius: 12px;
-  overflow: hidden;
-  backdrop-filter: blur(10px);
+  overflow: auto;
   box-shadow: 0 6px 30px rgba(0, 0, 0, 0.25);
 }
 
@@ -130,126 +140,120 @@
   padding: 14px 16px;
   border-bottom: 1px solid rgba(255, 255, 255, 0.15);
   text-align: left;
-  color: #fdf2f8;
+  color: #3b0a45;
+  font-size: 1.05rem;
 }
 
 .lb-table th {
-  background: linear-gradient(90deg, rgba(255, 192, 203, 0.25), rgba(255, 182, 193, 0.45));
+  background: linear-gradient(90deg, #ffb6c1, #ffc0cb);
   font-weight: 700;
-  font-size: 1rem;
-  color: #fff0f6;
-  text-shadow: 0 0 6px rgba(255, 192, 203, 0.35);
+  font-size: 1.15rem;
+  color: #fff;
+  text-shadow: 0 0 4px rgba(255, 182, 193, 0.35);
 }
 
 .lb-table tbody tr:nth-child(even) {
-  background: rgba(255, 255, 255, 0.06);
+  background: rgba(255, 182, 193, 0.1);
 }
 
 .lb-table tbody tr:hover {
-  background: rgba(255, 255, 255, 0.15);
+  background: rgba(255, 105, 180, 0.2);
 }
 
 .lb-table tbody tr.top {
-  background: linear-gradient(90deg, rgba(249, 168, 212, 0.25), rgba(244, 114, 182, 0.35));
+  background: linear-gradient(90deg, #ff69b4, #ff1493);
   font-weight: 600;
-  color: #fff0f6;
+  color: #fff;
 }
 
-/* 🌐 MEDIA QUERIES */
-
-/* 🧩 Medium Devices (Tablets) */
-@media (max-width: 1024px) {
-  .lb-root {
-    padding: 60px 15%;
-  }
-
-  .lb-content {
-    padding: 32px 24px;
-  }
-
-  .lb-header h2 {
-    font-size: 2.2rem;
-  }
-
-  .lb-table th,
-  .lb-table td {
-    padding: 12px 14px;
-    font-size: 0.95rem;
-  }
-}
-
-/* 📱 Small Devices (Phones) */
+/* Responsive adjustments */
 @media (max-width: 768px) {
-  .lb-root {
-    padding: 50px 10%;
+  .lb-navbar {
+    flex-direction: row;
+    align-items: center;
+    justify-content: space-between;
+    padding: 12px 6%;
+    gap: 6px;
   }
 
-  .lb-content {
-    padding: 28px 18px;
+  .lb-navbar .nav-left {
+    display: none;
   }
 
-  .lb-header {
-    flex-direction: column;
-    align-items: flex-start;
-    gap: 12px;
+  .lb-navbar .nav-center {
+    text-align: left;
+    font-size: 1.2rem;
   }
 
-  .lb-header h2 {
-    font-size: 1.8rem;
-  }
-
-  .lb-actions {
-    width: 100%;
-    justify-content: flex-start;
-    flex-wrap: wrap;
+  .lb-navbar .nav-right {
+    display: flex;
+    justify-content: flex-end;
     gap: 8px;
   }
 
-  .lb-root .btn {
-    font-size: 0.9rem;
-    padding: 8px 14px;
+  .lb-video-bg {
+    transform: scale(1.15);
   }
 
-  .lb-table th,
-  .lb-table td {
-    font-size: 0.9rem;
-    padding: 10px 12px;
+  .lb-root {
+    padding: 50px 5%;
+    gap: 25px; /* increase vertical spacing for mobiles */
   }
 
   .last-card {
+    margin-bottom: 20px;
     padding: 14px 16px;
-    font-size: 0.9rem;
-  }
-}
-
-/* 📞 Extra Small Devices (Phones under 480px) */
-@media (max-width: 480px) {
-  .lb-root {
-    padding: 40px 6%;
   }
 
-  .lb-header h2 {
-    font-size: 1.5rem;
-    text-align: center;
-    width: 100%;
-  }
-
-  .lb-actions {
-    justify-content: center;
-  }
-
-  .lb-content {
-    border-radius: 14px;
-    padding: 20px 14px;
+  .lb-content, .lb-main, .last-card, .lb-table {
+    width: 85%;
+    margin: 20px auto 0 auto;
   }
 
   .lb-table th,
   .lb-table td {
-    font-size: 0.85rem;
+    font-size: 1.05rem; /* slightly bigger for readability */
+  }
+}
+
+@media (max-width: 480px) {
+  .lb-root {
+    padding: 30px 4%;
+  }
+
+  .lb-navbar .nav-center {
+    font-size: 1.05rem;
+  }
+
+  .lb-navbar .nav-right button,
+  .btn.primary,
+  .btn.ghost {
+    font-size: 0.9rem;
+    padding: 8px 12px;
+  }
+
+  .lb-navbar .nav-right .home-btn {
+    font-size: 1rem;
+    padding: 10px 18px;
+  }
+
+  .lb-table th,
+  .lb-table td {
+    font-size: 0.95rem; /* increased for leaderboard on mobile */
     padding: 8px 10px;
   }
 
   .last-card {
-    padding: 12px;
+    padding: 12px 14px;
+    margin-bottom: 15px;
+  }
+
+  .lb-video-bg {
+    transform: scale(1.05);
+  }
+
+  .lb-content, .lb-main, .last-card, .lb-table {
+    width: 95%;
+    margin: 35px auto 0 auto;
   }
 }

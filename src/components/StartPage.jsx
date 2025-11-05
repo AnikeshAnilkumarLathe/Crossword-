@@ -5,7 +5,7 @@ import "../styles/StartPage.css";
 // backend base URL
 const BACKEND_BASE = "https://crosswordbackend.onrender.com";
 
-export default function StartPage({ videoSrc = "/o.mp4" }) {
+export default function StartPage({ videoSrc = "/og.mp4" }) {
   const navigate = useNavigate();
   const [error, setError] = useState(null);
   const [loading, setLoading] = useState(true);
@@ -14,7 +14,8 @@ export default function StartPage({ videoSrc = "/o.mp4" }) {
   const childDivRef = useRef(null);
   const initializedRef = useRef(false);
 
-  const CLIENT_ID = "919062485527-9hno8iqrqs35samoaub3reobf03pq3du.apps.googleusercontent.com";
+  const CLIENT_ID =
+    "919062485527-9hno8iqrqs35samoaub3reobf03pq3du.apps.googleusercontent.com";
 
   // Helper function to call backend with JWT if present
   const apiFetch = useCallback(async (path, opts = {}) => {
@@ -92,8 +93,10 @@ export default function StartPage({ videoSrc = "/o.mp4" }) {
     async (response) => {
       if (!response || !response.credential) {
         setError("No credential returned from Google.");
+        setLoading(false);
         return;
       }
+
       setError(null);
       setLoading(true);
 
@@ -165,13 +168,13 @@ export default function StartPage({ videoSrc = "/o.mp4" }) {
           return;
         }
       }
-      createChildDivIfNeeded();
+      const childDiv = createChildDivIfNeeded();
       if (!user) {
         try {
-          window.google.accounts.id.renderButton(childDivRef.current, {
+          window.google.accounts.id.renderButton(childDiv, {
             theme: "outline",
             size: "large",
-            width: 280,
+            width: 180,
           });
         } catch {
           // ignore render errors
@@ -191,6 +194,13 @@ export default function StartPage({ videoSrc = "/o.mp4" }) {
       }
     };
   }, [user, ensureScriptLoaded, handleCredentialResponse, createChildDivIfNeeded, removeChildDivIfExists]);
+
+  // Hide/show Google button based on loading
+  useEffect(() => {
+    if (childDivRef.current) {
+      childDivRef.current.style.display = loading ? "none" : "block";
+    }
+  }, [loading]);
 
   // Logout user and clear local storage
   const handleLogout = useCallback(() => {
@@ -231,10 +241,10 @@ export default function StartPage({ videoSrc = "/o.mp4" }) {
                     display: "flex",
                     justifyContent: "center",
                     alignItems: "center",
-                    minHeight: 48,
+                    minHeight: 48, // keep layout stable
                   }}
                 >
-                  {loading && <div>Loading Google Sign-In…</div>}
+                  {loading && <div className="spinner" />}
                 </div>
                 {error && (
                   <p
