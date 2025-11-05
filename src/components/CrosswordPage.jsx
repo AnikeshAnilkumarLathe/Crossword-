@@ -18,30 +18,23 @@ export default function CrosswordPage() {
   // Fetch crossword data from backend
   useEffect(() => {
     const fetchCrossword = async () => {
-  setLoading(true);
-  try {
-    const res = await fetch("https://crosswordbackend.onrender.com/crossword");
-    const data = await res.json();
-    console.log("Fetched crossword:", data);
+      setLoading(true);
+      try {
+        const res = await fetch("https://crosswordbackend.onrender.com/crossword"); // ✅ adjust endpoint if needed
+        const data = await res.json();
+        console.log(data);
+        setCrossword(data);
 
-    // 🧠 Convert backend grid to the format your React UI expects
-    const transformedLayout = data.Grid.map((row) =>
-      row.map((cell) => (cell.IsBlank ? "" : ""))
-    );
-
-    setCrossword({
-      ...data,
-      layout: transformedLayout,
-      clues: data.Clues,
-    });
-  } catch (error) {
-    console.log("Error fetching crossword:", error);
-  } finally {
-    setLoading(false);
-  }
-};
-  fetchCrossword();
-
+        // Build initial empty grid (null = black, "" = input cell)
+        const g = data.Grid.map((row) => row.map((cell) => (cell.IsBlank ? null : "")));
+        setGrid(g);
+      } catch (err) {
+        console.error("Error fetching crossword:", err);
+      } finally {
+        setLoading(false);
+      }
+    };
+    fetchCrossword();
   }, []);
 
   // Start countdown timer
