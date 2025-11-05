@@ -375,6 +375,7 @@
   .cw-root .board-grid {
     transform: scale(0.7);
     transform-origin: top center;
+    width: 100%
   }
 
   .cw-root .cw-side {

@@ -41,19 +41,24 @@ export default function CrosswordPage() {
   const [grid, setGrid] = useState(initialGrid);
 
   useEffect(() => {
-    if (submitted) return;
-    const timer = setInterval(() => {
-      setRemaining((prev) => {
-        if (prev <= 1) {
-          clearInterval(timer);
-          handleSubmit();
-          return 0;
-        }
-        return prev - 1;
-      });
-    }, 1000);
-    return () => clearInterval(timer);
-  }, [submitted]);
+  if (submitted) return;
+
+  const timer = setInterval(() => {
+    setRemaining((prev) => {
+      if (prev <= 1) {
+        clearInterval(timer);
+        setRemaining(0);
+        setSubmitted(true);
+        handleSubmit(); // ⏰ Auto-submit when timer ends
+        return 0;
+      }
+      return prev - 1;
+    });
+  }, 1000);
+
+  return () => clearInterval(timer);
+}, [submitted]); // dependencies
+
 
   const formatTime = (seconds) => {
     const mins = Math.floor(seconds / 60);
