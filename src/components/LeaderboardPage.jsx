@@ -1,18 +1,34 @@
-import React from "react";
+import React, { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import "../styles/LeaderboardPage.css";
 
 export default function LeaderboardPage() {
   const navigate = useNavigate();
-  const raw = JSON.parse(localStorage.getItem("leaderboard") || "[]");
-  const list = Array.isArray(raw) ? raw : [];
-  list.sort((a, b) => a.time - b.time || b.correct - a.correct);
+  const [list, setList] = useState([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    async function fetchLeaderboard() {
+      setLoading(true);
+      try {
+        const res = await fetch("https://crosswordbackend.onrender.com/leaderboard");
+        const data = await res.json();
+        // Sort descending by score
+        setList(Array.isArray(data) ? data.sort((a, b) => b.score - a.score) : []);
+      } catch (err) {
+        console.error("Failed to fetch leaderboard:", err);
+        setList([]);
+      }
+      setLoading(false);
+    }
+    fetchLeaderboard();
+  }, []);
 
   const last = JSON.parse(localStorage.getItem("lastResult") || "null");
 
   return (
     <div className="lb-root">
-    <video
+      <video
         className="lb-video-bg"
         src="/final.mp4"
         autoPlay
@@ -42,20 +58,20 @@ export default function LeaderboardPage() {
             <tr>
               <th>#</th>
               <th>Name</th>
-              <th>Time (s)</th>
-              <th>Correct</th>
+              <th>Score</th>
             </tr>
           </thead>
           <tbody>
-            {list.length === 0 ? (
-              <tr><td colSpan="4">No results yet — be the first!</td></tr>
+            {loading ? (
+              <tr><td colSpan="4">Loading…</td></tr>
+            ) : list.length === 0 ? (
+              <tr><td colSpan="4">No results yet — they will be announced tomorrow!</td></tr>
             ) : (
-              list.map((p, i) => (
-                <tr key={i} className={i < 3 ? "top" : ""}>
+              list.map((user, i) => (
+                <tr key={user.id} className={i < 3 ? "top" : ""}>
                   <td>{i + 1}</td>
-                  <td>{p.name}</td>
-                  <td>{p.time}</td>
-                  <td>{p.correct ?? "-"}</td>
+                  <td>{user.username}</td>
+                  <td>{user.score}</td>
                 </tr>
               ))
             )}

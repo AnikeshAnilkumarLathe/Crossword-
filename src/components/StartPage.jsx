@@ -1,6 +1,7 @@
 import React, { useEffect, useState, useCallback, useRef } from "react";
 import { useNavigate } from "react-router-dom";
 import "../styles/StartPage.css";
+console.log(window.location.protocol);
 
 // backend base
 const BACKEND_BASE = "https://crosswordbackend.onrender.com";
