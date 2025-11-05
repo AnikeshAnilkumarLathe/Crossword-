@@ -25,18 +25,20 @@ export default function CrosswordPage() {
   const fetchCrossword = async () => {
     setLoading(true);
     try {
-      const token = localStorage.getItem("token");
-      const res = await fetch("https://crosswordbackend.onrender.com/crossword", {
-        headers: token ? { Authorization: `Bearer ${token}` } : {},
-      });
-      if (!res.ok) throw new Error(`HTTP ${res.status}`);
+      const res = await fetch("https://crosswordbackend.onrender.com/crossword");
       const data = await res.json();
       console.log("Fetched crossword:", data);
+
+      if (!data || !Array.isArray(data.Grid)) {
+        console.error("❌ Unexpected data format:", data);
+        setCrossword(null);
+        return;
+      }
+
       setCrossword(data);
 
-      // Adapt based on backend structure
       const g = data.Grid.map((row) =>
-        row.map((cell) => (cell.IsBlank ? null : ""))
+        row.map((cell) => (cell?.IsBlank ? null : ""))
       );
       setGrid(g);
     } catch (err) {
