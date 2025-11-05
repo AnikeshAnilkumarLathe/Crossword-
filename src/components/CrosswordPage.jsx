@@ -353,9 +353,8 @@ export default function CrosswordPage() {
             <button className="btn primary" onClick={handleSubmit} disabled={submitted}>
               Submit Answers
             </button>
-          </div>
-          <div className="btn-ghost">
-            <button className="btn primary" onClick={()=>navigate("/leaderboard")}>
+          
+            <button className="btn ghost" onClick={()=>navigate("/leaderboard")}>
               Leaderboard
             </button>
           </div>
