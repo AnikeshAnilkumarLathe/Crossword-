@@ -354,6 +354,11 @@ export default function CrosswordPage() {
               Submit Answers
             </button>
           </div>
+          <div className="actions">
+            <button className="btn primary" onClick={()=>navigate("/leaderboard")}>
+              Leaderboard
+            </button>
+          </div>
         </aside>
       </main>
 
