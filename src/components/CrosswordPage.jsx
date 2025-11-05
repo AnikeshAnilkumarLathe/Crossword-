@@ -20,7 +20,7 @@ export default function CrosswordPage() {
     const fetchCrossword = async () => {
       setLoading(true);
       try {
-        const res = await fetch("https://crosswordbackend.onrender.com/crossword/1"); // ✅ adjust endpoint if needed
+        const res = await fetch("https://crosswordbackend.onrender.com/crossword"); // ✅ adjust endpoint if needed
         const data = await res.json();
         console.log(data);
         setCrossword(data);
