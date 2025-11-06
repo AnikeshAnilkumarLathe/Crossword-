@@ -2,6 +2,7 @@ import React, { useEffect, useState, useCallback, useRef } from "react";
 import { useNavigate } from "react-router-dom";
 import "../styles/StartPage.css";
 
+// backend base URL
 const BACKEND_BASE = "https://crosswordbackend.onrender.com";
 
 export default function StartPage({ videoSrc = "/og.mp4" }) {
@@ -9,7 +10,6 @@ export default function StartPage({ videoSrc = "/og.mp4" }) {
   const [error, setError] = useState(null);
   const [loading, setLoading] = useState(true);
   const [user, setUser] = useState(null);
-  const [videosReady, setVideosReady] = useState(false);
   const googleContainerRef = useRef(null);
   const childDivRef = useRef(null);
   const initializedRef = useRef(false);
@@ -17,55 +17,20 @@ export default function StartPage({ videoSrc = "/og.mp4" }) {
   const CLIENT_ID =
     "919062485527-9hno8iqrqs35samoaub3reobf03pq3du.apps.googleusercontent.com";
 
-  // 🟩 Helper to preload videos and store them in sessionStorage
-  const preloadVideos = useCallback(async () => {
-    const sources = ["/og.mp4", "/final.mp4"];
-    try {
-      await Promise.all(
-        sources.map(
-          (src) =>
-            new Promise((resolve, reject) => {
-              const video = document.createElement("video");
-              video.src = src;
-              video.preload = "auto";
-              video.oncanplaythrough = () => {
-                // Convert small videos into blobs and cache in sessionStorage
-                fetch(src)
-                  .then((res) => res.blob())
-                  .then((blob) => {
-                    const blobUrl = URL.createObjectURL(blob);
-                    sessionStorage.setItem(src, blobUrl);
-                    resolve();
-                  })
-                  .catch(() => resolve()); // fallback ignore
-              };
-              video.onerror = reject;
-            })
-        )
-      );
-      setVideosReady(true);
-    } catch (err) {
-      console.error("Video preload failed:", err);
-      setVideosReady(false);
-    }
-  }, []);
-
-  // 🟩 Run preload once on mount
-  useEffect(() => {
-    preloadVideos();
-  }, [preloadVideos]);
-
-  // ✅ Helper: backend call
+  // Helper function to call backend with JWT if present
   const apiFetch = useCallback(async (path, opts = {}) => {
     const headers = (opts.headers = opts.headers || {});
     const stored = localStorage.getItem("jwt");
+
     if (stored) headers["Authorization"] = `Bearer ${stored}`;
     headers["Content-Type"] = headers["Content-Type"] || "application/json";
+
     const res = await fetch(BACKEND_BASE + path, {
       credentials: "omit",
       ...opts,
       headers,
     });
+
     const text = await res.text();
     let json;
     try {
@@ -73,27 +38,34 @@ export default function StartPage({ videoSrc = "/og.mp4" }) {
     } catch {
       json = text;
     }
+
     if (!res.ok) {
       const err = new Error(json?.message || `HTTP ${res.status}`);
       err.status = res.status;
       err.body = json;
       throw err;
     }
+
     return json;
   }, []);
 
-  // ✅ Create/remove Google Sign-In divs
+  // Create child div for Google sign-in button if needed
   const createChildDivIfNeeded = useCallback(() => {
     if (childDivRef.current) return childDivRef.current;
     const el = document.createElement("div");
     el.setAttribute("data-gsi-child", "1");
-    if (googleContainerRef.current) googleContainerRef.current.appendChild(el);
+
+    if (googleContainerRef.current)
+      googleContainerRef.current.appendChild(el);
+
     childDivRef.current = el;
     return el;
   }, []);
 
+  // Remove Google sign-in child div if exists
   const removeChildDivIfExists = useCallback(() => {
     if (!childDivRef.current && !googleContainerRef.current) return;
+
     if (childDivRef.current && childDivRef.current.parentNode) {
       childDivRef.current.parentNode.removeChild(childDivRef.current);
     } else if (googleContainerRef.current) {
@@ -103,14 +75,16 @@ export default function StartPage({ videoSrc = "/og.mp4" }) {
         );
       }
     }
+
     childDivRef.current = null;
   }, []);
 
-  // ✅ Load Google client script
+  // Load Google Sign-In client library script dynamically
   const ensureScriptLoaded = useCallback(async () => {
     const src = "https://accounts.google.com/gsi/client";
     if (window.google && window.google.accounts && window.google.accounts.id)
       return;
+
     await new Promise((resolve) => {
       const existing = document.querySelector(`script[src="${src}"]`);
       if (existing) {
@@ -118,6 +92,7 @@ export default function StartPage({ videoSrc = "/og.mp4" }) {
         existing.addEventListener("error", resolve, { once: true });
         return;
       }
+
       const s = document.createElement("script");
       s.src = src;
       s.async = true;
@@ -128,7 +103,7 @@ export default function StartPage({ videoSrc = "/og.mp4" }) {
     });
   }, []);
 
-  // ✅ Handle Google credential response
+  // Handle Google credential response by sending token to /auth/google
   const handleCredentialResponse = useCallback(
     async (response) => {
       if (!response || !response.credential) {
@@ -145,19 +120,25 @@ export default function StartPage({ videoSrc = "/og.mp4" }) {
           method: "POST",
           body: JSON.stringify({ token: response.credential }),
         });
+
         const serverJwt = result?.token || result?.jwt || null;
         const serverUser = result?.user;
+
         if (serverJwt) {
           localStorage.setItem("jwt", serverJwt);
         }
+
         if (serverUser) {
           localStorage.setItem("user", JSON.stringify(serverUser));
           setUser(serverUser);
         }
+
         setError(null);
       } catch (err) {
         console.error("auth error", err, err?.body);
-        setError(err?.body?.message || err.message || "Authentication failed.");
+        setError(
+          err?.body?.message || err.message || "Authentication failed."
+        );
       } finally {
         setLoading(false);
         removeChildDivIfExists();
@@ -166,7 +147,7 @@ export default function StartPage({ videoSrc = "/og.mp4" }) {
     [apiFetch, removeChildDivIfExists]
   );
 
-  // ✅ Load stored user
+  // On mount, load user from localStorage if exists
   useEffect(() => {
     const stored = localStorage.getItem("user");
     if (stored) {
@@ -178,25 +159,27 @@ export default function StartPage({ videoSrc = "/og.mp4" }) {
     }
   }, []);
 
-  // ✅ Set up Google sign-in
+  // Set up Google One Tap on mount or user change
   useEffect(() => {
     if (user) {
       removeChildDivIfExists();
       setLoading(false);
       return;
     }
+
     let cancelled = false;
+
     async function init() {
       setLoading(true);
       await ensureScriptLoaded();
       if (cancelled) return;
-      if (
-        !(window.google && window.google.accounts && window.google.accounts.id)
-      ) {
+
+      if (!(window.google && window.google.accounts && window.google.accounts.id)) {
         setError("Failed to load Google Sign-In.");
         setLoading(false);
         return;
       }
+
       if (!initializedRef.current) {
         try {
           window.google.accounts.id.initialize({
@@ -210,6 +193,7 @@ export default function StartPage({ videoSrc = "/og.mp4" }) {
           return;
         }
       }
+
       const childDiv = createChildDivIfNeeded();
       if (!user) {
         try {
@@ -219,12 +203,14 @@ export default function StartPage({ videoSrc = "/og.mp4" }) {
             width: 180,
           });
         } catch {
-          // ignore
+          // ignore render errors
         }
       }
       setLoading(false);
     }
+
     init();
+
     return () => {
       cancelled = true;
       try {
@@ -236,7 +222,9 @@ export default function StartPage({ videoSrc = "/og.mp4" }) {
         ) {
           window.google.accounts.id.cancel();
         }
-      } catch {}
+      } catch {
+        // ignore
+      }
     };
   }, [
     user,
@@ -246,7 +234,14 @@ export default function StartPage({ videoSrc = "/og.mp4" }) {
     removeChildDivIfExists,
   ]);
 
-  // ✅ Logout
+  // Hide/show Google button based on loading
+  useEffect(() => {
+    if (childDivRef.current) {
+      childDivRef.current.style.display = loading ? "none" : "block";
+    }
+  }, [loading]);
+
+  // Logout user and clear local storage
   const handleLogout = useCallback(() => {
     try {
       localStorage.removeItem("user");
@@ -254,24 +249,22 @@ export default function StartPage({ videoSrc = "/og.mp4" }) {
     } catch (err) {
       console.warn("Failed to remove user info from localStorage:", err);
     }
+
     setUser(null);
     initializedRef.current = false;
     setLoading(true);
     removeChildDivIfExists();
   }, [removeChildDivIfExists]);
 
-  // ✅ Start game — use preloaded blob for final.mp4
-  const handleStartGame = useCallback(() => {
-    const finalBlobUrl = sessionStorage.getItem("/final.mp4") || "/final.mp4";
-    navigate("/crossword", { state: { videoSrc: finalBlobUrl } });
-  }, [navigate]);
-
-  const ogBlobUrl = sessionStorage.getItem("/og.mp4") || videoSrc;
+  const handleStartGame = useCallback(
+    () => navigate("/crossword"),
+    [navigate]
+  );
 
   return (
     <div className="start-root">
       <video autoPlay loop muted playsInline className="bg-video">
-        <source src={ogBlobUrl} type="video/mp4" />
+        <source src={videoSrc} type="video/mp4" />
         Your browser does not support the video tag.
       </video>
 
@@ -293,11 +286,12 @@ export default function StartPage({ videoSrc = "/og.mp4" }) {
                     display: "flex",
                     justifyContent: "center",
                     alignItems: "center",
-                    minHeight: 48,
+                    minHeight: 48, // keep layout stable
                   }}
                 >
                   {loading && <div className="spinner" />}
                 </div>
+
                 {error && (
                   <p
                     className="error"
@@ -316,12 +310,8 @@ export default function StartPage({ videoSrc = "/og.mp4" }) {
               <>
                 <p className="username">Hi, {user.username}</p>
                 <div className="row">
-                  <button
-                    className="btn primary"
-                    onClick={handleStartGame}
-                    disabled={!videosReady}
-                  >
-                    {videosReady ? "Start Game" : "Loading Videos..."}
+                  <button className="btn primary" onClick={handleStartGame}>
+                    Start Game
                   </button>
                   <button className="btn muted" onClick={handleLogout}>
                     Log Out
