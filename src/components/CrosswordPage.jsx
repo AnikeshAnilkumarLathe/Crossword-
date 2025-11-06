@@ -1,4 +1,4 @@
-import React, {useEffect, useMemo, useRef, useState,useCallback} from "react";
+import React, { useEffect, useMemo, useRef, useState, useCallback } from "react";
 import { useNavigate } from "react-router-dom";
 import "../styles/CrosswordPage.css";
 
@@ -15,20 +15,17 @@ export default function CrosswordPage() {
     message: "",
     success: false,
   });
+
   const TOTAL_TIME = 180;
   const [remaining, setRemaining] = useState(TOTAL_TIME);
 
-  // ========================= FETCH CROSSWORD =========================
   useEffect(() => {
     const fetchCrossword = async () => {
       setLoading(true);
       try {
-        const res = await fetch(
-          "https://crosswordbackend.onrender.com/crossword"
-        );
+        const res = await fetch("https://crosswordbackend.onrender.com/crossword");
         const data = await res.json();
         setCrossword(data);
-        console.log("Response data", data);
 
         let savedGrid = null;
         try {
@@ -53,7 +50,6 @@ export default function CrosswordPage() {
         const savedTime = parseInt(localStorage.getItem("cw-time"), 10);
         const lastTimestamp = parseInt(localStorage.getItem("cw-timestamp"), 10);
         const now = Date.now();
-
         if (!isNaN(savedTime) && savedTime > 0) {
           if (!isNaN(lastTimestamp)) {
             const elapsed = Math.floor((now - lastTimestamp) / 1000);
@@ -74,18 +70,15 @@ export default function CrosswordPage() {
         setLoading(false);
       }
     };
-
     fetchCrossword();
   }, []);
 
-  // ========================= GRID STORAGE =========================
   useEffect(() => {
     if (grid.length > 0) {
       localStorage.setItem("cw-grid", JSON.stringify(grid));
     }
   }, [grid]);
 
-  // ========================= HELPERS =========================
   function getClueLength(grid, row, col, dir) {
     if (
       !Array.isArray(grid) ||
@@ -95,12 +88,19 @@ export default function CrosswordPage() {
       grid[row][col] === null
     )
       return 0;
-
     let len = 0;
     if (dir === "across") {
-      while (col + len < grid[row].length && grid[row][col + len] !== null) len++;
+      while (
+        col + len < grid[row].length &&
+        grid[row][col + len] !== null
+      )
+        len++;
     } else if (dir === "down") {
-      while (row + len < grid.length && grid[row + len] && grid[row + len][col] !== null)
+      while (
+        row + len < grid.length &&
+        grid[row + len] &&
+        grid[row + len][col] !== null
+      )
         len++;
     }
     return len;
@@ -110,144 +110,165 @@ export default function CrosswordPage() {
     const map = {};
     if (!grid.length) return map;
     let num = 1;
-
     for (let r = 0; r < grid.length; r++) {
       for (let c = 0; c < grid[r].length; c++) {
         if (grid[r][c] === null) continue;
-
         const startAcross =
           (c === 0 || grid[r][c - 1] === null) &&
           c + 1 < grid[r].length &&
           grid[r][c + 1] !== null;
-
         const startDown =
           (r === 0 || grid[r - 1][c] === null) &&
           r + 1 < grid.length &&
           grid[r + 1][c] !== null;
-
         if (startAcross || startDown) {
           map[`${r}-${c}`] = num++;
         }
       }
     }
-
     return map;
   }, [grid]);
 
   const handleSubmit = useCallback(async () => {
-    if (!crossword) return;
-    if (submitted) return;
+  if (!crossword) {
+    console.warn("handleSubmit called but crossword is null");
+    return;
+  }
+  if (submitted) {
+    console.warn("handleSubmit called but already submitted");
+    return;
+  }
 
-    const clueIdToGridCoordinates = {};
-    Object.entries(getNumberingMap).forEach(([key, clueNum]) => {
-      clueIdToGridCoordinates[clueNum] = key.split("-").map(Number);
+  console.log("==== SUBMISSION DEBUG START ====");
+  console.log("Grid state before submission:", grid);
+
+  // Build map from clue ID to grid cell position using numbering
+  const clueIdToGridCoordinates = {};
+  Object.entries(getNumberingMap).forEach(([key, clueNum]) => {
+    clueIdToGridCoordinates[clueNum] = key.split('-').map(Number);
+  });
+  console.log("ClueID to grid position map:", clueIdToGridCoordinates);
+
+  // Attach position for each clue by ClueID and check
+  const cluesRaw = [
+    ...(crossword.Clues?.Across || []).map(c => ({
+      ...c,
+      dir: "across",
+      gridCoordinates: clueIdToGridCoordinates[c.ClueID]
+    })),
+    ...(crossword.Clues?.Down || []).map(c => ({
+      ...c,
+      dir: "down",
+      gridCoordinates: clueIdToGridCoordinates[c.ClueID]
+    }))
+  ];
+  console.log("Clues with coordinates:", cluesRaw);
+
+  // Only clues with found coordinates
+  const validClues = cluesRaw.filter(clue => Array.isArray(clue.gridCoordinates));
+  console.log("Valid clues after filtering:", validClues);
+
+  // Fill clue lengths and prep extraction
+  const clues = validClues.map(clue => {
+    const [row, col] = clue.gridCoordinates;
+    const length = getClueLength(grid, row, col, clue.dir);
+    console.log(
+      `ClueID ${clue.ClueID}, dir ${clue.dir}, start (${row},${col}), expected length: ${length}`
+    );
+    return { ...clue, ClueRow: row + 1, ClueCol: col + 1, ClueLength: length };
+  });
+
+  // Extract word for each clue and validate by expected length
+  const answers = clues.map(clue => {
+  let word = "";
+  const startRow = clue.ClueRow - 1;
+  const startCol = clue.ClueCol - 1;
+
+  if (clue.dir === "across") {
+    for (let i = 0; i < clue.ClueLength; i++) {
+      word += (grid[startRow]?.[startCol + i] || "").toUpperCase();
+    }
+  } else {
+    for (let i = 0; i < clue.ClueLength; i++) {
+      word += (grid[startRow + i]?.[startCol] || "").toUpperCase();
+    }
+  }
+
+  let clueText;
+  if (word && word.length === clue.ClueLength) {
+    clueText = word.toUpperCase();
+  } else {
+    clueText = "";
+  }
+
+  return {
+    clueID: clue.ClueID,
+    clueText
+  };
+});
+
+  // No filtering, always send all clues
+  console.log("Answers to submit:", answers);
+
+  const payload = {
+    crossword_id: crossword.CrosswordID,
+    answers
+  };
+  console.log("Payload to submit:", payload);
+
+  const jwt = localStorage.getItem("jwt");
+  if (!jwt) console.warn("JWT token missing!");
+
+  try {
+    const res = await fetch("https://crosswordbackend.onrender.com/submitcrossword", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${jwt}`,
+      },
+      body: JSON.stringify(payload),
     });
 
-    const cluesRaw = [
-      ...(crossword.Clues?.Across || []).map((c) => ({
-        ...c,
-        dir: "across",
-        gridCoordinates: clueIdToGridCoordinates[c.ClueID],
-      })),
-      ...(crossword.Clues?.Down || []).map((c) => ({
-        ...c,
-        dir: "down",
-        gridCoordinates: clueIdToGridCoordinates[c.ClueID],
-      })),
-    ];
+    console.log("Raw response:", res);
 
-    const validClues = cluesRaw.filter((clue) => Array.isArray(clue.gridCoordinates));
+    const result = await res.json();
+    console.log("Parsed response JSON:", result);
 
-    const clues = validClues.map((clue) => {
-      const [row, col] = clue.gridCoordinates;
-      const length = getClueLength(grid, row, col, clue.dir);
-      return {
-        ...clue,
-        ClueRow: row + 1,
-        ClueCol: col + 1,
-        ClueLength: length,
-      };
-    });
-
-    const answers = clues.map((clue) => {
-      let word = "";
-      const startRow = clue.ClueRow - 1;
-      const startCol = clue.ClueCol - 1;
-
-      if (clue.dir === "across") {
-        for (let i = 0; i < clue.ClueLength; i++) {
-          word += (grid[startRow]?.[startCol + i] || "").toUpperCase();
-        }
-      } else {
-        for (let i = 0; i < clue.ClueLength; i++) {
-          word += (grid[startRow + i]?.[startCol] || "").toUpperCase();
-        }
-      }
-
-      const clueText = word && word.length === clue.ClueLength ? word.toUpperCase() : "";
-      return { clueID: clue.ClueID, clueText };
-    });
-
-    const payload = {
-      crossword_id: crossword.CrosswordID,
-      answers,
-    };
-
-    const jwt = localStorage.getItem("jwt");
-
-    try {
-      const res = await fetch(
-        "https://crosswordbackend.onrender.com/submitcrossword",
-        {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-            Authorization: `Bearer ${jwt}`,
-          },
-          body: JSON.stringify(payload),
-        }
-      );
-
-      const result = await res.json();
-
-      if (res.ok) {
-        setPopup({
-          open: true,
-          title: "✅ Submission Successful!",
-          message: result.message || "Your answers have been submitted successfully.",
-          success: true,
-        });
-      } else {
-        setPopup({
-          open: true,
-          title: "❌ Submission Failed",
-          message: result.message || "Something went wrong. Please try again.",
-          success: false,
-        });
-      }
-
-      setSubmitted(true);
-    } catch (err) {
+    if (res.ok) {
       setPopup({
         open: true,
-        title: "⚠️ Network Error",
-        message: "Unable to connect to the server. Please try again later.",
+        title: "✅ Submission Successful!",
+        message: result.message || "Your answers have been submitted successfully.",
+        success: true,
+      });
+    } else {
+      setPopup({
+        open: true,
+        title: "❌ Submission Failed",
+        message: result.message || "Something went wrong. Please try again.",
         success: false,
       });
-      console.error("Submission error:", err);
     }
-  }, [crossword, grid, submitted, getNumberingMap]);
+    setSubmitted(true);
+  } catch (err) {
+    setPopup({
+      open: true,
+      title: "⚠️ Network Error",
+      message: "Unable to connect to the server. Please try again later.",
+      success: false,
+    });
+    console.error("Submission error:", err);
+  }
+  console.log("==== SUBMISSION DEBUG END ====");
+}, [crossword, grid, submitted, getNumberingMap]);
 
-  // ========================= TIMER =========================
   useEffect(() => {
     if (submitted || remaining <= 0) return;
-
     const timer = setInterval(() => {
       setRemaining((prev) => {
         const newTime = prev - 1;
         localStorage.setItem("cw-time", newTime.toString());
         localStorage.setItem("cw-timestamp", Date.now().toString());
-
         if (newTime <= 0) {
           clearInterval(timer);
           handleSubmit();
@@ -256,20 +277,17 @@ export default function CrosswordPage() {
         return newTime;
       });
     }, 1000);
-
     return () => clearInterval(timer);
   }, [submitted, handleSubmit, remaining]);
 
   const formatTime = (seconds) => {
     const mins = Math.floor(seconds / 60);
     const secs = seconds % 60;
-    return `${mins}:${secs.toString().padStart(2, "0")}`;
+    return `${mins}:${secs.toString().padStart(2, '0')}`;
   };
 
-  // ========================= CELL NAVIGATION =========================
   const inputRefs = useRef({});
   const keyFor = (r, c) => `${r}-${c}`;
-
   const focusCell = (r, c) => {
     const key = keyFor(r, c);
     const el = inputRefs.current[key];
@@ -282,29 +300,23 @@ export default function CrosswordPage() {
   const findNextCell = (r, c) => {
     const rows = grid.length;
     const cols = grid[0]?.length || 0;
-
     for (let cc = c + 1; cc < cols; cc++) if (grid[r][cc] !== null) return [r, cc];
     for (let rr = r + 1; rr < rows; rr++)
       for (let cc = 0; cc < cols; cc++) if (grid[rr][cc] !== null) return [rr, cc];
-
     return null;
   };
 
   const findPrevCell = (r, c) => {
     const cols = grid[0]?.length || 0;
-
     for (let cc = c - 1; cc >= 0; cc--) if (grid[r][cc] !== null) return [r, cc];
     for (let rr = r - 1; rr >= 0; rr--)
-      for (let cc = cols - 1; cc >= 0; cc--)
-        if (grid[rr][cc] !== null) return [rr, cc];
-
+      for (let cc = cols - 1; cc >= 0; cc--) if (grid[rr][cc] !== null) return [rr, cc];
     return null;
   };
 
   const moveToNearestRightOrDown = (r, c) => {
     const rows = grid.length;
     const cols = grid[0]?.length || 0;
-
     for (let offset = 1; offset <= Math.max(rows, cols); offset++) {
       if (c + offset < cols && grid[r][c + offset] !== null) {
         focusCell(r, c + offset);
@@ -315,14 +327,12 @@ export default function CrosswordPage() {
         return true;
       }
     }
-
     return false;
   };
 
   const handleInput = (r, c, e) => {
     const raw = e.target.value || "";
     const char = raw.slice(-1).toUpperCase();
-
     if (!/^[A-Z]$/.test(char)) {
       setGrid((prev) => {
         const next = prev.map((row) => [...row]);
@@ -331,13 +341,11 @@ export default function CrosswordPage() {
       });
       return;
     }
-
     setGrid((prev) => {
       const next = prev.map((row) => [...row]);
       next[r][c] = char;
       return next;
     });
-
     moveToNearestRightOrDown(r, c);
   };
 
@@ -392,7 +400,6 @@ export default function CrosswordPage() {
     }
   };
 
-  // ========================= RENDER =========================
   if (loading || !crossword) {
     return (
       <div className="cw-root">
@@ -414,7 +421,6 @@ export default function CrosswordPage() {
           </div>
         </div>
       </header>
-
       <main className="cw-main">
         <section className="cw-board">
           <div className="board-scroll">
@@ -425,10 +431,7 @@ export default function CrosswordPage() {
                     const key = keyFor(r, c);
                     const number = getNumberingMap[key];
                     return (
-                      <div
-                        key={c}
-                        className={`cell ${cell !== null ? "white" : "black"}`}
-                      >
+                      <div key={c} className={`cell ${cell !== null ? "white" : "black"}`}>
                         {cell !== null && number && (
                           <span className="cell-number">{number}</span>
                         )}
@@ -452,7 +455,6 @@ export default function CrosswordPage() {
             </div>
           </div>
         </section>
-
         <aside className="cw-side">
           <h3>Clues</h3>
           <div className="clue-group">
@@ -465,7 +467,6 @@ export default function CrosswordPage() {
               ))}
             </ul>
           </div>
-
           <div className="clue-group">
             <h4>Down</h4>
             <ul>
@@ -476,19 +477,16 @@ export default function CrosswordPage() {
               ))}
             </ul>
           </div>
-
           <div className="actions">
-            <button
-              className="btn primary"
-              onClick={handleSubmit}
-              disabled={submitted}
-            >
+            <button className="btn primary" onClick={handleSubmit} disabled={submitted}>
               Submit Answers
+            </button>
+            <button className="btn ghost" onClick={() => navigate("/leaderboard")}>
+              Leaderboard
             </button>
           </div>
         </aside>
       </main>
-
       {popup.open && (
         <div className="popup-overlay">
           <div className="popup-box">
