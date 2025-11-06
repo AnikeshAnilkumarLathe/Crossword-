@@ -1,4 +1,4 @@
-import React, { useEffect, useMemo, useRef, useState } from "react";
+import React, { useEffect, useMemo, useRef, useState, useCallback } from "react";
 import { useNavigate } from "react-router-dom";
 import "../styles/CrosswordPage.css";
 import GateTransition from "./GateTransition";
@@ -17,7 +17,7 @@ export default function CrosswordPage() {
     success: false,
   });
 
-  const TOTAL_TIME = 180; // 3 minutes
+  const TOTAL_TIME = 180;
   const [remaining, setRemaining] = useState(TOTAL_TIME);
 
   // Fetch crossword data from backend
@@ -27,16 +27,13 @@ export default function CrosswordPage() {
       try {
         const res = await fetch("https://crosswordbackend.onrender.com/crossword");
         const data = await res.json();
-        console.log(data);
         setCrossword(data);
-
-        // Build initial empty grid (null = black, "" = input cell)
         const g = data.Grid.map((row) =>
           row.map((cell) => (cell.IsBlank ? null : ""))
         );
         setGrid(g);
-      } catch (err) {
-        console.error("Error fetching crossword:", err);
+      } catch (e) {
+        console.error("Error fetching crossword:", e);
       } finally {
         setLoading(false);
       }
@@ -44,7 +41,61 @@ export default function CrosswordPage() {
     fetchCrossword();
   }, []);
 
-  // Start countdown timer
+  // Timer (with dependency)
+  const handleSubmit = useCallback(async () => {
+    if (!crossword || submitted) return;
+    const numberingMap = getNumberingMap;
+    const answers = Object.entries(numberingMap).map(([pos, clueID]) => {
+      const [r, c] = pos.split("-").map(Number);
+      return {
+        clueID,
+        clueText: grid[r][c] || "",
+      };
+    });
+
+    const payload = {
+      crossword_id: crossword.CrosswordID,
+      answers,
+    };
+
+    const jwt = localStorage.getItem("jwt");
+    try {
+      const res = await fetch("https://crosswordbackend.onrender.com/submitcrossword", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          "Authorization": `Bearer ${jwt}`,
+        },
+        body: JSON.stringify(payload),
+      });
+
+      const result = await res.json();
+      if (res.ok) {
+        setPopup({
+          open: true,
+          title: "✅ Submission Successful!",
+          message: result.message || "Your answers have been submitted successfully.",
+          success: true,
+        });
+      } else {
+        setPopup({
+          open: true,
+          title: "❌ Submission Failed",
+          message: result.message || "Something went wrong. Please try again.",
+          success: false,
+        });
+      }
+      setSubmitted(true);
+    } catch {
+      setPopup({
+        open: true,
+        title: "⚠️ Network Error",
+        message: "Unable to connect to the server. Please try again later.",
+        success: false,
+      });
+    }
+  }, [crossword, submitted, grid, getNumberingMap]);
+
   useEffect(() => {
     if (submitted) return;
     const timer = setInterval(() => {
@@ -52,16 +103,15 @@ export default function CrosswordPage() {
         if (prev <= 1) {
           clearInterval(timer);
           setRemaining(0);
-          handleSubmit(); // auto-submit when time ends
+          handleSubmit();
           return 0;
         }
         return prev - 1;
       });
     }, 1000);
     return () => clearInterval(timer);
-  }, [submitted]);
+  }, [submitted, handleSubmit]);
 
-  // Format time as MM:SS
   const formatTime = (seconds) => {
     const mins = Math.floor(seconds / 60);
     const secs = seconds % 60;
@@ -70,17 +120,14 @@ export default function CrosswordPage() {
 
   const inputRefs = useRef({});
   const keyFor = (r, c) => `${r}-${c}`;
-
   const focusCell = (r, c) => {
     const key = keyFor(r, c);
     const el = inputRefs.current[key];
     if (el && typeof el.focus === "function") {
       el.focus();
-      if (el.setSelectionRange)
-        el.setSelectionRange(el.value.length, el.value.length);
+      if (el.setSelectionRange) el.setSelectionRange(el.value.length, el.value.length);
     }
   };
-
   const findNextCell = (r, c) => {
     const rows = grid.length;
     const cols = grid[0]?.length || 0;
@@ -89,7 +136,6 @@ export default function CrosswordPage() {
       for (let cc = 0; cc < cols; cc++) if (grid[rr][cc] !== null) return [rr, cc];
     return null;
   };
-
   const findPrevCell = (r, c) => {
     const cols = grid[0]?.length || 0;
     for (let cc = c - 1; cc >= 0; cc--) if (grid[r][cc] !== null) return [r, cc];
@@ -97,7 +143,6 @@ export default function CrosswordPage() {
       for (let cc = cols - 1; cc >= 0; cc--) if (grid[rr][cc] !== null) return [rr, cc];
     return null;
   };
-
   const moveToNearestRightOrDown = (r, c) => {
     const rows = grid.length;
     const cols = grid[0]?.length || 0;
@@ -113,7 +158,6 @@ export default function CrosswordPage() {
     }
     return false;
   };
-
   const handleInput = (r, c, e) => {
     const raw = e.target.value || "";
     const char = raw.slice(-1).toUpperCase();
@@ -132,7 +176,6 @@ export default function CrosswordPage() {
     });
     moveToNearestRightOrDown(r, c);
   };
-
   const handleKeyDown = (r, c, e) => {
     if (e.key === "ArrowRight") {
       e.preventDefault();
@@ -184,7 +227,7 @@ export default function CrosswordPage() {
     }
   };
 
-  // Numbering logic
+  // Numbering logic (must be outside handleSubmit so used as dependency)
   const getNumberingMap = useMemo(() => {
     const map = {};
     if (!grid.length) return map;
@@ -208,64 +251,6 @@ export default function CrosswordPage() {
     return map;
   }, [grid]);
 
-  const handleSubmit = async () => {
-    if (!crossword || submitted) return;
-
-    // Flatten clues from backend
-    const allClues = [
-      ...(crossword.Clues?.Across || []).map((c) => ({ ...c, dir: "across" })),
-      ...(crossword.Clues?.Down || []).map((c) => ({ ...c, dir: "down" })),
-    ];
-
-    const userAnswers = allClues.map((clue, index) => {
-      let word = "";
-      // simple word collector — if your backend gives row/col, modify accordingly
-      word = clue.ClueText ? clue.ClueText.replace(/[^A-Z]/gi, "") : "";
-      return {
-        clueID: clue.ClueID,
-        clueText: word.trim(),
-      };
-    });
-
-    const payload = {
-      crossword_id: crossword.CrosswordID,
-      answers: userAnswers,
-    };
-
-    try {
-      const res = await fetch("https://crosswordbackend.onrender.com/submitcrossword", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(payload),
-      });
-
-      const result = await res.json();
-      if (res.ok) {
-        setPopup({
-          open: true,
-          title: "✅ Submission Successful!",
-          message: result.message || "Your answers have been submitted successfully.",
-          success: true,
-        });
-      } else {
-        setPopup({
-          open: true,
-          title: "❌ Submission Failed",
-          message: result.message || "Something went wrong. Please try again.",
-          success: false,
-        });
-      }
-      setSubmitted(true);
-    } catch (err) {
-      setPopup({
-        open: true,
-        title: "⚠️ Network Error",
-        message: "Unable to connect to the server. Please try again later.",
-        success: false,
-      });
-    }
-  };
-
   if (loading || !crossword) {
     return (
       <div className="cw-root">
@@ -273,11 +258,6 @@ export default function CrosswordPage() {
       </div>
     );
   }
-
-  const allClues = [
-    ...(crossword.Clues?.Across || []).map((c) => ({ ...c, dir: "across" })),
-    ...(crossword.Clues?.Down || []).map((c) => ({ ...c, dir: "down" })),
-  ];
 
   return (
     <div className="cw-root dark">
@@ -353,8 +333,7 @@ export default function CrosswordPage() {
             <button className="btn primary" onClick={handleSubmit} disabled={submitted}>
               Submit Answers
             </button>
-          
-            <button className="btn ghost" onClick={()=>navigate("/leaderboard")}>
+            <button className="btn ghost" onClick={() => navigate("/leaderboard")}>
               Leaderboard
             </button>
           </div>
