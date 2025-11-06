@@ -20,24 +20,56 @@ export default function CrosswordPage() {
   const [remaining, setRemaining] = useState(TOTAL_TIME);
 
   useEffect(() => {
-    const fetchCrossword = async () => {
-      setLoading(true);
+  const fetchCrossword = async () => {
+    setLoading(true);
+    try {
+      const res = await fetch("https://crosswordbackend.onrender.com/crossword");
+      const data = await res.json();
+      setCrossword(data);
+
+      // 🛠 Safely restore from localStorage
+      let savedGrid = null;
       try {
-        const res = await fetch("https://crosswordbackend.onrender.com/crossword");
-        const data = await res.json();
-        setCrossword(data);
+        const raw = localStorage.getItem("cw-grid");
+        if (raw) {
+          const parsed = JSON.parse(raw);
+          if (Array.isArray(parsed)) savedGrid = parsed;
+        }
+      } catch (e) {
+        console.warn("Invalid cw-grid in localStorage:", e);
+      }
+
+      if (savedGrid && savedGrid.length) {
+        setGrid(savedGrid);
+      } else {
         const g = data.Grid.map((row) =>
           row.map((cell) => (cell.IsBlank ? null : ""))
         );
         setGrid(g);
-      } catch (e) {
-        console.error("Error fetching crossword:", e);
-      } finally {
-        setLoading(false);
       }
-    };
-    fetchCrossword();
-  }, []);
+
+      // ⏳ Restore timer safely
+      const savedTime = parseInt(localStorage.getItem("cw-time"), 10);
+      if (!isNaN(savedTime) && savedTime > 0) {
+        setRemaining(savedTime);
+      }
+
+    } catch (e) {
+      console.error("Error fetching crossword:", e);
+    } finally {
+      setLoading(false);
+    }
+  };
+  fetchCrossword();
+}, []);
+
+
+  useEffect(()=>{
+    if(grid.length > 0){
+      localStorage.setItem("cw-grid", JSON.stringify(grid));
+    }
+  },[grid]);
+
 
   // Numbering logic (used as submission index)
   const getNumberingMap = useMemo(() => {
@@ -146,20 +178,25 @@ console.log("hello");
   }, [crossword, grid, submitted]);
 
   // Timer countdown with auto submit on end
-  useEffect(() => {
-    if (submitted) return;
-    const timer = setInterval(() => {
-      setRemaining((prev) => {
-        if (prev <= 1) {
-          clearInterval(timer);
-          handleSubmit();
-          return 0;
-        }
-        return prev - 1;
-      });
-    }, 1000);
-    return () => clearInterval(timer);
-  }, [submitted, handleSubmit]);
+ useEffect(() => {
+  if (submitted || remaining <= 0) return;
+
+  const timer = setInterval(() => {
+    setRemaining((prev) => {
+      const newTime = prev - 1;
+      localStorage.setItem("cw-time", newTime.toString());
+      if (newTime <= 0) {
+        clearInterval(timer);
+        handleSubmit();
+        return 0;
+      }
+      return newTime;
+    });
+  }, 1000);
+
+  return () => clearInterval(timer);
+}, [submitted, handleSubmit]); // ✅ keep submitted + handleSubmit only
+
 
   const formatTime = (seconds) => {
     const mins = Math.floor(seconds / 60);
