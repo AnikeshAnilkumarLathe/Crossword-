@@ -90,7 +90,7 @@ export default function CrosswordPage() {
     });
 
     const payload = {
-      crossword_id: crossword.CrosswordID,
+      crossword_id: crossword.crossword_id,
       answers,
     };
 
@@ -280,7 +280,7 @@ export default function CrosswordPage() {
         <div className="cw-title">Crossword</div>
         <div className="cw-meta">
           <div className="cw-user">
-            Player: <strong>{user?.name || "Guest"}</strong>
+            Player: <strong>{user?.username || "Guest"}</strong>
           </div>
           <div className="cw-timer">
             ⏳ Time Left: <strong>{formatTime(remaining)}</strong>
