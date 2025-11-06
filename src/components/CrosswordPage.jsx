@@ -244,8 +244,8 @@ export default function CrosswordPage() {
     } else {
       setPopup({
         open: true,
-        title: "❌ Submission Failed",
-        message: result.message || "Something went wrong. Please try again.",
+        title: "❌ Multiple Submissions Detected",
+        message: result.message || "You have already submitted answers for this crossword.",
         success: false,
       });
     }
@@ -488,22 +488,23 @@ export default function CrosswordPage() {
         </aside>
       </main>
       {popup.open && (
-        <div className="popup-overlay">
-          <div className="popup-box">
-            <h2>{popup.title}</h2>
-            <p>{popup.message}</p>
-            <button
-              className="btn primary"
-              onClick={() => {
-                setPopup({ open: false });
-                if (popup.success) navigate("/leaderboard");
-              }}
-            >
-              {popup.success ? "Go to Leaderboard" : "Close"}
-            </button>
-          </div>
-        </div>
-      )}
+  <div className="popup-overlay">
+    <div className="popup-box">
+      <h2>{popup.title}</h2>
+      <p>{popup.message}</p>
+      <button
+        className="btn primary"
+        onClick={() => {
+          setPopup({ open: false });
+          navigate("/leaderboard");
+        }}
+      >
+        Go to Leaderboard
+      </button>
+    </div>
+  </div>
+)}
+
     </div>
   );
 }

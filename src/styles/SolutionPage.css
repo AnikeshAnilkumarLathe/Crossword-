@@ -1,0 +1,263 @@
+/* === Refined Sakura Theme (Mobile Enhanced) === */
+.solution-root {
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  font-family: 'Inter', Arial, sans-serif;
+  background: linear-gradient(135deg, #fef6f8 0%, #fbeaf1 60%, #f8dee9 100%);
+  color: #3b0928;
+  letter-spacing: 0.02em;
+  background-attachment: fixed;
+}
+
+/* === Navbar === */
+.solution-navbar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  background: rgba(255, 240, 245, 0.7);
+  padding: 1rem 2rem;
+  border-bottom: 1px solid rgba(255, 182, 193, 0.3);
+  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.05);
+  backdrop-filter: blur(12px);
+}
+
+.nav-title {
+  flex: 1 1 auto;
+  text-align: center;
+  font-size: 1.45rem;
+  font-weight: 700;
+  color: #77204b;
+  text-shadow: 0 0 6px rgba(255, 200, 220, 0.3);
+}
+
+.nav-buttons {
+  display: flex;
+  flex: 1 1 auto;
+  justify-content: flex-end;
+  align-items: center;
+}
+
+.nav-buttons button {
+  margin-left: 0.6rem;
+  background: linear-gradient(90deg, #f9c7d9, #f7adc8);
+  border: none;
+  border-radius: 8px;
+  color: #fff;
+  padding: 0.45em 1.1em;
+  font-weight: 600;
+  font-size: 1.05rem;
+  cursor: pointer;
+  transition: all 0.22s ease;
+  box-shadow: 0 2px 8px rgba(249, 170, 200, 0.4);
+  min-width: 88px;
+}
+
+.nav-buttons button:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 14px rgba(249, 150, 190, 0.5);
+}
+
+/* === Main Content === */
+.solution-main {
+  max-width: 940px;
+  margin: 3rem auto;
+  margin-top: 120px;
+  background: rgba(255, 250, 253, 0.6);
+  border-radius: 16px;
+  padding: 2.5rem;
+  box-shadow: 0 4px 24px rgba(255, 182, 193, 0.25);
+  backdrop-filter: blur(10px);
+  border: 1px solid rgba(255, 182, 193, 0.3);
+}
+
+/* === Controls === */
+.solution-controls {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 0.8em;
+  margin-bottom: 2em;
+  flex-wrap: wrap;
+}
+
+.solution-controls button {
+  background: linear-gradient(90deg, #f8c5d6, #f5a9c3);
+  border: none;
+  border-radius: 8px;
+  color: #3b0928;
+  padding: 0.48em 1.12em;
+  font-size: 1rem;
+  font-weight: 600;
+  min-width: 84px;
+  cursor: pointer;
+  transition: all 0.25s ease-in-out;
+  box-shadow: 0 3px 10px rgba(245, 140, 180, 0.25);
+}
+
+.solution-controls button:hover {
+  background: linear-gradient(90deg, #f799b8, #f675a6);
+  color: #fff;
+  transform: translateY(-2px);
+  box-shadow: 0 6px 18px rgba(245, 120, 170, 0.4);
+}
+
+/* === Each Day Card === */
+.solution-card {
+  background: rgba(255, 250, 252, 0.78);
+  backdrop-filter: blur(8px);
+  margin: 2em 0;
+  border-radius: 14px;
+  padding: 2em;
+  box-shadow: 0 6px 24px rgba(255, 190, 210, 0.17);
+  border: 1px solid rgba(255, 200, 210, 0.29);
+  color: #3b0928;
+  max-width: 98vw;
+  word-break: break-word;
+}
+
+/* === Crossword Grid === */
+.grid-table {
+  border-collapse: collapse;
+  margin: 1.2em auto;
+  box-shadow: 0 0 12px rgba(255, 150, 180, 0.14);
+}
+
+.grid-table td {
+  width: 32px;
+  height: 32px;
+  text-align: center;
+  font-size: 1em;
+  font-weight: 600;
+  border: 1px solid rgba(255, 182, 193, 0.3);
+  transition: background 0.17s ease, transform 0.1s ease;
+}
+
+.cell-black {
+  background: rgba(250, 210, 220, 0.36);
+  color: #99506c;
+}
+
+.cell-white {
+  background: rgba(255, 255, 255, 0.87);
+  color: #3b0928;
+}
+.grid-table td:hover.cell-white {
+  background: rgba(255, 220, 230, 0.9);
+  transform: scale(1.05);
+}
+
+/* === Text & Clues === */
+h3, h4 {
+  color: #77204b;
+  margin-bottom: 0.4em;
+  font-weight: 700;
+  text-shadow: 0 0 5px rgba(255, 190, 210, 0.20);
+}
+
+.answer {
+  color: #c23b7a;
+  font-weight: 600;
+  margin-left: 0.41em;
+  letter-spacing: 0.05em;
+}
+
+ul {
+  margin-top: 0.5em;
+  line-height: 1.6em;
+}
+
+::-webkit-scrollbar {
+  width: 10px;
+}
+::-webkit-scrollbar-thumb {
+  background: #f7a8c4;
+  border-radius: 8px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: #f477a7;
+}
+::-webkit-scrollbar-track {
+  background: rgba(255, 200, 210, 0.13);
+}
+
+/* === Responsive === */
+@media (max-width: 900px) {
+  .solution-main {
+    padding: 1.25rem;
+  }
+  .solution-card {
+    padding: 1.25em;
+  }
+}
+
+@media (max-width: 768px) {
+  .solution-main {
+    padding: 0.5rem;
+    margin: 1.5rem auto;
+    margin-top: 120px;
+  }
+  .nav-title {
+    font-size: 1.15rem;
+    text-align: center;
+    flex: 1 0 100%;
+  }
+  .solution-navbar {
+    flex-direction: column;
+    gap: 0.5em;
+    padding: 0.5rem 0.5rem;
+  }
+  .nav-buttons {
+    justify-content: center;
+  }
+  .nav-buttons button {
+    font-size: 1rem;
+    padding: 0.42em 0.9em;
+    min-width: 68px;
+  }
+  .solution-controls button {
+    font-size: 1rem;
+    padding: 0.42em 0.85em;
+    min-width: 68px;
+  }
+  .solution-card {
+    padding: 0.9em;
+    margin: 1em 0;
+  }
+  .grid-table td {
+    width: 25px;
+    height: 25px;
+    font-size: 0.88em;
+  }
+}
+
+@media (max-width: 560px) {
+  .solution-navbar {
+    padding: 0.4rem 0.3rem;
+
+  }
+  .solution-main {
+    padding: 1.2rem;
+    margin: 0.3rem auto;
+    margin-top: 120px;
+  }
+  .nav-title, h3 {
+    font-size: 1em;
+  }
+  .solution-controls {
+    gap: 0.3em;
+  }
+  .nav-buttons button, .solution-controls button {
+    font-size: 1rem;
+    padding: 0.28em 0.5em;
+    min-width: 44px;
+  }
+  .solution-card {
+    padding: 0.56em;
+  }
+  .grid-table td {
+    width: 17px;
+    height: 17px;
+    font-size: 0.75em;
+  }
+}
