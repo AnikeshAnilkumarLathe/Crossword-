@@ -426,7 +426,7 @@ export default function CrosswordPage() {
         </div>
       </header>
       <main className="cw-main">
-        <section className="cw-board">
+        <div className="cw-board">
           <div className="board-scroll">
             <div className="board-grid large" role="grid">
               {grid.map((row, r) => (
@@ -458,7 +458,7 @@ export default function CrosswordPage() {
               ))}
             </div>
           </div>
-        </section>
+        </div>
         <aside className="cw-side">
           <h3>Clues</h3>
           <div className="clue-group">
