@@ -139,6 +139,7 @@
 .lb-table tbody tr:hover {
   background: rgba(255, 76, 165, 0.2);
   transform: scale(1.02);
+  transition: all 0.25s ease-in-out;
 }
 
 .lb-table tbody tr.top {
