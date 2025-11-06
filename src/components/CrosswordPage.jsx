@@ -130,120 +130,133 @@ export default function CrosswordPage() {
   }, [grid]);
 
   const handleSubmit = useCallback(async () => {
-    if (!crossword) {
-      console.warn("handleSubmit called but crossword is null");
-      return;
-    }
-    if (submitted) {
-      console.warn("handleSubmit called but already submitted");
-      return;
-    }
+  if (!crossword) {
+    console.warn("handleSubmit called but crossword is null");
+    return;
+  }
+  if (submitted) {
+    console.warn("handleSubmit called but already submitted");
+    return;
+  }
 
-    console.log("==== SUBMISSION DEBUG START ====");
-    console.log("Grid state before submission:", grid);
+  console.log("==== SUBMISSION DEBUG START ====");
+  console.log("Grid state before submission:", grid);
 
-    const cluesRaw = [
-      ...(crossword.Clues?.Across || []).map(c => ({ ...c, dir: "across" })),
-      ...(crossword.Clues?.Down || []).map(c => ({ ...c, dir: "down" }))
-    ];
-    console.log("Raw clues from backend:", cluesRaw);
+  // Get clue numbering from grid
+  const numberingEntries = Object.entries(getNumberingMap);
 
-    const validClues = cluesRaw.filter(
-      clue =>
-        typeof clue.ClueRow === "number" &&
-        typeof clue.ClueCol === "number" &&
-        grid[clue.ClueRow - 1] &&
-        grid[clue.ClueRow - 1][clue.ClueCol - 1] !== null
+  // Map clues to numbering indices
+  const cluesRaw = [
+    ...(crossword.Clues?.Across || []).map((c, i) => ({
+      ...c,
+      dir: "across",
+      gridCoordinates: numberingEntries[i]
+        ? numberingEntries[i][0].split('-').map(Number)
+        : null
+    })),
+    ...(crossword.Clues?.Down || []).map((c, i) => ({
+      ...c,
+      dir: "down",
+      gridCoordinates: numberingEntries[
+        (crossword.Clues?.Across?.length || 0) + i
+      ]
+        ? numberingEntries[(crossword.Clues?.Across?.length || 0) + i][0].split('-').map(Number)
+        : null
+    }))
+  ];
+  console.log("Raw clues mapped to grid coordinates:", cluesRaw);
+
+  // Only clues with valid gridCoordinates
+  const validClues = cluesRaw.filter(clue => clue.gridCoordinates);
+  console.log("Valid clues after numbering:", validClues);
+
+  // Attach clue lengths
+  const clues = validClues.map(clue => {
+    const [row, col] = clue.gridCoordinates;
+    const length = getClueLength(grid, row, col, clue.dir);
+    console.log(
+      `ClueID ${clue.ClueID}, dir ${clue.dir}, numbering at (${row},${col}), computed length: ${length}`
     );
-    console.log("Valid clues after filtering:", validClues);
+    return { ...clue, ClueRow: row + 1, ClueCol: col + 1, ClueLength: length };
+  });
 
-    const clues = validClues.map(clue => {
-      const length = getClueLength(
-        grid,
-        clue.ClueRow - 1,
-        clue.ClueCol - 1,
-        clue.dir
-      );
-      console.log(
-        `ClueID ${clue.ClueID}, dir ${clue.dir}, row ${clue.ClueRow}, col ${clue.ClueCol}, computed length: ${length}`
-      );
-      return { ...clue, ClueLength: length };
-    });
-
-    const answers = clues.map(clue => {
-      let word = "";
-      const startRow = clue.ClueRow - 1;
-      const startCol = clue.ClueCol - 1;
-      if (clue.dir === "across") {
-        for (let i = 0; i < clue.ClueLength; i++) {
-          word += (grid[startRow]?.[startCol + i] || "").toUpperCase();
-        }
-      } else {
-        for (let i = 0; i < clue.ClueLength; i++) {
-          word += (grid[startRow + i]?.[startCol] || "").toUpperCase();
-        }
+  // Extract answers
+  const answers = clues.map(clue => {
+    let word = "";
+    const startRow = clue.ClueRow - 1;
+    const startCol = clue.ClueCol - 1;
+    if (clue.dir === "across") {
+      for (let i = 0; i < clue.ClueLength; i++) {
+        word += (grid[startRow]?.[startCol + i] || "").toUpperCase();
       }
-      console.log(`ClueID ${clue.ClueID} (${clue.dir}) answer: "${word.trim()}"`);
-      return {
-        clueID: clue.ClueID,
-        answerText: word.trim(),
-      };
-    });
-
-    const filteredAnswers = answers.filter(a => a.answerText !== "");
-    console.log("Filtered answers (non-empty):", filteredAnswers);
-
-    const payload = {
-      crossword_id: crossword.CrosswordID,
-      answers: filteredAnswers,
+    } else {
+      for (let i = 0; i < clue.ClueLength; i++) {
+        word += (grid[startRow + i]?.[startCol] || "").toUpperCase();
+      }
+    }
+    console.log(`ClueID ${clue.ClueID} (${clue.dir}) answer: "${word.trim()}"`);
+    return {
+      clueID: clue.ClueID,
+      answerText: word.trim(),
     };
-    console.log("Payload to submit:", payload);
+  });
 
-    const jwt = localStorage.getItem("jwt");
-    if (!jwt) console.warn("JWT token missing!");
+  // Filter non-empty answers for submission
+  const filteredAnswers = answers.filter(a => a.answerText !== "");
+  console.log("Filtered answers (non-empty):", filteredAnswers);
 
-    try {
-      const res = await fetch("https://crosswordbackend.onrender.com/submitcrossword", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${jwt}`,
-        },
-        body: JSON.stringify(payload),
-      });
+  const payload = {
+    crossword_id: crossword.CrosswordID,
+    answers: filteredAnswers,
+  };
+  console.log("Payload to submit:", payload);
 
-      console.log("Raw response:", res);
+  const jwt = localStorage.getItem("jwt");
+  if (!jwt) console.warn("JWT token missing!");
 
-      const result = await res.json();
-      console.log("Parsed response JSON:", result);
+  try {
+    const res = await fetch("https://crosswordbackend.onrender.com/submitcrossword", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${jwt}`,
+      },
+      body: JSON.stringify(payload),
+    });
 
-      if (res.ok) {
-        setPopup({
-          open: true,
-          title: "✅ Submission Successful!",
-          message: result.message || "Your answers have been submitted successfully.",
-          success: true,
-        });
-      } else {
-        setPopup({
-          open: true,
-          title: "❌ Submission Failed",
-          message: result.message || "Something went wrong. Please try again.",
-          success: false,
-        });
-      }
-      setSubmitted(true);
-    } catch (err) {
+    console.log("Raw response:", res);
+
+    const result = await res.json();
+    console.log("Parsed response JSON:", result);
+
+    if (res.ok) {
       setPopup({
         open: true,
-        title: "⚠️ Network Error",
-        message: "Unable to connect to the server. Please try again later.",
+        title: "✅ Submission Successful!",
+        message: result.message || "Your answers have been submitted successfully.",
+        success: true,
+      });
+    } else {
+      setPopup({
+        open: true,
+        title: "❌ Submission Failed",
+        message: result.message || "Something went wrong. Please try again.",
         success: false,
       });
-      console.error("Submission error:", err);
     }
-    console.log("==== SUBMISSION DEBUG END ====");
-  }, [crossword, grid, submitted]);
+    setSubmitted(true);
+  } catch (err) {
+    setPopup({
+      open: true,
+      title: "⚠️ Network Error",
+      message: "Unable to connect to the server. Please try again later.",
+      success: false,
+    });
+    console.error("Submission error:", err);
+  }
+  console.log("==== SUBMISSION DEBUG END ====");
+}, [crossword, grid, submitted, getNumberingMap]);
+
 
   useEffect(() => {
     if (submitted || remaining <= 0) return;
