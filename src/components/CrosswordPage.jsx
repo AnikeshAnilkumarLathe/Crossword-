@@ -234,13 +234,17 @@ export default function CrosswordPage() {
     const result = await res.json();
     console.log("Parsed response JSON:", result);
 
-    if (res.ok) {
-      setPopup({
-        open: true,
-        title: "✅ Submission Successful!",
-        message: result.message || "Your answers have been submitted successfully.",
-        success: true,
-      });
+  if (res.ok) {
+    localStorage.removeItem("cw-grid");
+    localStorage.removeItem("cw-time");
+    localStorage.removeItem("cw-timestamp");
+    
+    setPopup({
+      open: true,
+      title: "✅ Submission Successful!",
+      message: result.message || "Your answers have been submitted successfully.",
+      success: true,
+    });
     } else {
       setPopup({
         open: true,

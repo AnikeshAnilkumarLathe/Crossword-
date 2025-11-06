@@ -4,99 +4,86 @@ import "../styles/SolutionPage.css";
 
 export default function SolutionPage() {
   const navigate = useNavigate();
-  const [day, setDay] = useState(2); // By default, show up to yesterday's solutions
-  const [solutions, setSolutions] = useState([]);
+  const [day, setDay] = useState(1);  // Start at day 1
+  const [solution, setSolution] = useState(null);
   const [loading, setLoading] = useState(false);
 
   useEffect(() => {
-    async function fetchSolutionsUpToDay() {
+    async function fetchSolution() {
       setLoading(true);
-      let results = [];
       try {
-        // Only show solutions for days strictly before the current day
-        for (let i = 1; i < day; i++) {
-          const res = await fetch("https://crosswordbackend.onrender.com/getsolution", {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({ crossword_id: i }),
-          });
-          const data = await res.json();
-          results.push({
-            day: i,
-            solution: data.solution,
-            grid: data.grid,
-            clues: data.clues,
-          });
-        }
-        setSolutions(results);
-      } catch (err) {
-        console.error("Failed to fetch solutions:", err);
-        setSolutions([]);
+        const res = await fetch("https://crosswordbackend.onrender.com/getsolution", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ crossword_id: day }),
+        });
+        const data = await res.json();
+        setSolution(data);
+      } catch {
+        setSolution(null);
       }
       setLoading(false);
     }
-    fetchSolutionsUpToDay();
+    fetchSolution();
   }, [day]);
 
   return (
     <div className="solution-root">
       <nav className="lb-navbar">
-  <div className="nav-left">
-    Crossword by <strong>CC</strong> and <strong>EPC</strong>
-  </div>
-  <div className="nav-center">Solutions</div>
-  <div className="nav-right">
-    <button className="home-btn" onClick={() => navigate("/")}>Home</button>
-    <button className="home-btn" onClick={() => navigate("/leaderboard")}>Leaderboard</button>
-  </div>
-  </nav>
-  
+        <div className="nav-left">
+          Crossword by <strong>CC</strong> and <strong>EPC</strong>
+        </div>
+        <div className="nav-center">Solutions</div>
+        <div className="nav-right">
+          <button className="home-btn" onClick={() => navigate("/")}>Home</button>
+          <button className="home-btn" onClick={() => navigate("/leaderboard")}>Leaderboard</button>
+        </div>
+      </nav>
+
       <main className="solution-main">
         <div className="solution-controls">
-          <button onClick={() => setDay(Math.max(2, day - 1))}>Prev Day</button>
-          <span style={{ margin: "0 10px" }}>Day {day - 1} Solution{day > 2 ? "s" : ""}</span>
-          <button onClick={() => setDay(day + 1)}>Next Day</button>
+          <button onClick={() => setDay(d => Math.max(1, d - 1))}>Prev Day</button>
+          <span style={{ margin: "0 10px" }}>Day {day} Solution</span>
+          <button onClick={() => setDay(d => d + 1)}>Next Day</button>
         </div>
         {loading ? (
           <div>Loading…</div>
-        ) : solutions.length === 0 ? (
-          <div>No solutions available yet. Come back after each day's crossword is closed!</div>
+        ) : !solution ? (
+          <div>No solution available for day {day}</div>
         ) : (
-          solutions.map(sol => (
-            <div key={sol.day} className="solution-card">
-              <h3>Day {sol.day} Solution</h3>
-              {sol.grid && (
-                <table className="grid-table">
-                  <tbody>
-                    {sol.grid.map((row, r) => (
-                      <tr key={r}>
-                        {row.map((cell, c) => (
-                          <td key={c} className={cell === null ? "cell-black" : "cell-white"}>
-                            {cell || ""}
-                          </td>
-                        ))}
-                      </tr>
-                    ))}
-                  </tbody>
-                </table>
-              )}
-              <div>
-                <h4>Clues & Answers</h4>
-                <ul>
-                  {(sol.clues?.Across || []).map((clue, i) =>
-                    <li key={`across-${i}`}>
-                      <strong>Across {clue.ClueID}:</strong> {clue.ClueText} — <span className="answer">{sol.solution?.[clue.ClueID]}</span>
-                    </li>
-                  )}
-                  {(sol.clues?.Down || []).map((clue, i) =>
-                    <li key={`down-${i}`}>
-                      <strong>Down {clue.ClueID}:</strong> {clue.ClueText} — <span className="answer">{sol.solution?.[clue.ClueID]}</span>
-                    </li>
-                  )}
-                </ul>
-              </div>
+          <div className="solution-card">
+            <h3>Day {day} Solution</h3>
+            {solution.grid && (
+              <table className="grid-table">
+                <tbody>
+                  {solution.grid.map((row, r) => (
+                    <tr key={r}>
+                      {row.map((cell, c) => (
+                        <td key={c} className={cell === null ? "cell-black" : "cell-white"}>
+                          {cell || ""}
+                        </td>
+                      ))}
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            )}
+            <div>
+              <h4>Clues & Answers</h4>
+              <ul>
+                {(solution.clues?.Across || []).map((clue, i) => (
+                  <li key={`across-${i}`}>
+                    <strong>Across {clue.ClueID}:</strong> {clue.ClueText} — <span className="answer">{solution.solution?.[clue.ClueID]}</span>
+                  </li>
+                ))}
+                {(solution.clues?.Down || []).map((clue, i) => (
+                  <li key={`down-${i}`}>
+                    <strong>Down {clue.ClueID}:</strong> {clue.ClueText} — <span className="answer">{solution.solution?.[clue.ClueID]}</span>
+                  </li>
+                ))}
+              </ul>
             </div>
-          ))
+          </div>
         )}
       </main>
     </div>
