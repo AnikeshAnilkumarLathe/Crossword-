@@ -90,14 +90,20 @@ export default function CrosswordPage() {
     });
 
     const payload = {
-      crossword_id: crossword.CrosswordID,
-      answers,
-    };
+  crossword_id: crossword.CrosswordID, // ensure this matches backend field name
+  answers: answers
+    .filter(a => a.clueText.trim() !== "") // optional: remove empty answers
+    .map(a => ({
+      clueID: a.clueID,     // lowercase as backend expects
+      clueText: a.clueText
+    })),
+};
+
 
     const jwt = localStorage.getItem("jwt");
-console.log("🔹 Crossword object:", crossword);
-console.log("🔹 Payload being sent:", JSON.stringify(payload, null, 2));
-console.log("🔹 JWT token:", jwt);
+console.log("Payload:", JSON.stringify(payload, null, 2));
+console.log("hello");
+
 
     try {
       const res = await fetch("https://crosswordbackend.onrender.com/submitcrossword", {
