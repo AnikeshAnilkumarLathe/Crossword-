@@ -76,6 +76,23 @@ export default function CrosswordPage() {
 
     fetchCrossword();
   }, []);
+  useEffect(() => {
+  if (!user) return;
+
+  const submittedDate = localStorage.getItem("cw-submitted-date");
+  const today = new Date().toISOString().split("T")[0];
+
+  if (submittedDate === today) {
+    setPopup({
+      open: true,
+      title: "❌ Already Played Today",
+      message: "You cannot play more than once per day. Please come back tomorrow!",
+      success: false,
+    });
+    setGrid([]); // optionally remove the grid
+  }
+}, [user]);
+
 
   // ========================= GRID STORAGE =========================
   useEffect(() => {
@@ -129,8 +146,8 @@ export default function CrosswordPage() {
   }, [grid]);
 
   const handleSubmit = useCallback(async () => {
-    if (!crossword) return;
-    if (submitted) return;
+    if (!crossword || submitted) return;
+
 
     const clueIdToGridCoordinates = {};
     Object.entries(getNumberingMap).forEach(([key, clueNum]) => {
@@ -190,42 +207,49 @@ export default function CrosswordPage() {
     const jwt = localStorage.getItem("jwt");
 
     try {
-      const res = await fetch("https://crosswordbackend.onrender.com/submitcrossword", {
+    const res = await fetch(
+      "https://crosswordbackend.onrender.com/submitcrossword",
+      {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
-          Authorization: `Bearer ${jwt}`,
+          Authorization: `Bearer ${localStorage.getItem("jwt")}`,
         },
         body: JSON.stringify(payload),
-      });
-
-      const result = await res.json();
-      if (res.ok) {
-        setPopup({
-          open: true,
-          title: "✅ Submission Successful!",
-          message: result.message || "Your answers have been submitted successfully.",
-          success: true,
-        });
-      } else {
-        setPopup({
-          open: true,
-          title: "❌ Submission Failed",
-          message: result.message || "Something went wrong. Please try again.",
-          success: false,
-        });
       }
-      setSubmitted(true);
-    } catch (err) {
+    );
+
+    const result = await res.json();
+    if (res.ok) {
+      // Save submission date (yyyy-mm-dd) in localStorage
+      const today = new Date().toISOString().split("T")[0];
+      localStorage.setItem("cw-submitted-date", today);
+
       setPopup({
         open: true,
-        title: "⚠️ Network Error",
-        message: "Unable to connect to the server. Please try again later.",
+        title: "✅ Submission Successful!",
+        message: result.message || "Your answers have been submitted successfully.",
+        success: true,
+      });
+    } else {
+      setPopup({
+        open: true,
+        title: "❌ Submission Failed",
+        message: result.message || "Something went wrong. Please try again.",
         success: false,
       });
-      console.error("Submission error:", err);
     }
-  }, [crossword, grid, submitted, getNumberingMap]);
+    setSubmitted(true);
+  } catch (err) {
+    setPopup({
+      open: true,
+      title: "⚠️ Network Error",
+      message: "Unable to connect to the server. Please try again later.",
+      success: false,
+    });
+    console.error("Submission error:", err);
+  }
+}, [crossword, grid, submitted, getNumberingMap]);
 
   // ========================= TIMER =========================
   useEffect(() => {
@@ -422,7 +446,7 @@ export default function CrosswordPage() {
                             value={grid[r][c] || ""}
                             onChange={(e) => handleInput(r, c, e)}
                             onKeyDown={(e) => handleKeyDown(r, c, e)}
-                            disabled={submitted}
+                            disabled={submitted || grid.length===0}
                             autoComplete="off"
                           />
                         )}
