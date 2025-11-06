@@ -75,8 +75,8 @@ export default function LeaderboardPage() {
               list.map((user, i) => (
                 <tr key={user.id || i} className={i < 3 ? "top" : ""}>
                   <td>{i + 1}</td>
-                  <td>{user.username}</td>
-                  <td>{user.score}</td>
+                  <td>{user.Username}</td>
+                  <td>{user.Score}</td>
                 </tr>
               ))
             )}
