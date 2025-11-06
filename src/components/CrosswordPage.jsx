@@ -20,74 +20,96 @@ export default function CrosswordPage() {
   const [remaining, setRemaining] = useState(TOTAL_TIME);
 
   useEffect(() => {
-  const fetchCrossword = async () => {
-    setLoading(true);
-    try {
-      const res = await fetch("https://crosswordbackend.onrender.com/crossword");
-      const data = await res.json();
-      setCrossword(data);
-
-      // 🛠 Safely restore from localStorage
-      let savedGrid = null;
+    const fetchCrossword = async () => {
+      setLoading(true);
       try {
-        const raw = localStorage.getItem("cw-grid");
-        if (raw) {
-          const parsed = JSON.parse(raw);
-          if (Array.isArray(parsed)) savedGrid = parsed;
+        const res = await fetch("https://crosswordbackend.onrender.com/crossword");
+        const data = await res.json();
+        setCrossword(data);
+
+        let savedGrid = null;
+        try {
+          const raw = localStorage.getItem("cw-grid");
+          if (raw) {
+            const parsed = JSON.parse(raw);
+            if (Array.isArray(parsed)) savedGrid = parsed;
+          }
+        } catch (e) {
+          console.warn("Invalid cw-grid in localStorage:", e);
+        }
+
+        // Initialize grid with blanks as null
+        if (savedGrid && savedGrid.length) {
+          setGrid(savedGrid);
+        } else if (Array.isArray(data.Grid)) {
+          const g = data.Grid.map((row) =>
+            row.map((cell) => (cell.IsBlank ? null : ""))
+          );
+          setGrid(g);
+        }
+
+        // Timer
+        const savedTime = parseInt(localStorage.getItem("cw-time"), 10);
+        const lastTimestamp = parseInt(localStorage.getItem("cw-timestamp"), 10);
+        const now = Date.now();
+        if (!isNaN(savedTime) && savedTime > 0) {
+          if (!isNaN(lastTimestamp)) {
+            const elapsed = Math.floor((now - lastTimestamp) / 1000);
+            const newRemaining = Math.max(0, savedTime - elapsed);
+            setRemaining(newRemaining);
+            localStorage.setItem("cw-time", newRemaining.toString());
+            localStorage.setItem("cw-timestamp", now.toString());
+          } else {
+            setRemaining(savedTime);
+            localStorage.setItem("cw-timestamp", now.toString());
+          }
+        } else {
+          localStorage.setItem("cw-timestamp", now.toString());
         }
       } catch (e) {
-        console.warn("Invalid cw-grid in localStorage:", e);
+        console.error("Error fetching crossword:", e);
+      } finally {
+        setLoading(false);
       }
+    };
+    fetchCrossword();
+  }, []);
 
-      if (savedGrid && savedGrid.length) {
-        setGrid(savedGrid);
-      } else {
-        const g = data.Grid.map((row) =>
-          row.map((cell) => (cell.IsBlank ? null : ""))
-        );
-        setGrid(g);
-      }
-
-      // ⏳ Restore timer safely
-      // ⏳ Restore timer with real-time sync
-const savedTime = parseInt(localStorage.getItem("cw-time"), 10);
-const lastTimestamp = parseInt(localStorage.getItem("cw-timestamp"), 10);
-const now = Date.now();
-
-if (!isNaN(savedTime) && savedTime > 0) {
-  if (!isNaN(lastTimestamp)) {
-    const elapsed = Math.floor((now - lastTimestamp) / 1000);
-    const newRemaining = Math.max(0, savedTime - elapsed);
-    setRemaining(newRemaining);
-    localStorage.setItem("cw-time", newRemaining.toString());
-    localStorage.setItem("cw-timestamp", now.toString());
-  } else {
-    setRemaining(savedTime);
-    localStorage.setItem("cw-timestamp", now.toString());
-  }
-} else {
-  localStorage.setItem("cw-timestamp", now.toString());
-}
-
-
-    } catch (e) {
-      console.error("Error fetching crossword:", e);
-    } finally {
-      setLoading(false);
-    }
-  };
-  fetchCrossword();
-}, []);
-
-
-  useEffect(()=>{
-    if(grid.length > 0){
+  useEffect(() => {
+    if (grid.length > 0) {
       localStorage.setItem("cw-grid", JSON.stringify(grid));
     }
-  },[grid]);
+  }, [grid]);
 
+  // Utility for clue length, safe against blanks and out-of-bounds
+  function getClueLength(grid, row, col, dir) {
+    if (
+      !Array.isArray(grid) ||
+      typeof row !== "number" ||
+      typeof col !== "number" ||
+      grid[row] === undefined ||
+      grid[row][col] === null
+    )
+      return 0;
+    let len = 0;
+    if (dir === "across") {
+      while (
+        col + len < grid[row].length &&
+        grid[row][col + len] !== null
+      )
+        len++;
+    } else if (dir === "down") {
+      while (
+        row + len < grid.length &&
+        grid[row + len] &&
+        grid[row + len][col] !== null
+      )
+        len++;
+    }
+    return len;
+  }
 
-  // Numbering logic (used as submission index)
+  // Numbering map (for cell indices)
   const getNumberingMap = useMemo(() => {
     const map = {};
     if (!grid.length) return map;
@@ -110,146 +132,128 @@ if (!isNaN(savedTime) && savedTime > 0) {
     }
     return map;
   }, [grid]);
-   
-  // Utility to calculate clue length from the grid
-function getClueLength(grid, row, col, dir) {
-  let len = 0;
-  if (dir === "across") {
-    while (col + len < grid[row].length && grid[row][col + len] !== null) len++;
-  } else {
-    while (row + len < grid.length && grid[row + len][col] !== null) len++;
-  }
-  return len;
-}
 
-const handleSubmit = useCallback(async () => {
-  if (!crossword) {
-    console.warn("handleSubmit called but crossword is null");
-    return;
-  }
-  if (submitted) {
-    console.warn("handleSubmit called but already submitted");
-    return;
-  }
-
-  console.log("Starting submission...");
-
-  const cluesRaw = [
-    ...(crossword.Clues?.Across || []).map(c => ({ ...c, dir: "across" })),
-    ...(crossword.Clues?.Down || []).map(c => ({ ...c, dir: "down" })),
-  ];
-
-  // Add clue length dynamically
-  const clues = cluesRaw.map(clue => ({
-    ...clue,
-    ClueLength: getClueLength(
-      grid,
-      clue.ClueRow - 1, // zero-based
-      clue.ClueCol - 1, // zero-based
-      clue.dir
-    ),
-  }));
-
-  console.log("Clues for submission with length:", clues);
-
-  const answers = clues.map(clue => {
-    let word = "";
-    const startRow = clue.ClueRow - 1;
-    const startCol = clue.ClueCol - 1;
-    if (clue.dir === "across") {
-      for (let i = 0; i < clue.ClueLength; i++) {
-        word += (grid[startRow]?.[startCol + i] || "").toUpperCase();
-      }
-    } else { // down
-      for (let i = 0; i < clue.ClueLength; i++) {
-        word += (grid[startRow + i]?.[startCol] || "").toUpperCase();
-      }
+  // Submission logic, fully safe
+  const handleSubmit = useCallback(async () => {
+    if (!crossword) {
+      console.warn("handleSubmit called but crossword is null");
+      return;
     }
-    console.log(`ClueID ${clue.ClueID} answer:`, word);
-    return {
-      clueID: clue.ClueID,       
-      answerText: word.trim(),   
-    };
-  });
+    if (submitted) {
+      console.warn("handleSubmit called but already submitted");
+      return;
+    }
 
-  const filteredAnswers = answers.filter(a => a.answerText !== "");
-  console.log("Filtered answers (non-empty):", filteredAnswers);
+    // Combine clues with directions
+    const cluesRaw = [
+      ...(crossword.Clues?.Across || []).map(c => ({ ...c, dir: "across" })),
+      ...(crossword.Clues?.Down || []).map(c => ({ ...c, dir: "down" }))
+    ];
 
-  const payload = {
-    crossword_id: crossword.CrosswordID,
-    answers: filteredAnswers,
-  };
+    // Filter out clues that start at blank/out-of-bounds cells
+    const validClues = cluesRaw.filter(
+      clue =>
+        typeof clue.ClueRow === "number" &&
+        typeof clue.ClueCol === "number" &&
+        grid[clue.ClueRow - 1] &&
+        grid[clue.ClueRow - 1][clue.ClueCol - 1] !== null
+    );
 
-  console.log("Payload to submit:", payload);
+    // Attach clue lengths
+    const clues = validClues.map(clue => ({
+      ...clue,
+      ClueLength: getClueLength(
+        grid,
+        clue.ClueRow - 1,
+        clue.ClueCol - 1,
+        clue.dir
+      )
+    }));
 
-  const jwt = localStorage.getItem("jwt");
-  if (!jwt) console.warn("JWT token missing!");
-
-  try {
-    const res = await fetch("https://crosswordbackend.onrender.com/submitcrossword", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        Authorization: `Bearer ${jwt}`,
-      },
-      body: JSON.stringify(payload),
+    // Collect word for each clue, skip empty
+    const answers = clues.map(clue => {
+      let word = "";
+      const startRow = clue.ClueRow - 1;
+      const startCol = clue.ClueCol - 1;
+      if (clue.dir === "across") {
+        for (let i = 0; i < clue.ClueLength; i++) {
+          word += (grid[startRow]?.[startCol + i] || "").toUpperCase();
+        }
+      } else { // down
+        for (let i = 0; i < clue.ClueLength; i++) {
+          word += (grid[startRow + i]?.[startCol] || "").toUpperCase();
+        }
+      }
+      return {
+        clueID: clue.ClueID,
+        answerText: word.trim(),
+      };
     });
 
-    const result = await res.json();
-    console.log("Parsed response JSON:", result);
+    const filteredAnswers = answers.filter(a => a.answerText !== "");
+    const payload = {
+      crossword_id: crossword.CrosswordID,
+      answers: filteredAnswers,
+    };
 
-    if (res.ok) {
-      setPopup({
-        open: true,
-        title: "✅ Submission Successful!",
-        message: result.message || "Your answers have been submitted successfully.",
-        success: true,
+    const jwt = localStorage.getItem("jwt");
+    if (!jwt) console.warn("JWT token missing!");
+
+    try {
+      const res = await fetch("https://crosswordbackend.onrender.com/submitcrossword", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${jwt}`,
+        },
+        body: JSON.stringify(payload),
       });
-      console.log("Submission successful!");
-    } else {
+
+      const result = await res.json();
+      if (res.ok) {
+        setPopup({
+          open: true,
+          title: "✅ Submission Successful!",
+          message: result.message || "Your answers have been submitted successfully.",
+          success: true,
+        });
+      } else {
+        setPopup({
+          open: true,
+          title: "❌ Submission Failed",
+          message: result.message || "Something went wrong. Please try again.",
+          success: false,
+        });
+      }
+      setSubmitted(true);
+    } catch {
       setPopup({
         open: true,
-        title: "❌ Submission Failed",
-        message: result.message || "Something went wrong. Please try again.",
+        title: "⚠️ Network Error",
+        message: "Unable to connect to the server. Please try again later.",
         success: false,
       });
-      console.error("Submission failed:", result);
     }
-    setSubmitted(true);
-  } catch (err) {
-    setPopup({
-      open: true,
-      title: "⚠️ Network Error",
-      message: "Unable to connect to the server. Please try again later.",
-      success: false,
-    });
-    console.error("Submission error:", err);
-  }
-}, [crossword, grid, submitted]);
+  }, [crossword, grid, submitted]);
 
-
-
-  // Timer countdown with auto submit on end
- useEffect(() => {
-  if (submitted || remaining <= 0) return;
-
-  const timer = setInterval(() => {
-    setRemaining((prev) => {
-      const newTime = prev - 1;
-      localStorage.setItem("cw-time", newTime.toString());
-      localStorage.setItem("cw-timestamp", Date.now().toString());
-      if (newTime <= 0) {
-        clearInterval(timer);
-        handleSubmit();
-        return 0;
-      }
-      return newTime;
-    });
-  }, 1000);
-
-  return () => clearInterval(timer);
-}, [submitted, handleSubmit, remaining]); // ✅ keep submitted + handleSubmit only
-
+  // Timer with auto submit
+  useEffect(() => {
+    if (submitted || remaining <= 0) return;
+    const timer = setInterval(() => {
+      setRemaining((prev) => {
+        const newTime = prev - 1;
+        localStorage.setItem("cw-time", newTime.toString());
+        localStorage.setItem("cw-timestamp", Date.now().toString());
+        if (newTime <= 0) {
+          clearInterval(timer);
+          handleSubmit();
+          return 0;
+        }
+        return newTime;
+      });
+    }, 1000);
+    return () => clearInterval(timer);
+  }, [submitted, handleSubmit, remaining]);
 
   const formatTime = (seconds) => {
     const mins = Math.floor(seconds / 60);
@@ -267,6 +271,7 @@ const handleSubmit = useCallback(async () => {
       if (el.setSelectionRange) el.setSelectionRange(el.value.length, el.value.length);
     }
   };
+
   const findNextCell = (r, c) => {
     const rows = grid.length;
     const cols = grid[0]?.length || 0;
@@ -275,6 +280,7 @@ const handleSubmit = useCallback(async () => {
       for (let cc = 0; cc < cols; cc++) if (grid[rr][cc] !== null) return [rr, cc];
     return null;
   };
+
   const findPrevCell = (r, c) => {
     const cols = grid[0]?.length || 0;
     for (let cc = c - 1; cc >= 0; cc--) if (grid[r][cc] !== null) return [r, cc];
@@ -282,6 +288,7 @@ const handleSubmit = useCallback(async () => {
       for (let cc = cols - 1; cc >= 0; cc--) if (grid[rr][cc] !== null) return [rr, cc];
     return null;
   };
+
   const moveToNearestRightOrDown = (r, c) => {
     const rows = grid.length;
     const cols = grid[0]?.length || 0;
@@ -297,6 +304,7 @@ const handleSubmit = useCallback(async () => {
     }
     return false;
   };
+
   const handleInput = (r, c, e) => {
     const raw = e.target.value || "";
     const char = raw.slice(-1).toUpperCase();
@@ -315,6 +323,7 @@ const handleSubmit = useCallback(async () => {
     });
     moveToNearestRightOrDown(r, c);
   };
+
   const handleKeyDown = (r, c, e) => {
     if (e.key === "ArrowRight") {
       e.preventDefault();
@@ -389,39 +398,39 @@ const handleSubmit = useCallback(async () => {
       </header>
 
       <main className="cw-main">
-  <section className="cw-board">
-    <div className="board-scroll">
-      <div className="board-grid large" role="grid">
-        {grid.map((row, r) => (
-          <div className="board-row" key={r}>
-            {row.map((cell, c) => {
-              const key = keyFor(r, c);
-              const number = getNumberingMap[key];
-              return (
-                <div key={c} className={`cell ${cell !== null ? "white" : "black"}`}>
-                  {cell !== null && number && (
-                    <span className="cell-number">{number}</span>
-                  )}
-                  {cell !== null && (
-                    <input
-                      ref={(el) => (inputRefs.current[key] = el)}
-                      className="cell-input"
-                      maxLength={1}
-                      value={grid[r][c] || ""}
-                      onChange={(e) => handleInput(r, c, e)}
-                      onKeyDown={(e) => handleKeyDown(r, c, e)}
-                      disabled={submitted}
-                      autoComplete="off"
-                    />
-                  )}
+        <section className="cw-board">
+          <div className="board-scroll">
+            <div className="board-grid large" role="grid">
+              {grid.map((row, r) => (
+                <div className="board-row" key={r}>
+                  {row.map((cell, c) => {
+                    const key = keyFor(r, c);
+                    const number = getNumberingMap[key];
+                    return (
+                      <div key={c} className={`cell ${cell !== null ? "white" : "black"}`}>
+                        {cell !== null && number && (
+                          <span className="cell-number">{number}</span>
+                        )}
+                        {cell !== null && (
+                          <input
+                            ref={(el) => (inputRefs.current[key] = el)}
+                            className="cell-input"
+                            maxLength={1}
+                            value={grid[r][c] || ""}
+                            onChange={(e) => handleInput(r, c, e)}
+                            onKeyDown={(e) => handleKeyDown(r, c, e)}
+                            disabled={submitted}
+                            autoComplete="off"
+                          />
+                        )}
+                      </div>
+                    );
+                  })}
                 </div>
-              );
-            })}
+              ))}
+            </div>
           </div>
-        ))}
-      </div>
-    </div>
-  </section>
+        </section>
 
         <aside className="cw-side">
           <h3>Clues</h3>
@@ -445,7 +454,6 @@ const handleSubmit = useCallback(async () => {
               ))}
             </ul>
           </div>
-
           <div className="actions">
             <button className="btn primary" onClick={handleSubmit} disabled={submitted}>
               Submit Answers
