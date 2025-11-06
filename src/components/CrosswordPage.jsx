@@ -89,6 +89,10 @@ export default function CrosswordPage() {
       return { clueID: clue.ClueID, clueText: word.trim() };
     });
 
+    console.log("👉 DEBUG: crossword object:", crossword);
+console.log("👉 DEBUG: grid state:", grid);
+console.log("👉 DEBUG: computed answers before filter:", answers);
+
     const payload = {
   crossword_id: crossword.CrosswordID, // ensure this matches backend field name
   answers: answers
@@ -98,12 +102,9 @@ export default function CrosswordPage() {
       clueText: a.clueText
     })),
 };
-
+console.log("✅ FINAL PAYLOAD:", JSON.stringify(payload, null, 2));
 
     const jwt = localStorage.getItem("jwt");
-console.log("Payload:", JSON.stringify(payload, null, 2));
-console.log("hello");
-
 
     try {
       const res = await fetch("https://crosswordbackend.onrender.com/submitcrossword", {
@@ -116,6 +117,7 @@ console.log("hello");
       });
 
       const result = await res.json();
+      console.log("📦 Server response:", result);
 
       if (res.ok) {
         setPopup({
