@@ -90,7 +90,7 @@ export default function CrosswordPage() {
     });
 
     const payload = {
-      crossword_id: crossword.crossword_id,
+      crossword_id: crossword.CrosswordID,
       answers,
     };
 
