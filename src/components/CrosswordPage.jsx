@@ -112,12 +112,22 @@ if (!isNaN(savedTime) && savedTime > 0) {
   }, [grid]);
    
   const handleSubmit = useCallback(async () => {
-  if (!crossword || submitted) return;
+  if (!crossword) {
+    console.warn("handleSubmit called but crossword is null");
+    return;
+  }
+  if (submitted) {
+    console.warn("handleSubmit called but already submitted");
+    return;
+  }
+
+  console.log("Starting submission...");
 
   const clues = [
     ...(crossword.Clues?.Across || []).map(c => ({ ...c, dir: "across" })),
     ...(crossword.Clues?.Down || []).map(c => ({ ...c, dir: "down" })),
   ];
+  console.log("Clues for submission:", clues);
 
   const answers = clues.map(clue => {
     let word = "";
@@ -134,18 +144,25 @@ if (!isNaN(savedTime) && savedTime > 0) {
       }
     }
 
+    console.log(`ClueID ${clue.ClueID} answer:`, word);
     return {
-      clueID: clue.ClueID,       // ensure it matches backend
-      answerText: word.trim(),   // <-- changed from clueText to answerText if backend expects
+      clueID: clue.ClueID,       
+      answerText: word.trim(),   
     };
   });
 
+  const filteredAnswers = answers.filter(a => a.answerText !== "");
+  console.log("Filtered answers (non-empty):", filteredAnswers);
+
   const payload = {
     crossword_id: crossword.CrosswordID,
-    answers: answers.filter(a => a.answerText !== ""), // remove empty answers
+    answers: filteredAnswers,
   };
 
+  console.log("Payload to submit:", payload);
+
   const jwt = localStorage.getItem("jwt");
+  if (!jwt) console.warn("JWT token missing!");
 
   try {
     const res = await fetch("https://crosswordbackend.onrender.com/submitcrossword", {
@@ -157,7 +174,10 @@ if (!isNaN(savedTime) && savedTime > 0) {
       body: JSON.stringify(payload),
     });
 
+    console.log("Raw response:", res);
+
     const result = await res.json();
+    console.log("Parsed response JSON:", result);
 
     if (res.ok) {
       setPopup({
@@ -166,6 +186,7 @@ if (!isNaN(savedTime) && savedTime > 0) {
         message: result.message || "Your answers have been submitted successfully.",
         success: true,
       });
+      console.log("Submission successful!");
     } else {
       setPopup({
         open: true,
@@ -173,6 +194,7 @@ if (!isNaN(savedTime) && savedTime > 0) {
         message: result.message || "Something went wrong. Please try again.",
         success: false,
       });
+      console.error("Submission failed:", result);
     }
 
     setSubmitted(true);
@@ -183,7 +205,7 @@ if (!isNaN(savedTime) && savedTime > 0) {
       message: "Unable to connect to the server. Please try again later.",
       success: false,
     });
-    console.error(err);
+    console.error("Submission error:", err);
   }
 }, [crossword, grid, submitted]);
 
