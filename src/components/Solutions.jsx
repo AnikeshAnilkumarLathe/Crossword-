@@ -1,10 +1,10 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useMemo } from "react";
 import { useNavigate } from "react-router-dom";
 import "../styles/SolutionPage.css";
 
 export default function SolutionPage() {
   const navigate = useNavigate();
-  const [day, setDay] = useState(1);  // Start at day 1
+  const [day, setDay] = useState(1); // Start at day 1
   const [solution, setSolution] = useState(null);
   const [loading, setLoading] = useState(false);
 
@@ -25,7 +25,6 @@ export default function SolutionPage() {
         const data = await res.json();
         console.log("Fetched solution data:", data);
 
-        // Map backend response fields properly
         setSolution({
           grid: data.crossword?.Grid || [],
           clues: data.crossword?.Clues || { Across: [], Down: [] },
@@ -40,15 +39,81 @@ export default function SolutionPage() {
     fetchSolution();
   }, [day]);
 
-  // Create a map of answers for quick lookup by ClueID
-  const answersMap = {};
+  // Create a map of clue answers by ClueID for easy access
+  const answersMap = React.useMemo(() => {
+  const map = {};
   if (solution?.solution && Array.isArray(solution.solution)) {
     solution.solution.forEach(({ ClueID, ClueText }) => {
-      answersMap[ClueID] = ClueText;
+      map[ClueID] = ClueText.toUpperCase();
     });
   }
+  return map;
+}, [solution?.solution]);
 
-  console.log("Currently displaying solution:", solution);
+  // Prepare filled grid with solution letters
+  const filledGrid = useMemo(() => {
+    if (!solution || !solution.grid.length) return [];
+
+    // Initialize with empty strings or nulls for black cells
+    const filled = solution.grid.map(row =>
+      row.map(cell => (cell === null ? null : ""))
+    );
+
+    // Fill letters from Across clues
+    (solution.clues?.Across || []).forEach(clue => {
+      const answer = answersMap[clue.ClueID] || "";
+      const row = (clue.ClueRow || 1) - 1;
+      const col = (clue.ClueCol || 1) - 1;
+
+      for (let i = 0; i < answer.length && col + i < filled[0].length; i++) {
+        if (filled[row][col + i] !== null) {
+          filled[row][col + i] = answer[i];
+        }
+      }
+    });
+
+    // Fill letters from Down clues
+    (solution.clues?.Down || []).forEach(clue => {
+      const answer = answersMap[clue.ClueID] || "";
+      const row = (clue.ClueRow || 1) - 1;
+      const col = (clue.ClueCol || 1) - 1;
+
+      for (let i = 0; i < answer.length && row + i < filled.length; i++) {
+        if (filled[row + i][col] !== null) {
+          filled[row + i][col] = answer[i];
+        }
+      }
+    });
+
+    return filled;
+  }, [solution, answersMap]);
+
+  // Generate numbering map for clue starts
+  const getNumberingMap = useMemo(() => {
+    const map = {};
+    if (!solution?.grid || !solution.grid.length) return map;
+    let num = 1;
+    for (let r = 0; r < solution.grid.length; r++) {
+      for (let c = 0; c < solution.grid[r].length; c++) {
+        if (solution.grid[r][c] === null) continue;
+
+        const startAcross =
+          (c === 0 || solution.grid[r][c - 1] === null) &&
+          c + 1 < solution.grid[r].length &&
+          solution.grid[r][c + 1] !== null;
+
+        const startDown =
+          (r === 0 || solution.grid[r - 1][c] === null) &&
+          r + 1 < solution.grid.length &&
+          solution.grid[r + 1][c] !== null;
+
+        if (startAcross || startDown) {
+          map[`${r}-${c}`] = num++;
+        }
+      }
+    }
+    return map;
+  }, [solution]);
 
   return (
     <div className="solution-root">
@@ -69,6 +134,7 @@ export default function SolutionPage() {
           <span style={{ margin: "0 10px" }}>Day {day} Solution</span>
           <button onClick={() => setDay(d => d + 1)}>Next Day</button>
         </div>
+
         {loading ? (
           <div>Loading…</div>
         ) : !solution ? (
@@ -76,17 +142,23 @@ export default function SolutionPage() {
         ) : (
           <div className="solution-card">
             <h3>Day {day} Solution</h3>
-            {solution.grid && solution.grid.length > 0 && (
+            {filledGrid.length > 0 && (
               <table className="grid-table">
                 <tbody>
-                  {solution.grid.map((row, r) => (
+                  {filledGrid.map((row, r) => (
                     <tr key={r}>
-                      {row.map((cell, c) => (
-                        <td key={c} className={cell === null ? "cell-black" : "cell-white"}>
-                          {/* Adjust here if cell contains objects; assuming string or null */}
-                          {typeof cell === 'object' && cell !== null ? (cell.Letter || "") : (cell || "")}
-                        </td>
-                      ))}
+                      {row.map((cell, c) => {
+                        const key = `${r}-${c}`;
+                        const number = getNumberingMap[key];
+                        return (
+                          <td key={c} className={solution.grid[r][c] === null ? "cell-black" : "cell-white"}>
+                            {solution.grid[r][c] !== null && number && (
+                              <span className="cell-number">{number}</span>
+                            )}
+                            {cell || ""}
+                          </td>
+                        );
+                      })}
                     </tr>
                   ))}
                 </tbody>

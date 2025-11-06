@@ -60,15 +60,17 @@
 
 /* === Main Content === */
 .solution-main {
-  max-width: 940px;
+  max-width: 1100px; /* increased for desktop */
   margin: 3rem auto;
   margin-top: 120px;
   background: rgba(255, 250, 253, 0.6);
   border-radius: 16px;
-  padding: 2.5rem;
+  padding: 3rem 2rem;
   box-shadow: 0 4px 24px rgba(255, 182, 193, 0.25);
   backdrop-filter: blur(10px);
   border: 1px solid rgba(255, 182, 193, 0.3);
+  overflow-wrap: break-word;
+  box-sizing: border-box;
 }
 
 /* === Controls === */
@@ -112,7 +114,7 @@
   box-shadow: 0 6px 24px rgba(255, 190, 210, 0.17);
   border: 1px solid rgba(255, 200, 210, 0.29);
   color: #3b0928;
-  max-width: 98vw;
+  max-width: 100%;
   word-break: break-word;
 }
 
@@ -124,10 +126,10 @@
 }
 
 .grid-table td {
-  width: 32px;
-  height: 32px;
+  width: 38px; /* increased grid size */
+  height: 38px;
   text-align: center;
-  font-size: 1em;
+  font-size: 1.15em;
   font-weight: 600;
   border: 1px solid rgba(255, 182, 193, 0.3);
   transition: background 0.17s ease, transform 0.1s ease;
@@ -145,6 +147,23 @@
 .grid-table td:hover.cell-white {
   background: rgba(255, 220, 230, 0.9);
   transform: scale(1.05);
+}
+
+/* number inside cell for clues */
+.cell-number {
+  position: absolute;
+  top: 2px;
+  left: 3px;
+  font-size: 0.6rem;
+  color: #77204b;
+  font-weight: 700;
+  text-shadow: 0 0 3px #ffc0de;
+  pointer-events: none;
+}
+
+/* make TD relative for absolute number */
+.grid-table td.cell-white {
+  position: relative;
 }
 
 /* === Text & Clues === */
@@ -167,33 +186,28 @@ ul {
   line-height: 1.6em;
 }
 
-::-webkit-scrollbar {
-  width: 10px;
-}
-::-webkit-scrollbar-thumb {
-  background: #f7a8c4;
-  border-radius: 8px;
-}
-::-webkit-scrollbar-thumb:hover {
-  background: #f477a7;
-}
-::-webkit-scrollbar-track {
-  background: rgba(255, 200, 210, 0.13);
-}
-
 /* === Responsive === */
 @media (max-width: 900px) {
   .solution-main {
-    padding: 1.25rem;
+    padding: 1.25rem 1rem;
+    max-width: 90vw;
+    margin: 1.5rem auto;
+    margin-top: 120px;
   }
   .solution-card {
     padding: 1.25em;
+  }
+  .grid-table td {
+    width: 32px;
+    height: 32px;
+    font-size: 1.05em;
   }
 }
 
 @media (max-width: 768px) {
   .solution-main {
-    padding: 0.5rem;
+    padding: 0.5rem 1rem;
+    max-width: 90vw;
     margin: 1.5rem auto;
     margin-top: 120px;
   }
@@ -225,19 +239,16 @@ ul {
     margin: 1em 0;
   }
   .grid-table td {
-    width: 25px;
-    height: 25px;
-    font-size: 0.88em;
+    width: 30px;
+    height: 30px;
+    font-size: 0.95em;
   }
 }
 
 @media (max-width: 560px) {
-  .solution-navbar {
-    padding: 0.4rem 0.3rem;
-
-  }
   .solution-main {
-    padding: 1.2rem;
+    max-width: 95vw;
+    padding: 1.2rem 1rem;
     margin: 0.3rem auto;
     margin-top: 120px;
   }
@@ -256,8 +267,8 @@ ul {
     padding: 0.56em;
   }
   .grid-table td {
-    width: 17px;
-    height: 17px;
-    font-size: 0.75em;
+    width: 28px;
+    height: 28px;
+    font-size: 0.88em;
   }
 }
