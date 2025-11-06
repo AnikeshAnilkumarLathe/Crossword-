@@ -173,12 +173,12 @@ export default function CrosswordPage() {
     const [row, col] = clue.gridCoordinates;
     const length = getClueLength(grid, row, col, clue.dir);
     console.log(
-      `ClueID ${clue.ClueID}, dir ${clue.dir}, start (${row},${col}), length: ${length}`
+      `ClueID ${clue.ClueID}, dir ${clue.dir}, start (${row},${col}), expected length: ${length}`
     );
     return { ...clue, ClueRow: row + 1, ClueCol: col + 1, ClueLength: length };
   });
 
-  // Extract word for each clue
+  // Extract word for each clue and validate by expected length
   const answers = clues.map(clue => {
     let word = "";
     const startRow = clue.ClueRow - 1;
@@ -192,20 +192,32 @@ export default function CrosswordPage() {
         word += (grid[startRow + i]?.[startCol] || "").toUpperCase();
       }
     }
-    console.log(`ClueID ${clue.ClueID} (${clue.dir}) extracted answer: "${word.trim()}"`);
+    // Send answer only if all expected slots are filled with letters
+    let answerText;
+    if (
+      word &&
+      word.length === clue.ClueLength &&
+      /^[A-Z]+$/.test(word)
+    ) {
+      answerText = word;
+    } else {
+      answerText = null;
+    }
+    console.log(
+      `ClueID ${clue.ClueID} (${clue.dir}) extracted answer: "${word}", (sent: ${answerText})`
+    );
     return {
       clueID: clue.ClueID,
-      answerText: word.trim(),
+      answerText
     };
   });
 
-  // Filter empty/blank answers
-  const filteredAnswers = answers.filter(a => a.answerText !== "");
-  console.log("Answers to submit:", filteredAnswers);
+  // No filtering, always send all clues
+  console.log("Answers to submit:", answers);
 
   const payload = {
     crossword_id: crossword.CrosswordID,
-    answers: filteredAnswers,
+    answers
   };
   console.log("Payload to submit:", payload);
 
@@ -254,8 +266,6 @@ export default function CrosswordPage() {
   }
   console.log("==== SUBMISSION DEBUG END ====");
 }, [crossword, grid, submitted, getNumberingMap]);
-
-
 
   useEffect(() => {
     if (submitted || remaining <= 0) return;
