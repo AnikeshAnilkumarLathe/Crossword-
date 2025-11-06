@@ -111,7 +111,18 @@ if (!isNaN(savedTime) && savedTime > 0) {
     return map;
   }, [grid]);
    
-  const handleSubmit = useCallback(async () => {
+  // Utility to calculate clue length from the grid
+function getClueLength(grid, row, col, dir) {
+  let len = 0;
+  if (dir === "across") {
+    while (col + len < grid[row].length && grid[row][col + len] !== null) len++;
+  } else {
+    while (row + len < grid.length && grid[row + len][col] !== null) len++;
+  }
+  return len;
+}
+
+const handleSubmit = useCallback(async () => {
   if (!crossword) {
     console.warn("handleSubmit called but crossword is null");
     return;
@@ -123,17 +134,28 @@ if (!isNaN(savedTime) && savedTime > 0) {
 
   console.log("Starting submission...");
 
-  const clues = [
+  const cluesRaw = [
     ...(crossword.Clues?.Across || []).map(c => ({ ...c, dir: "across" })),
     ...(crossword.Clues?.Down || []).map(c => ({ ...c, dir: "down" })),
   ];
-  console.log("Clues for submission:", clues);
+
+  // Add clue length dynamically
+  const clues = cluesRaw.map(clue => ({
+    ...clue,
+    ClueLength: getClueLength(
+      grid,
+      clue.ClueRow - 1, // zero-based
+      clue.ClueCol - 1, // zero-based
+      clue.dir
+    ),
+  }));
+
+  console.log("Clues for submission with length:", clues);
 
   const answers = clues.map(clue => {
     let word = "";
-    const startRow = clue.ClueRow - 1; // zero-based
-    const startCol = clue.ClueCol - 1; // zero-based
-
+    const startRow = clue.ClueRow - 1;
+    const startCol = clue.ClueCol - 1;
     if (clue.dir === "across") {
       for (let i = 0; i < clue.ClueLength; i++) {
         word += (grid[startRow]?.[startCol + i] || "").toUpperCase();
@@ -143,7 +165,6 @@ if (!isNaN(savedTime) && savedTime > 0) {
         word += (grid[startRow + i]?.[startCol] || "").toUpperCase();
       }
     }
-
     console.log(`ClueID ${clue.ClueID} answer:`, word);
     return {
       clueID: clue.ClueID,       
@@ -174,8 +195,6 @@ if (!isNaN(savedTime) && savedTime > 0) {
       body: JSON.stringify(payload),
     });
 
-    console.log("Raw response:", res);
-
     const result = await res.json();
     console.log("Parsed response JSON:", result);
 
@@ -196,7 +215,6 @@ if (!isNaN(savedTime) && savedTime > 0) {
       });
       console.error("Submission failed:", result);
     }
-
     setSubmitted(true);
   } catch (err) {
     setPopup({
@@ -208,6 +226,7 @@ if (!isNaN(savedTime) && savedTime > 0) {
     console.error("Submission error:", err);
   }
 }, [crossword, grid, submitted]);
+
 
 
   // Timer countdown with auto submit on end
