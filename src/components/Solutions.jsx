@@ -11,21 +11,30 @@ export default function SolutionPage() {
   useEffect(() => {
     async function fetchSolution() {
       setLoading(true);
+      console.log(`Fetching solution for crossword_id = ${day}...`);
+
       try {
         const res = await fetch("https://crosswordbackend.onrender.com/getsolution", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({ crossword_id: day }),
         });
+        console.log("Raw response status:", res.status);
+        
         const data = await res.json();
+        console.log("Fetched solution data:", data);
+
         setSolution(data);
-      } catch {
+      } catch (err) {
+        console.error("Error fetching solution:", err);
         setSolution(null);
       }
       setLoading(false);
     }
     fetchSolution();
   }, [day]);
+
+  console.log("Currently displaying solution:", solution);
 
   return (
     <div className="solution-root">
