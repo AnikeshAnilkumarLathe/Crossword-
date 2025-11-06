@@ -60,6 +60,15 @@
   overflow: auto;
   justify-content: flex-start;
 }
+.cw-board {
+  display: flex;
+  justify-content: center;
+  width: 100%;
+  overflow: visible;
+}
+.board-scroll {
+  display: inline-block;
+}
 
 .cw-root .board-grid {
   background: #1e293b;
@@ -68,6 +77,14 @@
   display: flex;
   flex-direction: column;
   gap: 4px;
+  border: 2px solid #475569;
+}
+.board-grid {
+  display: inline-block;
+  min-width: max-content;
+  background: #1e293b;
+  padding: 20px;
+  border-radius: 16px;
   border: 2px solid #475569;
 }
 
@@ -312,86 +329,73 @@
 
 /* ✅ RESPONSIVE */
 @media (max-width: 1024px) {
-
-  .cw-root .cw-main {
+  .cw-main {
     flex-direction: column;
     align-items: center;
   }
 
-  .cw-root .cw-side {
+  .cw-board {
+    justify-content: center;
+    overflow-x: auto;
+  }
+
+  .board-scroll {
+    transform: scale(0.95);
+    transform-origin: top center;
+  }
+
+  .cw-side {
     width: 100%;
     max-width: 600px;
   }
-
-  .cw-root .cw-board {
-    width: 100%;
-    justify-content: center;
-  }
-
-  .board-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(20px, 1fr));
-  justify-content: center;
-  align-items: center;
-  padding-bottom: 0;
-  margin-bottom: 0;
-  transform: scale(0.95);
-  transform-origin: top center;
-  overflow: auto;
-  height: auto;
-}
 }
 
+/* === Phones (≤768px) === */
 @media (max-width: 768px) {
   .cw-root {
     padding: 12px;
   }
 
-  .cw-root .cw-header {
-    flex-direction: column;
-    gap: 8px;
-    text-align: center;
+  .cw-board {
+    display: block;
+    overflow-x: auto;
+    overflow-y: hidden;
+    width: 100%;
   }
 
-  .cw-root .cw-main {
-    flex-direction: column;
-    align-items: center;
-    gap: 0;
-  }
-
-  .cw-root .board-grid {
+  .board-scroll {
+    display: inline-block;
     transform: scale(0.85);
-    transform-origin: top center;
+    transform-origin: top left;
+    min-width: max-content;
   }
 
-  .cw-root .cw-side {
+  .cw-side {
     width: 100%;
     max-width: 100%;
     margin-top: -80px;
   }
 }
 
+/* === Small Phones (≤480px) === */
 @media (max-width: 480px) {
-  .cw-root .board-grid {
+  .board-scroll {
     transform: scale(0.7);
-    transform-origin: top center;
-    width: 100%
+    transform-origin: top left;
   }
 
-  .cw-root .cw-side {
+  .cw-side {
     margin-top: -180px;
   }
-  .cw-root .cell.white:focus-within {
-  transform: scale(1.08);
-  box-shadow: 0 0 8px rgba(242, 198, 21, 0.6);
-  background:rgb(242, 208, 16)
-}
+
   .cw-title {
-    font-size: 2rem;
+    font-size: 1.2rem;
     color: rgb(234, 213, 49);
   }
 
-  .cw-root .cw-title {
-    font-size: 1.2rem;
+  .cell.white:focus-within {
+    transform: scale(1.08);
+    box-shadow: 0 0 8px rgba(242, 198, 21, 0.6);
+    background: rgb(242, 208, 16);
   }
 }
