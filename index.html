@@ -19,9 +19,12 @@
   </head>
 
   <body>
-  <!-- ✅ Preloader (visible instantly when site opens) -->
+  <!-- 🌀 Dark-Themed Preloader -->
   <div id="preloader">
-    <div class="spinner"></div>
+    <div class="loader-container">
+      <div class="spinner"></div>
+      <p class="loading-text">Loading...</p>
+    </div>
   </div>
 
   <div id="root"></div>
@@ -29,28 +32,35 @@
   <script type="module" src="/src/main.jsx"></script>
 
   <style>
-    /* ✅ Preloader Styles */
+    /* 🖤 Fullscreen overlay */
     #preloader {
       position: fixed;
-      top: 0;
-      left: 0;
-      width: 100%;
-      height: 100%;
-      background: #000; /* or your background color */
+      inset: 0;
+      background: radial-gradient(circle at center, #111 0%, #000 100%);
       display: flex;
       align-items: center;
       justify-content: center;
       z-index: 9999;
-      transition: opacity 0.5s ease;
+      transition: opacity 0.6s ease;
     }
 
+    /* 🔄 Center container */
+    .loader-container {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 12px;
+    }
+
+    /* ✨ Spinner animation */
     .spinner {
       width: 60px;
       height: 60px;
-      border: 6px solid #fff;
-      border-top: 6px solid transparent;
+      border: 4px solid rgba(255, 255, 255, 0.15);
+      border-top-color: #06f6d6;
       border-radius: 50%;
-      animation: spin 1s linear infinite;
+      animation: spin 1s linear infinite, glow 2s ease-in-out infinite alternate;
+      box-shadow: 0 0 20px rgba(6, 246, 214, 0.1);
     }
 
     @keyframes spin {
@@ -58,15 +68,44 @@
         transform: rotate(360deg);
       }
     }
+
+    /* 🌌 Subtle glow pulse */
+    @keyframes glow {
+      from {
+        box-shadow: 0 0 10px rgba(6, 246, 214, 0.2);
+      }
+      to {
+        box-shadow: 0 0 25px rgba(6, 246, 214, 0.6);
+      }
+    }
+
+    /* 💬 Loading text */
+    .loading-text {
+      font-family: "Inter", sans-serif;
+      font-size: 0.95rem;
+      color: rgba(255, 255, 255, 0.7);
+      letter-spacing: 1px;
+      text-transform: uppercase;
+      animation: fadeIn 1.2s ease-in-out infinite alternate;
+    }
+
+    @keyframes fadeIn {
+      from {
+        opacity: 0.4;
+      }
+      to {
+        opacity: 1;
+      }
+    }
   </style>
 
   <script>
-    // ✅ Hide preloader once page fully loaded (including React bundle)
+    // ✅ Fade-out when everything (React + assets) has loaded
     window.addEventListener("load", () => {
       const preloader = document.getElementById("preloader");
       if (preloader) {
         preloader.style.opacity = "0";
-        setTimeout(() => preloader.remove(), 500);
+        setTimeout(() => preloader.remove(), 600);
       }
     });
   </script>
