@@ -139,6 +139,42 @@ export default function StartPage({ videoSrc = "/og.mp4" }) {
   );
 
   // On mount, load user from localStorage if exists
+  // Preload and cache videos on first load
+useEffect(() => {
+  async function preloadVideos() {
+    const videos = [
+      { key: "ogVideo", url: "/og.mp4" },
+      { key: "finalVideo", url: "/final.mp4" },
+    ];
+
+    for (const { key, url } of videos) {
+      try {
+        // Skip if already in localStorage
+        if (localStorage.getItem(key)) continue;
+
+        const response = await fetch(url);
+        const blob = await response.blob();
+
+        // Convert blob to Base64 string
+        const reader = new FileReader();
+        reader.onloadend = () => {
+          try {
+            localStorage.setItem(key, reader.result);
+            console.log(`${key} cached successfully`);
+          } catch (err) {
+            console.warn(`Failed to cache ${key}:`, err);
+          }
+        };
+        reader.readAsDataURL(blob);
+      } catch (err) {
+        console.error(`Error preloading ${url}:`, err);
+      }
+    }
+  }
+
+  preloadVideos();
+}, []);
+
   useEffect(() => {
     const stored = localStorage.getItem("user");
     if (stored) {
@@ -241,9 +277,16 @@ export default function StartPage({ videoSrc = "/og.mp4" }) {
   return (
     <div className="start-root">
       <video autoPlay loop muted playsInline className="bg-video">
-        <source src={videoSrc} type="video/mp4" />
-        Your browser does not support the video tag.
-      </video>
+  <source
+    src={
+      localStorage.getItem("ogVideo")
+        ? localStorage.getItem("ogVideo")
+        : videoSrc
+    }
+    type="video/mp4"
+  />
+  Your browser does not support the video tag.
+</video>
 
       <div className="content-container">
         <div className="start-left">
