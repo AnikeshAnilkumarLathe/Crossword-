@@ -25,6 +25,8 @@ export default function CrosswordPage() {
       try {
         const res = await fetch("https://crosswordbackend.onrender.com/crossword");
         const data = await res.json();
+        console.log("🧩 DEBUG: sample clue structure:", data.Clues?.Across?.[0]);
+    console.log("🧱 DEBUG: sample grid cell:", data.Grid?.[0]?.[0]);
         setCrossword(data);
         const g = data.Grid.map((row) =>
           row.map((cell) => (cell.IsBlank ? null : ""))
@@ -70,7 +72,7 @@ export default function CrosswordPage() {
       ...(crossword.Clues?.Across || []).map(c => ({ ...c, dir: "across" })),
       ...(crossword.Clues?.Down || []).map(c => ({ ...c, dir: "down" })),
     ];
-
+    console.log("🧩 Example clue keys:", Object.keys(crossword.Clues.Across[0]));
     const answers = clues.map(clue => {
       let word = "";
       if (clue.dir === "across") {
