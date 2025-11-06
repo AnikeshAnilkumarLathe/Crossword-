@@ -263,7 +263,7 @@ export default function StartPage({ videoSrc = "/og.mp4" }) {
             ) : (
               <>
                 <p className="username">Hi, {user.username}</p>
-                <p className="userscore">Score: {user.score}</p>
+              
                 <div className="row">
                   <button className="btn primary" onClick={handleStartGame}>
                     Start Game
