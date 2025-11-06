@@ -1,6 +1,6 @@
 import React, { useEffect, useState, useCallback, useRef } from "react";
 import { useNavigate } from "react-router-dom";
-import Preloader from "./Preloader"; // ✅ Import your preloader
+import Preloader from "./Preloader";
 import "../styles/StartPage.css";
 
 const BACKEND_BASE = "https://crosswordbackend.onrender.com";
@@ -8,11 +8,10 @@ const BACKEND_BASE = "https://crosswordbackend.onrender.com";
 export default function StartPage({ videoSrc = "/og.mp4" }) {
   const navigate = useNavigate();
   const [error, setError] = useState(null);
-  const [loading, setLoading] = useState(true); // For Google Sign-in
+  const [loading, setLoading] = useState(true);
   const [user, setUser] = useState(null);
-
-  const [showPreloader, setShowPreloader] = useState(false); // ✅ Show preloader on click
-  const [progress, setProgress] = useState(0); // ✅ Preloader progress
+  const [showPreloader, setShowPreloader] = useState(false); // ✅ track preloader visibility
+  const [progress, setProgress] = useState(0); // ✅ progress value (optional visual effect)
 
   const googleContainerRef = useRef(null);
   const childDivRef = useRef(null);
@@ -21,7 +20,20 @@ export default function StartPage({ videoSrc = "/og.mp4" }) {
   const CLIENT_ID =
     "919062485527-9hno8iqrqs35samoaub3reobf03pq3du.apps.googleusercontent.com";
 
-  // On mount, load user from localStorage if exists
+  // Simulate gradual loading (optional)
+  useEffect(() => {
+    if (showPreloader) {
+      let progressValue = 0;
+      const interval = setInterval(() => {
+        progressValue += 10;
+        setProgress(progressValue);
+        if (progressValue >= 100) clearInterval(interval);
+      }, 100);
+      return () => clearInterval(interval);
+    }
+  }, [showPreloader]);
+
+  // Normal Google Sign-in + JWT logic (unchanged)
   useEffect(() => {
     const stored = localStorage.getItem("user");
     if (stored) {
@@ -35,26 +47,17 @@ export default function StartPage({ videoSrc = "/og.mp4" }) {
     }
   }, []);
 
-  // Logout user
   const handleLogout = useCallback(() => {
     localStorage.removeItem("user");
     localStorage.removeItem("jwt");
     setUser(null);
   }, []);
 
-  // ✅ Handle Start Game click
+  // ✅ When Start Game is clicked → show preloader → navigate after short delay
   const handleStartGame = useCallback(() => {
     setShowPreloader(true);
 
-    // Optional: animate progress for visible effect
-    let prog = 0;
-    const interval = setInterval(() => {
-      prog += 10;
-      setProgress(prog);
-      if (prog >= 100) clearInterval(interval);
-    }, 100);
-
-    // Navigate after short delay (or replace with real async action)
+    // optional fake delay (for visible animation)
     setTimeout(() => {
       navigate("/crossword");
     }, 1000);
