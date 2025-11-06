@@ -13,6 +13,7 @@ export default function LeaderboardPage() {
       try {
         const res = await fetch("https://crosswordbackend.onrender.com/leaderboard");
         const data = await res.json();
+        console.log("Leaderboard data:", data);
         setList(Array.isArray(data) ? data.sort((a, b) => b.score - a.score) : []);
       } catch (err) {
         console.error("Failed to fetch leaderboard:", err);
