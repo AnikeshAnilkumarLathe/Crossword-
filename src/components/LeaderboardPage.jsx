@@ -45,7 +45,6 @@ export default function LeaderboardPage() {
         </div>
         <div className="nav-right">
           <button className="home-btn" onClick={() => navigate("/")}>Home</button>
-          <button className="home-btn" onClick={() => navigate("/crossword")}>Resume</button>
         </div>
       </nav>
 
