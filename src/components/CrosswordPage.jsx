@@ -180,34 +180,32 @@ export default function CrosswordPage() {
 
   // Extract word for each clue and validate by expected length
   const answers = clues.map(clue => {
-    let word = "";
-    const startRow = clue.ClueRow - 1;
-    const startCol = clue.ClueCol - 1;
-    if (clue.dir === "across") {
-      for (let i = 0; i < clue.ClueLength; i++) {
-        word += (grid[startRow]?.[startCol + i] || "").toLowerCase();
-      }
-    } else {
-      for (let i = 0; i < clue.ClueLength; i++) {
-        word += (grid[startRow + i]?.[startCol] || "").toLowerCase();
-      }
-    }
-    // Send answer only if all expected slots are filled with letters
-    let answerText;
-    if (word && word.length === clue.ClueLength) {
-  answerText = word.toLowerCase();
-} else {
-  answerText = "";
-}
+  let word = "";
+  const startRow = clue.ClueRow - 1;
+  const startCol = clue.ClueCol - 1;
 
-    console.log(
-      `ClueID ${clue.ClueID} (${clue.dir}) extracted answer: "${word}", (sent: ${answerText})`
-    );
-    return {
-      clueID: clue.ClueID,
-      answerText
-    };
-  });
+  if (clue.dir === "across") {
+    for (let i = 0; i < clue.ClueLength; i++) {
+      word += (grid[startRow]?.[startCol + i] || "").toUpperCase();
+    }
+  } else {
+    for (let i = 0; i < clue.ClueLength; i++) {
+      word += (grid[startRow + i]?.[startCol] || "").toUpperCase();
+    }
+  }
+
+  let clueText;
+  if (word && word.length === clue.ClueLength) {
+    clueText = word.toUpperCase();
+  } else {
+    clueText = "";
+  }
+
+  return {
+    clueID: clue.ClueID,
+    clueText
+  };
+});
 
   // No filtering, always send all clues
   console.log("Answers to submit:", answers);
