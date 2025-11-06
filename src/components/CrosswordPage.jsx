@@ -142,45 +142,43 @@ export default function CrosswordPage() {
   console.log("==== SUBMISSION DEBUG START ====");
   console.log("Grid state before submission:", grid);
 
-  // Get clue numbering from grid
-  const numberingEntries = Object.entries(getNumberingMap);
+  // Build map from clue ID to grid cell position using numbering
+  const clueIdToGridCoordinates = {};
+  Object.entries(getNumberingMap).forEach(([key, clueNum]) => {
+    clueIdToGridCoordinates[clueNum] = key.split('-').map(Number);
+  });
+  console.log("ClueID to grid position map:", clueIdToGridCoordinates);
 
-  // Map clues to numbering indices
+  // Attach position for each clue by ClueID and check
   const cluesRaw = [
-    ...(crossword.Clues?.Across || []).map((c, i) => ({
+    ...(crossword.Clues?.Across || []).map(c => ({
       ...c,
       dir: "across",
-      gridCoordinates: numberingEntries[i]
-        ? numberingEntries[i][0].split('-').map(Number)
-        : null
+      gridCoordinates: clueIdToGridCoordinates[c.ClueID]
     })),
-    ...(crossword.Clues?.Down || []).map((c, i) => ({
+    ...(crossword.Clues?.Down || []).map(c => ({
       ...c,
       dir: "down",
-      gridCoordinates: numberingEntries[
-        (crossword.Clues?.Across?.length || 0) + i
-      ]
-        ? numberingEntries[(crossword.Clues?.Across?.length || 0) + i][0].split('-').map(Number)
-        : null
+      gridCoordinates: clueIdToGridCoordinates[c.ClueID]
     }))
   ];
-  console.log("Raw clues mapped to grid coordinates:", cluesRaw);
+  console.log("Clues with coordinates:", cluesRaw);
 
-  // Only clues with valid gridCoordinates
-  const validClues = cluesRaw.filter(clue => clue.gridCoordinates);
-  console.log("Valid clues after numbering:", validClues);
+  // Only clues with found coordinates
+  const validClues = cluesRaw.filter(clue => Array.isArray(clue.gridCoordinates));
+  console.log("Valid clues after filtering:", validClues);
 
-  // Attach clue lengths
+  // Fill clue lengths and prep extraction
   const clues = validClues.map(clue => {
     const [row, col] = clue.gridCoordinates;
     const length = getClueLength(grid, row, col, clue.dir);
     console.log(
-      `ClueID ${clue.ClueID}, dir ${clue.dir}, numbering at (${row},${col}), computed length: ${length}`
+      `ClueID ${clue.ClueID}, dir ${clue.dir}, start (${row},${col}), length: ${length}`
     );
     return { ...clue, ClueRow: row + 1, ClueCol: col + 1, ClueLength: length };
   });
 
-  // Extract answers
+  // Extract word for each clue
   const answers = clues.map(clue => {
     let word = "";
     const startRow = clue.ClueRow - 1;
@@ -194,16 +192,16 @@ export default function CrosswordPage() {
         word += (grid[startRow + i]?.[startCol] || "").toUpperCase();
       }
     }
-    console.log(`ClueID ${clue.ClueID} (${clue.dir}) answer: "${word.trim()}"`);
+    console.log(`ClueID ${clue.ClueID} (${clue.dir}) extracted answer: "${word.trim()}"`);
     return {
       clueID: clue.ClueID,
       answerText: word.trim(),
     };
   });
 
-  // Filter non-empty answers for submission
+  // Filter empty/blank answers
   const filteredAnswers = answers.filter(a => a.answerText !== "");
-  console.log("Filtered answers (non-empty):", filteredAnswers);
+  console.log("Answers to submit:", filteredAnswers);
 
   const payload = {
     crossword_id: crossword.CrosswordID,
@@ -256,6 +254,7 @@ export default function CrosswordPage() {
   }
   console.log("==== SUBMISSION DEBUG END ====");
 }, [crossword, grid, submitted, getNumberingMap]);
+
 
 
   useEffect(() => {
