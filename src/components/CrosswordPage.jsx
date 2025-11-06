@@ -1,7 +1,6 @@
 import React, { useEffect, useMemo, useRef, useState, useCallback } from "react";
 import { useNavigate } from "react-router-dom";
 import "../styles/CrosswordPage.css";
-import GateTransition from "./GateTransition";
 
 export default function CrosswordPage() {
   const navigate = useNavigate();
@@ -20,7 +19,6 @@ export default function CrosswordPage() {
   const TOTAL_TIME = 180;
   const [remaining, setRemaining] = useState(TOTAL_TIME);
 
-  // Fetch crossword data from backend
   useEffect(() => {
     const fetchCrossword = async () => {
       setLoading(true);
@@ -41,7 +39,30 @@ export default function CrosswordPage() {
     fetchCrossword();
   }, []);
 
-  // Timer (with dependency)
+  // Numbering logic (used as submission index)
+  const getNumberingMap = useMemo(() => {
+    const map = {};
+    if (!grid.length) return map;
+    let num = 1;
+    for (let r = 0; r < grid.length; r++) {
+      for (let c = 0; c < grid[r].length; c++) {
+        if (grid[r][c] === null) continue;
+        const startAcross =
+          (c === 0 || grid[r][c - 1] === null) &&
+          c + 1 < grid[r].length &&
+          grid[r][c + 1] !== null;
+        const startDown =
+          (r === 0 || grid[r - 1][c] === null) &&
+          r + 1 < grid.length &&
+          grid[r + 1][c] !== null;
+        if (startAcross || startDown) {
+          map[`${r}-${c}`] = num++;
+        }
+      }
+    }
+    return map;
+  }, [grid]);
+
   const handleSubmit = useCallback(async () => {
     if (!crossword || submitted) return;
     const numberingMap = getNumberingMap;
@@ -68,7 +89,6 @@ export default function CrosswordPage() {
         },
         body: JSON.stringify(payload),
       });
-
       const result = await res.json();
       if (res.ok) {
         setPopup({
@@ -226,30 +246,6 @@ export default function CrosswordPage() {
       e.preventDefault();
     }
   };
-
-  // Numbering logic (must be outside handleSubmit so used as dependency)
-  const getNumberingMap = useMemo(() => {
-    const map = {};
-    if (!grid.length) return map;
-    let num = 1;
-    for (let r = 0; r < grid.length; r++) {
-      for (let c = 0; c < grid[r].length; c++) {
-        if (grid[r][c] === null) continue;
-        const startAcross =
-          (c === 0 || grid[r][c - 1] === null) &&
-          c + 1 < grid[r].length &&
-          grid[r][c + 1] !== null;
-        const startDown =
-          (r === 0 || grid[r - 1][c] === null) &&
-          r + 1 < grid.length &&
-          grid[r + 1][c] !== null;
-        if (startAcross || startDown) {
-          map[`${r}-${c}`] = num++;
-        }
-      }
-    }
-    return map;
-  }, [grid]);
 
   if (loading || !crossword) {
     return (
