@@ -66,6 +66,14 @@
   width: 100%;
   overflow: visible;
 }
+.board-grid td {
+  width: 34px;
+  height: 34px;
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  text-align: center;
+  vertical-align: middle;
+  position: relative;
+}
 .board-scroll {
   display: inline-block;
 }
