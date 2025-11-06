@@ -4,7 +4,7 @@ import "../styles/SolutionPage.css";
 
 export default function SolutionPage() {
   const navigate = useNavigate();
-  const [day, setDay] = useState(1);  // Start at day 1
+  const [day, setDay] = useState(1); // Start at day 1
   const [solution, setSolution] = useState(null);
   const [loading, setLoading] = useState(false);
 
@@ -19,12 +19,18 @@ export default function SolutionPage() {
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({ crossword_id: day }),
         });
+
         console.log("Raw response status:", res.status);
-        
+
         const data = await res.json();
         console.log("Fetched solution data:", data);
 
-        setSolution(data);
+        // Adjust data structure as per backend response
+        setSolution({
+          grid: data.crossword?.Grid || [],
+          clues: data.crossword?.Clues || {},
+          solution: data.solution?.sol || {},
+        });
       } catch (err) {
         console.error("Error fetching solution:", err);
         setSolution(null);
@@ -57,12 +63,12 @@ export default function SolutionPage() {
         </div>
         {loading ? (
           <div>Loading…</div>
-        ) : !solution ? (
+        ) : !solution || (!solution.grid.length && (!solution.clues?.Across?.length && !solution.clues?.Down?.length)) ? (
           <div>No solution available for day {day}</div>
         ) : (
           <div className="solution-card">
             <h3>Day {day} Solution</h3>
-            {solution.grid && (
+            {solution.grid && solution.grid.length > 0 && (
               <table className="grid-table">
                 <tbody>
                   {solution.grid.map((row, r) => (
