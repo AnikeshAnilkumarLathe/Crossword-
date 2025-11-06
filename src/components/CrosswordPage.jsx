@@ -1,4 +1,10 @@
-import React, { useEffect, useMemo, useRef, useState, useCallback } from "react";
+import React, {
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+  useCallback,
+} from "react";
 import { useNavigate } from "react-router-dom";
 import "../styles/CrosswordPage.css";
 
@@ -15,7 +21,6 @@ export default function CrosswordPage() {
     message: "",
     success: false,
   });
-
   const TOTAL_TIME = 180;
   const [remaining, setRemaining] = useState(TOTAL_TIME);
 
@@ -24,7 +29,9 @@ export default function CrosswordPage() {
     const fetchCrossword = async () => {
       setLoading(true);
       try {
-        const res = await fetch("https://crosswordbackend.onrender.com/crossword");
+        const res = await fetch(
+          "https://crosswordbackend.onrender.com/crossword"
+        );
         const data = await res.json();
         setCrossword(data);
         console.log("Response data", data);
@@ -134,7 +141,8 @@ export default function CrosswordPage() {
   }, [grid]);
 
   const handleSubmit = useCallback(async () => {
-    if (!crossword || submitted) return;
+    if (!crossword) return;
+    if (submitted) return;
 
     const clueIdToGridCoordinates = {};
     Object.entries(getNumberingMap).forEach(([key, clueNum]) => {
@@ -194,14 +202,17 @@ export default function CrosswordPage() {
     const jwt = localStorage.getItem("jwt");
 
     try {
-      const res = await fetch("https://crosswordbackend.onrender.com/submitcrossword", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${jwt}`,
-        },
-        body: JSON.stringify(payload),
-      });
+      const res = await fetch(
+        "https://crosswordbackend.onrender.com/submitcrossword",
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${jwt}`,
+          },
+          body: JSON.stringify(payload),
+        }
+      );
 
       const result = await res.json();
 
@@ -365,7 +376,6 @@ export default function CrosswordPage() {
         }
       }
     }
-
     if (e.key === "Backspace") {
       if (!grid[r][c]) {
         const prev = findPrevCell(r, c);
@@ -421,7 +431,10 @@ export default function CrosswordPage() {
                     const key = keyFor(r, c);
                     const number = getNumberingMap[key];
                     return (
-                      <div key={c} className={`cell ${cell !== null ? "white" : "black"}`}>
+                      <div
+                        key={c}
+                        className={`cell ${cell !== null ? "white" : "black"}`}
+                      >
                         {cell !== null && number && (
                           <span className="cell-number">{number}</span>
                         )}
@@ -471,7 +484,11 @@ export default function CrosswordPage() {
           </div>
 
           <div className="actions">
-            <button className="btn primary" onClick={handleSubmit} disabled={submitted}>
+            <button
+              className="btn primary"
+              onClick={handleSubmit}
+              disabled={submitted}
+            >
               Submit Answers
             </button>
           </div>
