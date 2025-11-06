@@ -62,7 +62,7 @@ export default function CrosswordPage() {
     }
     return map;
   }, [grid]);
-
+   
   const handleSubmit = useCallback(async () => {
     if (!crossword || submitted) return;
 
@@ -95,6 +95,10 @@ export default function CrosswordPage() {
     };
 
     const jwt = localStorage.getItem("jwt");
+console.log("🔹 Crossword object:", crossword);
+console.log("🔹 Payload being sent:", JSON.stringify(payload, null, 2));
+console.log("🔹 JWT token:", jwt);
+
     try {
       const res = await fetch("https://crosswordbackend.onrender.com/submitcrossword", {
         method: "POST",
