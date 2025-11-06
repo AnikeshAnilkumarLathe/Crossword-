@@ -64,57 +64,75 @@ export default function CrosswordPage() {
   }, [grid]);
 
   const handleSubmit = useCallback(async () => {
-    if (!crossword || submitted) return;
-    const numberingMap = getNumberingMap;
-    const answers = Object.entries(numberingMap).map(([pos, clueID]) => {
-      const [r, c] = pos.split("-").map(Number);
-      return {
-        clueID,
-        clueText: grid[r][c] || "",
-      };
-    });
+  if (!crossword || submitted) return;
 
-    const payload = {
-      crossword_id: crossword.CrosswordID,
-      answers,
-    };
+  // Combine clues across and down into one array with direction info
+  const clues = [
+    ...(crossword.Clues?.Across || []).map(c => ({ ...c, dir: "across" })),
+    ...(crossword.Clues?.Down || []).map(c => ({ ...c, dir: "down" }))
+  ];
 
-    const jwt = localStorage.getItem("jwt");
-    try {
-      const res = await fetch("https://crosswordbackend.onrender.com/submitcrossword", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          "Authorization": `Bearer ${jwt}`,
-        },
-        body: JSON.stringify(payload),
-      });
-      const result = await res.json();
-      if (res.ok) {
-        setPopup({
-          open: true,
-          title: "✅ Submission Successful!",
-          message: result.message || "Your answers have been submitted successfully.",
-          success: true,
-        });
-      } else {
-        setPopup({
-          open: true,
-          title: "❌ Submission Failed",
-          message: result.message || "Something went wrong. Please try again.",
-          success: false,
-        });
+  // Build the word answers for each clue from grid letters
+  const answers = clues.map(clue => {
+    let word = "";
+    if (clue.dir === "across") {
+      for (let i = 0; i < clue.ClueLength; i++) {
+        const row = clue.ClueRow;
+        const col = clue.ClueCol + i;
+        word += (grid[row]?.[col] || "").toUpperCase();
       }
-      setSubmitted(true);
-    } catch {
+    } else {
+      for (let i = 0; i < clue.ClueLength; i++) {
+        const row = clue.ClueRow + i;
+        const col = clue.ClueCol;
+        word += (grid[row]?.[col] || "").toUpperCase();
+      }
+    }
+    return { clueID: clue.ClueID, clueText: word.trim() };
+  });
+
+  const payload = {
+    crossword_id: crossword.CrosswordID,
+    answers
+  };
+
+  const jwt = localStorage.getItem("jwt");
+  try {
+    const res = await fetch("https://crosswordbackend.onrender.com/submitcrossword", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        "Authorization": `Bearer ${jwt}`
+      },
+      body: JSON.stringify(payload)
+    });
+    const result = await res.json();
+    if (res.ok) {
       setPopup({
         open: true,
-        title: "⚠️ Network Error",
-        message: "Unable to connect to the server. Please try again later.",
+        title: "✅ Submission Successful!",
+        message: result.message || "Your answers have been submitted successfully.",
+        success: true,
+      });
+    } else {
+      setPopup({
+        open: true,
+        title: "❌ Submission Failed",
+        message: result.message || "Something went wrong. Please try again.",
         success: false,
       });
     }
-  }, [crossword, submitted, grid, getNumberingMap]);
+    setSubmitted(true);
+  } catch {
+    setPopup({
+      open: true,
+      title: "⚠️ Network Error",
+      message: "Unable to connect to the server. Please try again later.",
+      success: false,
+    });
+  }
+}, [crossword, grid, submitted]);
+
 
   useEffect(() => {
     if (submitted) return;
