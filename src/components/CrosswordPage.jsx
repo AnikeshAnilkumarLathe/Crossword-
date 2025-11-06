@@ -30,7 +30,6 @@ export default function CrosswordPage() {
       // 🛠 Safely restore from localStorage
       let savedGrid = null;
       try {
-<<<<<<< HEAD
         const raw = localStorage.getItem("cw-grid");
         if (raw) {
           const parsed = JSON.parse(raw);
@@ -43,13 +42,6 @@ export default function CrosswordPage() {
       if (savedGrid && savedGrid.length) {
         setGrid(savedGrid);
       } else {
-=======
-        const res = await fetch("https://crosswordbackend.onrender.com/crossword");
-        const data = await res.json();
-        console.log("🧩 DEBUG: sample clue structure:", data.Clues?.Across?.[0]);
-    console.log("🧱 DEBUG: sample grid cell:", data.Grid?.[0]?.[0]);
-        setCrossword(data);
->>>>>>> fbf66dc77e9b5acab21ad5a820d5a0acb2d6add3
         const g = data.Grid.map((row) =>
           row.map((cell) => (cell.IsBlank ? null : ""))
         );
