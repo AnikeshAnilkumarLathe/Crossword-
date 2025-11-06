@@ -13,6 +13,7 @@ export default function LeaderboardPage() {
       try {
         const res = await fetch("https://crosswordbackend.onrender.com/leaderboard");
         const data = await res.json();
+        console.log("Leaderboard data:", data);
         setList(Array.isArray(data) ? data.sort((a, b) => b.score - a.score) : []);
       } catch (err) {
         console.error("Failed to fetch leaderboard:", err);
@@ -39,6 +40,7 @@ export default function LeaderboardPage() {
       <nav className="lb-navbar">
         <div className="nav-left">
           Crossword by <strong>CC</strong> and <strong>EPC</strong>
+          {console.log("new")}
         </div>
         <div className="nav-center">
           Leaderboard
@@ -74,8 +76,8 @@ export default function LeaderboardPage() {
               list.map((user, i) => (
                 <tr key={user.id || i} className={i < 3 ? "top" : ""}>
                   <td>{i + 1}</td>
-                  <td>{user.username}</td>
-                  <td>{user.score}</td>
+                  <td>{user.Username}</td>
+                  <td>{user.Score}</td>
                 </tr>
               ))
             )}
