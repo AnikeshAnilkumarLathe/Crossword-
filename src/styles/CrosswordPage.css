@@ -338,9 +338,6 @@
   .cw-root {
     padding: 12px;
   }
-  .cw-main{
-    gap:20px;
-  }
   .cw-header {
     flex-direction: column;
     align-items: flex-start;
@@ -351,7 +348,6 @@
     overflow-x: auto;
     overflow-y: auto;
     width: 100%;
-    margin-bottom:-200px;
   }
   .board-scroll {
     display: inline-block;
@@ -362,7 +358,6 @@
   .cw-side {
     width: 100%;
     max-width: 100%;
-    margin-top: -100px;
   }
 }
 
@@ -370,9 +365,6 @@
   .board-scroll {
     transform: scale(0.6);
     transform-origin: top left;
-  }
-  .cw-side {
-    margin-top: -180px;
   }
   .cw-title {
     font-size: 1.2rem;
