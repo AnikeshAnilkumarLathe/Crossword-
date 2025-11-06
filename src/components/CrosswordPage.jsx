@@ -38,7 +38,6 @@ export default function CrosswordPage() {
           console.warn("Invalid cw-grid in localStorage:", e);
         }
 
-        // Initialize grid with blanks as null
         if (savedGrid && savedGrid.length) {
           setGrid(savedGrid);
         } else if (Array.isArray(data.Grid)) {
@@ -48,7 +47,6 @@ export default function CrosswordPage() {
           setGrid(g);
         }
 
-        // Timer
         const savedTime = parseInt(localStorage.getItem("cw-time"), 10);
         const lastTimestamp = parseInt(localStorage.getItem("cw-timestamp"), 10);
         const now = Date.now();
@@ -81,7 +79,6 @@ export default function CrosswordPage() {
     }
   }, [grid]);
 
-  // Utility for clue length, safe against blanks and out-of-bounds
   function getClueLength(grid, row, col, dir) {
     if (
       !Array.isArray(grid) ||
@@ -109,7 +106,6 @@ export default function CrosswordPage() {
     return len;
   }
 
-  // Numbering map (for cell indices)
   const getNumberingMap = useMemo(() => {
     const map = {};
     if (!grid.length) return map;
@@ -133,7 +129,6 @@ export default function CrosswordPage() {
     return map;
   }, [grid]);
 
-  // Submission logic, fully safe
   const handleSubmit = useCallback(async () => {
     if (!crossword) {
       console.warn("handleSubmit called but crossword is null");
@@ -144,13 +139,15 @@ export default function CrosswordPage() {
       return;
     }
 
-    // Combine clues with directions
+    console.log("==== SUBMISSION DEBUG START ====");
+    console.log("Grid state before submission:", grid);
+
     const cluesRaw = [
       ...(crossword.Clues?.Across || []).map(c => ({ ...c, dir: "across" })),
       ...(crossword.Clues?.Down || []).map(c => ({ ...c, dir: "down" }))
     ];
+    console.log("Raw clues from backend:", cluesRaw);
 
-    // Filter out clues that start at blank/out-of-bounds cells
     const validClues = cluesRaw.filter(
       clue =>
         typeof clue.ClueRow === "number" &&
@@ -158,19 +155,21 @@ export default function CrosswordPage() {
         grid[clue.ClueRow - 1] &&
         grid[clue.ClueRow - 1][clue.ClueCol - 1] !== null
     );
+    console.log("Valid clues after filtering:", validClues);
 
-    // Attach clue lengths
-    const clues = validClues.map(clue => ({
-      ...clue,
-      ClueLength: getClueLength(
+    const clues = validClues.map(clue => {
+      const length = getClueLength(
         grid,
         clue.ClueRow - 1,
         clue.ClueCol - 1,
         clue.dir
-      )
-    }));
+      );
+      console.log(
+        `ClueID ${clue.ClueID}, dir ${clue.dir}, row ${clue.ClueRow}, col ${clue.ClueCol}, computed length: ${length}`
+      );
+      return { ...clue, ClueLength: length };
+    });
 
-    // Collect word for each clue, skip empty
     const answers = clues.map(clue => {
       let word = "";
       const startRow = clue.ClueRow - 1;
@@ -179,11 +178,12 @@ export default function CrosswordPage() {
         for (let i = 0; i < clue.ClueLength; i++) {
           word += (grid[startRow]?.[startCol + i] || "").toUpperCase();
         }
-      } else { // down
+      } else {
         for (let i = 0; i < clue.ClueLength; i++) {
           word += (grid[startRow + i]?.[startCol] || "").toUpperCase();
         }
       }
+      console.log(`ClueID ${clue.ClueID} (${clue.dir}) answer: "${word.trim()}"`);
       return {
         clueID: clue.ClueID,
         answerText: word.trim(),
@@ -191,10 +191,13 @@ export default function CrosswordPage() {
     });
 
     const filteredAnswers = answers.filter(a => a.answerText !== "");
+    console.log("Filtered answers (non-empty):", filteredAnswers);
+
     const payload = {
       crossword_id: crossword.CrosswordID,
       answers: filteredAnswers,
     };
+    console.log("Payload to submit:", payload);
 
     const jwt = localStorage.getItem("jwt");
     if (!jwt) console.warn("JWT token missing!");
@@ -209,7 +212,11 @@ export default function CrosswordPage() {
         body: JSON.stringify(payload),
       });
 
+      console.log("Raw response:", res);
+
       const result = await res.json();
+      console.log("Parsed response JSON:", result);
+
       if (res.ok) {
         setPopup({
           open: true,
@@ -226,17 +233,18 @@ export default function CrosswordPage() {
         });
       }
       setSubmitted(true);
-    } catch {
+    } catch (err) {
       setPopup({
         open: true,
         title: "⚠️ Network Error",
         message: "Unable to connect to the server. Please try again later.",
         success: false,
       });
+      console.error("Submission error:", err);
     }
+    console.log("==== SUBMISSION DEBUG END ====");
   }, [crossword, grid, submitted]);
 
-  // Timer with auto submit
   useEffect(() => {
     if (submitted || remaining <= 0) return;
     const timer = setInterval(() => {
@@ -396,7 +404,6 @@ export default function CrosswordPage() {
           </div>
         </div>
       </header>
-
       <main className="cw-main">
         <section className="cw-board">
           <div className="board-scroll">
@@ -431,7 +438,6 @@ export default function CrosswordPage() {
             </div>
           </div>
         </section>
-
         <aside className="cw-side">
           <h3>Clues</h3>
           <div className="clue-group">
@@ -464,7 +470,6 @@ export default function CrosswordPage() {
           </div>
         </aside>
       </main>
-
       {popup.open && (
         <div className="popup-overlay">
           <div className="popup-box">
