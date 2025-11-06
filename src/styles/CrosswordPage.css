@@ -319,6 +319,7 @@
   .cw-main {
     flex-direction: column;
     align-items: center;
+    gap: 12px; /* reduced spacing between crossword and clues */
   }
   .cw-board {
     justify-content: center;
@@ -338,46 +339,62 @@
   .cw-root {
     padding: 12px;
   }
+
   .cw-header {
     flex-direction: column;
     align-items: flex-start;
     gap: 30px;
   }
+
+  .cw-main {
+    flex-direction: column;
+    align-items: center;
+    gap: 8px; /* reduced vertical gap further */
+  }
+
   .cw-board {
     display: block;
     overflow-x: auto;
     overflow-y: auto;
     width: 100%;
-    margin-bottom:-200px;
+    margin-bottom: -100px; /* previously -200px was too aggressive */
   }
+
   .board-scroll {
     display: inline-block;
     transform: scale(0.85);
     transform-origin: top left;
     min-width: max-content;
   }
+
   .cw-side {
     width: 100%;
     max-width: 100%;
-    margin-top: -100px;
+    margin-top: -60px; /* tightened spacing between board and clues */
   }
 }
 
 @media (max-width: 480px) {
+  .cw-main {
+    flex-direction: column;
+    align-items: center;
+    gap: 4px; /* minimal gap on very small screens */
+  }
+
   .board-scroll {
     transform: scale(0.6);
     transform-origin: top left;
   }
+
   .cw-side {
-    margin-top: -180px;
+    margin-top: -100px; /* more compact but not overlapping */
   }
-  .cw-main{
-    gap: 2px;
-  }
+
   .cw-title {
     font-size: 1.2rem;
     color: #9abaff;
   }
+
   .cell.white:focus-within {
     transform: scale(1.08);
     box-shadow: 0 0 8px rgba(148, 189, 255, 0.7);
