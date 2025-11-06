@@ -75,14 +75,14 @@ export default function CrosswordPage() {
       let word = "";
       if (clue.dir === "across") {
         for (let i = 0; i < clue.ClueLength; i++) {
-          const row = clue.ClueRow;
-          const col = clue.ClueCol + i;
+          const row = clue.ClueRow -1;
+          const col = clue.ClueCol -1 + i;
           word += (grid[row]?.[col] || "").toUpperCase();
         }
       } else {
         for (let i = 0; i < clue.ClueLength; i++) {
-          const row = clue.ClueRow + i;
-          const col = clue.ClueCol;
+          const row = clue.ClueRow -1 + i;
+          const col = clue.ClueCol -1;
           word += (grid[row]?.[col] || "").toUpperCase();
         }
       }
