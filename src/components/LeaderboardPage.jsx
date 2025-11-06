@@ -1,11 +1,14 @@
 import React, { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import "../styles/LeaderboardPage.css";
+import { useLocation } from "react-router-dom";
 
 export default function LeaderboardPage() {
   const navigate = useNavigate();
   const [list, setList] = useState([]);
   const [loading, setLoading] = useState(true);
+  const location = useLocation();
+  const videoSrc = location.state?.videoSrc || "/final.mp4";
 
   useEffect(() => {
     async function fetchLeaderboard() {
@@ -28,14 +31,9 @@ export default function LeaderboardPage() {
 
   return (
     <div className="lb-root">
-      <video
-        className="lb-video-bg"
-        src="/final.mp4"
-        autoPlay
-        loop
-        muted
-        playsInline
-      />
+      <video autoPlay loop muted playsInline className="bg-video">
+        <source src={videoSrc} type="video/mp4" />
+      </video>
 
       <nav className="lb-navbar">
         <div className="nav-left">
