@@ -319,7 +319,7 @@
   .cw-main {
     flex-direction: column;
     align-items: center;
-    gap: 12px; /* reduced spacing between crossword and clues */
+    gap: 16px; /* maintains good spacing */
   }
   .cw-board {
     justify-content: center;
@@ -332,6 +332,7 @@
   .cw-side {
     width: 100%;
     max-width: 600px;
+    margin-top: 0; /* ensure clues are visible */
   }
 }
 
@@ -349,7 +350,7 @@
   .cw-main {
     flex-direction: column;
     align-items: center;
-    gap: 8px; /* reduced vertical gap further */
+    gap: 12px; /* nice compact gap */
   }
 
   .cw-board {
@@ -357,7 +358,7 @@
     overflow-x: auto;
     overflow-y: auto;
     width: 100%;
-    margin-bottom: -100px; /* previously -200px was too aggressive */
+    margin-bottom: 0; /* ❌ remove -100px margin */
   }
 
   .board-scroll {
@@ -370,7 +371,7 @@
   .cw-side {
     width: 100%;
     max-width: 100%;
-    margin-top: -60px; /* tightened spacing between board and clues */
+    margin-top: 8px; /* small positive margin instead */
   }
 }
 
@@ -378,16 +379,16 @@
   .cw-main {
     flex-direction: column;
     align-items: center;
-    gap: 4px; /* minimal gap on very small screens */
+    gap: 8px; /* keep tight but safe spacing */
   }
 
   .board-scroll {
-    transform: scale(0.6);
-    transform-origin: top left;
+    transform: scale(0.65);
+    transform-origin: top center;
   }
 
   .cw-side {
-    margin-top: -100px; /* more compact but not overlapping */
+    margin-top: 12px; /* ensures clues always visible */
   }
 
   .cw-title {
