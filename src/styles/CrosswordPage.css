@@ -347,8 +347,7 @@
     display: block;
     overflow-x: auto;
     overflow-y: auto;
-    width: 30px;
-    height: 30px;
+    width: 100%;
   }
   .board-scroll {
     display: inline-block;
