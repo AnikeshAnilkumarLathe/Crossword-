@@ -2,7 +2,6 @@ import React, { useEffect, useState, useCallback, useRef } from "react";
 import { useNavigate } from "react-router-dom";
 import "../styles/StartPage.css";
 
-// backend base URL
 const BACKEND_BASE = "https://crosswordbackend.onrender.com";
 
 export default function StartPage({ videoSrc = "/og.mp4" }) {
@@ -10,6 +9,7 @@ export default function StartPage({ videoSrc = "/og.mp4" }) {
   const [error, setError] = useState(null);
   const [loading, setLoading] = useState(true);
   const [user, setUser] = useState(null);
+  const [videosReady, setVideosReady] = useState(false);
   const googleContainerRef = useRef(null);
   const childDivRef = useRef(null);
   const initializedRef = useRef(false);
@@ -17,7 +17,45 @@ export default function StartPage({ videoSrc = "/og.mp4" }) {
   const CLIENT_ID =
     "919062485527-9hno8iqrqs35samoaub3reobf03pq3du.apps.googleusercontent.com";
 
-  // Helper function to call backend with JWT if present
+  // 🟩 Helper to preload videos and store them in sessionStorage
+  const preloadVideos = useCallback(async () => {
+    const sources = ["/og.mp4", "/final.mp4"];
+    try {
+      await Promise.all(
+        sources.map(
+          (src) =>
+            new Promise((resolve, reject) => {
+              const video = document.createElement("video");
+              video.src = src;
+              video.preload = "auto";
+              video.oncanplaythrough = () => {
+                // Convert small videos into blobs and cache in sessionStorage
+                fetch(src)
+                  .then((res) => res.blob())
+                  .then((blob) => {
+                    const blobUrl = URL.createObjectURL(blob);
+                    sessionStorage.setItem(src, blobUrl);
+                    resolve();
+                  })
+                  .catch(() => resolve()); // fallback ignore
+              };
+              video.onerror = reject;
+            })
+        )
+      );
+      setVideosReady(true);
+    } catch (err) {
+      console.error("Video preload failed:", err);
+      setVideosReady(false);
+    }
+  }, []);
+
+  // 🟩 Run preload once on mount
+  useEffect(() => {
+    preloadVideos();
+  }, [preloadVideos]);
+
+  // ✅ Helper: backend call
   const apiFetch = useCallback(async (path, opts = {}) => {
     const headers = (opts.headers = opts.headers || {});
     const stored = localStorage.getItem("jwt");
@@ -44,7 +82,7 @@ export default function StartPage({ videoSrc = "/og.mp4" }) {
     return json;
   }, []);
 
-  // Create child div for Google sign-in button if needed
+  // ✅ Create/remove Google Sign-In divs
   const createChildDivIfNeeded = useCallback(() => {
     if (childDivRef.current) return childDivRef.current;
     const el = document.createElement("div");
@@ -54,23 +92,25 @@ export default function StartPage({ videoSrc = "/og.mp4" }) {
     return el;
   }, []);
 
-  // Remove Google sign-in child div if exists
   const removeChildDivIfExists = useCallback(() => {
     if (!childDivRef.current && !googleContainerRef.current) return;
     if (childDivRef.current && childDivRef.current.parentNode) {
       childDivRef.current.parentNode.removeChild(childDivRef.current);
     } else if (googleContainerRef.current) {
       while (googleContainerRef.current.firstChild) {
-        googleContainerRef.current.removeChild(googleContainerRef.current.firstChild);
+        googleContainerRef.current.removeChild(
+          googleContainerRef.current.firstChild
+        );
       }
     }
     childDivRef.current = null;
   }, []);
 
-  // Load Google Sign-In client library script dynamically
+  // ✅ Load Google client script
   const ensureScriptLoaded = useCallback(async () => {
     const src = "https://accounts.google.com/gsi/client";
-    if (window.google && window.google.accounts && window.google.accounts.id) return;
+    if (window.google && window.google.accounts && window.google.accounts.id)
+      return;
     await new Promise((resolve) => {
       const existing = document.querySelector(`script[src="${src}"]`);
       if (existing) {
@@ -88,7 +128,7 @@ export default function StartPage({ videoSrc = "/og.mp4" }) {
     });
   }, []);
 
-  // Handle Google credential response by sending token to /auth/google
+  // ✅ Handle Google credential response
   const handleCredentialResponse = useCallback(
     async (response) => {
       if (!response || !response.credential) {
@@ -126,7 +166,7 @@ export default function StartPage({ videoSrc = "/og.mp4" }) {
     [apiFetch, removeChildDivIfExists]
   );
 
-  // On mount, load user from localStorage if exists
+  // ✅ Load stored user
   useEffect(() => {
     const stored = localStorage.getItem("user");
     if (stored) {
@@ -138,7 +178,7 @@ export default function StartPage({ videoSrc = "/og.mp4" }) {
     }
   }, []);
 
-  // Set up Google One Tap on mount or user change
+  // ✅ Set up Google sign-in
   useEffect(() => {
     if (user) {
       removeChildDivIfExists();
@@ -150,7 +190,9 @@ export default function StartPage({ videoSrc = "/og.mp4" }) {
       setLoading(true);
       await ensureScriptLoaded();
       if (cancelled) return;
-      if (!(window.google && window.google.accounts && window.google.accounts.id)) {
+      if (
+        !(window.google && window.google.accounts && window.google.accounts.id)
+      ) {
         setError("Failed to load Google Sign-In.");
         setLoading(false);
         return;
@@ -177,7 +219,7 @@ export default function StartPage({ videoSrc = "/og.mp4" }) {
             width: 180,
           });
         } catch {
-          // ignore render errors
+          // ignore
         }
       }
       setLoading(false);
@@ -186,23 +228,25 @@ export default function StartPage({ videoSrc = "/og.mp4" }) {
     return () => {
       cancelled = true;
       try {
-        if (window.google && window.google.accounts && window.google.accounts.id && window.google.accounts.id.cancel) {
+        if (
+          window.google &&
+          window.google.accounts &&
+          window.google.accounts.id &&
+          window.google.accounts.id.cancel
+        ) {
           window.google.accounts.id.cancel();
         }
-      } catch {
-        // ignore
-      }
+      } catch {}
     };
-  }, [user, ensureScriptLoaded, handleCredentialResponse, createChildDivIfNeeded, removeChildDivIfExists]);
+  }, [
+    user,
+    ensureScriptLoaded,
+    handleCredentialResponse,
+    createChildDivIfNeeded,
+    removeChildDivIfExists,
+  ]);
 
-  // Hide/show Google button based on loading
-  useEffect(() => {
-    if (childDivRef.current) {
-      childDivRef.current.style.display = loading ? "none" : "block";
-    }
-  }, [loading]);
-
-  // Logout user and clear local storage
+  // ✅ Logout
   const handleLogout = useCallback(() => {
     try {
       localStorage.removeItem("user");
@@ -216,20 +260,28 @@ export default function StartPage({ videoSrc = "/og.mp4" }) {
     removeChildDivIfExists();
   }, [removeChildDivIfExists]);
 
-  const handleStartGame = useCallback(() => navigate("/crossword"), [navigate]);
+  // ✅ Start game — use preloaded blob for final.mp4
+  const handleStartGame = useCallback(() => {
+    const finalBlobUrl = sessionStorage.getItem("/final.mp4") || "/final.mp4";
+    navigate("/crossword", { state: { videoSrc: finalBlobUrl } });
+  }, [navigate]);
+
+  const ogBlobUrl = sessionStorage.getItem("/og.mp4") || videoSrc;
 
   return (
     <div className="start-root">
       <video autoPlay loop muted playsInline className="bg-video">
-        <source src={videoSrc} type="video/mp4" />
+        <source src={ogBlobUrl} type="video/mp4" />
         Your browser does not support the video tag.
       </video>
+
       <div className="content-container">
         <div className="start-left">
           <div className="brand">
             <h1 className="site-title">Crossword Challenge</h1>
             <p className="tagline">Presented by CC & EPC</p>
           </div>
+
           <div className="auth-card">
             {!user ? (
               <>
@@ -241,7 +293,7 @@ export default function StartPage({ videoSrc = "/og.mp4" }) {
                     display: "flex",
                     justifyContent: "center",
                     alignItems: "center",
-                    minHeight: 48, // keep layout stable
+                    minHeight: 48,
                   }}
                 >
                   {loading && <div className="spinner" />}
@@ -263,10 +315,13 @@ export default function StartPage({ videoSrc = "/og.mp4" }) {
             ) : (
               <>
                 <p className="username">Hi, {user.username}</p>
-              
                 <div className="row">
-                  <button className="btn primary" onClick={handleStartGame}>
-                    Start Game
+                  <button
+                    className="btn primary"
+                    onClick={handleStartGame}
+                    disabled={!videosReady}
+                  >
+                    {videosReady ? "Start Game" : "Loading Videos..."}
                   </button>
                   <button className="btn muted" onClick={handleLogout}>
                     Log Out
