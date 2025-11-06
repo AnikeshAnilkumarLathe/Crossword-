@@ -4,7 +4,7 @@ import "../styles/SolutionPage.css";
 
 export default function SolutionPage() {
   const navigate = useNavigate();
-  const [day, setDay] = useState(1); // Start at day 1
+  const [day, setDay] = useState(1);  // Start at day 1
   const [solution, setSolution] = useState(null);
   const [loading, setLoading] = useState(false);
 
@@ -25,11 +25,11 @@ export default function SolutionPage() {
         const data = await res.json();
         console.log("Fetched solution data:", data);
 
-        // Adjust data structure as per backend response
+        // Map backend response fields properly
         setSolution({
           grid: data.crossword?.Grid || [],
-          clues: data.crossword?.Clues || {},
-          solution: data.solution?.sol || {},
+          clues: data.crossword?.Clues || { Across: [], Down: [] },
+          solution: data.solution?.sol || [],
         });
       } catch (err) {
         console.error("Error fetching solution:", err);
@@ -39,6 +39,14 @@ export default function SolutionPage() {
     }
     fetchSolution();
   }, [day]);
+
+  // Create a map of answers for quick lookup by ClueID
+  const answersMap = {};
+  if (solution?.solution && Array.isArray(solution.solution)) {
+    solution.solution.forEach(({ ClueID, ClueText }) => {
+      answersMap[ClueID] = ClueText;
+    });
+  }
 
   console.log("Currently displaying solution:", solution);
 
@@ -63,7 +71,7 @@ export default function SolutionPage() {
         </div>
         {loading ? (
           <div>Loading…</div>
-        ) : !solution || (!solution.grid.length && (!solution.clues?.Across?.length && !solution.clues?.Down?.length)) ? (
+        ) : !solution ? (
           <div>No solution available for day {day}</div>
         ) : (
           <div className="solution-card">
@@ -75,7 +83,8 @@ export default function SolutionPage() {
                     <tr key={r}>
                       {row.map((cell, c) => (
                         <td key={c} className={cell === null ? "cell-black" : "cell-white"}>
-                          {cell || ""}
+                          {/* Adjust here if cell contains objects; assuming string or null */}
+                          {typeof cell === 'object' && cell !== null ? (cell.Letter || "") : (cell || "")}
                         </td>
                       ))}
                     </tr>
@@ -88,12 +97,12 @@ export default function SolutionPage() {
               <ul>
                 {(solution.clues?.Across || []).map((clue, i) => (
                   <li key={`across-${i}`}>
-                    <strong>Across {clue.ClueID}:</strong> {clue.ClueText} — <span className="answer">{solution.solution?.[clue.ClueID]}</span>
+                    <strong>Across {clue.ClueID}:</strong> {clue.ClueText} — <span className="answer">{answersMap[clue.ClueID]}</span>
                   </li>
                 ))}
                 {(solution.clues?.Down || []).map((clue, i) => (
                   <li key={`down-${i}`}>
-                    <strong>Down {clue.ClueID}:</strong> {clue.ClueText} — <span className="answer">{solution.solution?.[clue.ClueID]}</span>
+                    <strong>Down {clue.ClueID}:</strong> {clue.ClueText} — <span className="answer">{answersMap[clue.ClueID]}</span>
                   </li>
                 ))}
               </ul>
