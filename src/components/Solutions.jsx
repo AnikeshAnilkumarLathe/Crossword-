@@ -1,38 +1,29 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useMemo } from "react";
 import { useNavigate } from "react-router-dom";
 import "../styles/SolutionPage.css";
 
 export default function SolutionPage() {
   const navigate = useNavigate();
-  const [day, setDay] = useState(1);  // Start at day 1
+  const [day, setDay] = useState(1);
   const [solution, setSolution] = useState(null);
   const [loading, setLoading] = useState(false);
 
   useEffect(() => {
     async function fetchSolution() {
       setLoading(true);
-      console.log(`Fetching solution for crossword_id = ${day}...`);
-
       try {
         const res = await fetch("https://crosswordbackend.onrender.com/getsolution", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({ crossword_id: day }),
         });
-
-        console.log("Raw response status:", res.status);
-
         const data = await res.json();
-        console.log("Fetched solution data:", data);
-
-        // Map backend response fields properly
         setSolution({
           grid: data.crossword?.Grid || [],
           clues: data.crossword?.Clues || { Across: [], Down: [] },
           solution: data.solution?.sol || [],
         });
-      } catch (err) {
-        console.error("Error fetching solution:", err);
+      } catch{
         setSolution(null);
       }
       setLoading(false);
@@ -40,15 +31,79 @@ export default function SolutionPage() {
     fetchSolution();
   }, [day]);
 
-  // Create a map of answers for quick lookup by ClueID
-  const answersMap = {};
-  if (solution?.solution && Array.isArray(solution.solution)) {
-    solution.solution.forEach(({ ClueID, ClueText }) => {
-      answersMap[ClueID] = ClueText;
-    });
-  }
+  // Map answers by ClueID
+  const answersMap = useMemo(() => {
+    const map = {};
+    if (solution?.solution && Array.isArray(solution.solution)) {
+      solution.solution.forEach(({ ClueID, ClueText }) => {
+        map[ClueID] = ClueText.toUpperCase();
+      });
+    }
+    return map;
+  }, [solution?.solution]);
 
-  console.log("Currently displaying solution:", solution);
+  // Fill grid with answers mapped to appropriate clue positions
+  const filledGrid = useMemo(() => {
+    if (!solution || !solution.grid.length) return [];
+
+    const baseGrid = solution.grid.map(row =>
+      row.map(cell => (cell.IsBlank ? null : ""))
+    );
+
+    (solution.clues?.Across || []).forEach(clue => {
+      const answer = answersMap[clue.ClueID] || "";
+      const row = (clue.ClueRow || 1) - 1;
+      const col = (clue.ClueCol || 1) - 1;
+
+      for (let i = 0; i < answer.length && col + i < baseGrid[0].length; i++) {
+        if (baseGrid[row][col + i] !== null) {
+          baseGrid[row][col + i] = answer[i];
+        }
+      }
+    });
+
+    (solution.clues?.Down || []).forEach(clue => {
+      const answer = answersMap[clue.ClueID] || "";
+      const row = (clue.ClueRow || 1) - 1;
+      const col = (clue.ClueCol || 1) - 1;
+
+      for (let i = 0; i < answer.length && row + i < baseGrid.length; i++) {
+        if (baseGrid[row + i][col] !== null) {
+          baseGrid[row + i][col] = answer[i];
+        }
+      }
+    });
+
+    return baseGrid;
+  }, [solution, answersMap]);
+
+  // Generate numbering map for clue starts
+  const getNumberingMap = useMemo(() => {
+    const map = {};
+    if (!solution?.grid || !solution.grid.length) return map;
+    let num = 1;
+
+    for (let r = 0; r < solution.grid.length; r++) {
+      for (let c = 0; c < solution.grid[r].length; c++) {
+        if (solution.grid[r][c].IsBlank) continue;
+
+        const startAcross =
+          (c === 0 || solution.grid[r][c - 1].IsBlank) &&
+          c + 1 < solution.grid[r].length &&
+          !solution.grid[r][c + 1].IsBlank;
+
+        const startDown =
+          (r === 0 || solution.grid[r - 1][c].IsBlank) &&
+          r + 1 < solution.grid.length &&
+          !solution.grid[r + 1][c].IsBlank;
+
+        if (startAcross || startDown) {
+          map[`${r}-${c}`] = num++;
+        }
+      }
+    }
+    return map;
+  }, [solution]);
 
   return (
     <div className="solution-root">
@@ -69,6 +124,7 @@ export default function SolutionPage() {
           <span style={{ margin: "0 10px" }}>Day {day} Solution</span>
           <button onClick={() => setDay(d => d + 1)}>Next Day</button>
         </div>
+
         {loading ? (
           <div>Loading…</div>
         ) : !solution ? (
@@ -76,17 +132,22 @@ export default function SolutionPage() {
         ) : (
           <div className="solution-card">
             <h3>Day {day} Solution</h3>
-            {solution.grid && solution.grid.length > 0 && (
+            {filledGrid.length > 0 && (
               <table className="grid-table">
                 <tbody>
-                  {solution.grid.map((row, r) => (
+                  {filledGrid.map((row, r) => (
                     <tr key={r}>
-                      {row.map((cell, c) => (
-                        <td key={c} className={cell === null ? "cell-black" : "cell-white"}>
-                          {/* Adjust here if cell contains objects; assuming string or null */}
-                          {typeof cell === 'object' && cell !== null ? (cell.Letter || "") : (cell || "")}
-                        </td>
-                      ))}
+                      {row.map((cell, c) => {
+                        const originalCell = solution.grid[r][c];
+                        const number = getNumberingMap[`${r}-${c}`];
+
+                        return (
+                          <td key={c} className={originalCell.IsBlank ? "cell-black" : "cell-white"}>
+                            {number && <span className="cell-number">{number}</span>}
+                            {cell || ""}
+                          </td>
+                        );
+                      })}
                     </tr>
                   ))}
                 </tbody>
