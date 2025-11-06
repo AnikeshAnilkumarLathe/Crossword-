@@ -145,7 +145,14 @@
   background: none;
   font-weight: 800;
   color: #fff;
+  transition: all 0.25s ease-in-out;
 }
+
+.lb-table tbody tr.top:hover {
+  background: rgba(255, 76, 165, 0.2);
+  transform: scale(1.02);
+}
+
 
 @media (max-width: 768px) {
   .lb-navbar {
