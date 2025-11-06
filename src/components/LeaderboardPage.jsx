@@ -40,6 +40,7 @@ export default function LeaderboardPage() {
       <nav className="lb-navbar">
         <div className="nav-left">
           Crossword by <strong>CC</strong> and <strong>EPC</strong>
+          {console.log("new")}
         </div>
         <div className="nav-center">
           Leaderboard
