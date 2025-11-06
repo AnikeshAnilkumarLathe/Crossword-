@@ -426,46 +426,39 @@ export default function CrosswordPage() {
         </div>
       </header>
       <main className="cw-main">
-<section className="cw-board">
-  <div className="board-scroll">
-    <table className="board-grid large" role="grid">
-      <tbody>
-        {grid.map((row, r) => (
-          <tr key={r}>
-            {row.map((cell, c) => {
-              const key = keyFor(r, c);
-              const number = getNumberingMap[key];
-              return (
-                <td
-                  key={c}
-                  className={`cell ${cell !== null ? "cell-white" : "cell-black"}`}
-                >
-                  {cell !== null && number && (
-                    <span className="cell-number">{number}</span>
-                  )}
-
-                  {cell !== null && (
-                    <input
-                      ref={(el) => (inputRefs.current[key] = el)}
-                      className="cell-input"
-                      maxLength={1}
-                      value={grid[r][c] || ""}
-                      onChange={(e) => handleInput(r, c, e)}
-                      onKeyDown={(e) => handleKeyDown(r, c, e)}
-                      disabled={submitted}
-                      autoComplete="off"
-                    />
-                  )}
-                </td>
-              );
-            })}
-          </tr>
-        ))}
-      </tbody>
-    </table>
-  </div>
-</section>
-
+        <section className="cw-board">
+          <div className="board-scroll">
+            <div className="board-grid large" role="grid">
+              {grid.map((row, r) => (
+                <div className="board-row" key={r}>
+                  {row.map((cell, c) => {
+                    const key = keyFor(r, c);
+                    const number = getNumberingMap[key];
+                    return (
+                      <div key={c} className={`cell ${cell !== null ? "white" : "black"}`}>
+                        {cell !== null && number && (
+                          <span className="cell-number">{number}</span>
+                        )}
+                        {cell !== null && (
+                          <input
+                            ref={(el) => (inputRefs.current[key] = el)}
+                            className="cell-input"
+                            maxLength={1}
+                            value={grid[r][c] || ""}
+                            onChange={(e) => handleInput(r, c, e)}
+                            onKeyDown={(e) => handleKeyDown(r, c, e)}
+                            disabled={submitted}
+                            autoComplete="off"
+                          />
+                        )}
+                      </div>
+                    );
+                  })}
+                </div>
+              ))}
+            </div>
+          </div>
+        </section>
         <aside className="cw-side">
           <h3>Clues</h3>
           <div className="clue-group">
