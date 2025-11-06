@@ -1,6 +1,6 @@
 import React, { useEffect, useState, useCallback, useRef } from "react";
 import { useNavigate } from "react-router-dom";
-import Preloader from "./Preloader"; // ✅ Import your preloader
+import Preloader from "./Preloader";
 import "../styles/StartPage.css";
 
 const BACKEND_BASE = "https://crosswordbackend.onrender.com";
@@ -10,8 +10,8 @@ export default function StartPage({ videoSrc = "/og.mp4" }) {
   const [error, setError] = useState(null);
   const [loading, setLoading] = useState(true);
   const [user, setUser] = useState(null);
-  const [preloadProgress, setPreloadProgress] = useState(0); // ✅ track video load %
-  const [videosLoaded, setVideosLoaded] = useState(false); // ✅ track if both videos are ready
+  const [showPreloader, setShowPreloader] = useState(false); // ✅ track preloader visibility
+  const [progress, setProgress] = useState(0); // ✅ progress value (optional visual effect)
 
   const googleContainerRef = useRef(null);
   const childDivRef = useRef(null);
@@ -20,53 +20,54 @@ export default function StartPage({ videoSrc = "/og.mp4" }) {
   const CLIENT_ID =
     "919062485527-9hno8iqrqs35samoaub3reobf03pq3du.apps.googleusercontent.com";
 
-  // ✅ Helper function to preload videos
-  const preloadVideos = useCallback((sources) => {
-    return Promise.all(
-      sources.map(
-        (src, i) =>
-          new Promise((resolve, reject) => {
-            const video = document.createElement("video");
-            video.src = src;
-            video.preload = "auto";
-            video.oncanplaythrough = () => {
-              // Update progress incrementally
-              setPreloadProgress((prev) => Math.min(prev + 50, 100));
-              resolve();
-            };
-            video.onerror = reject;
-          })
-      )
-    );
+  // Simulate gradual loading (optional)
+  useEffect(() => {
+    if (showPreloader) {
+      let progressValue = 0;
+      const interval = setInterval(() => {
+        progressValue += 10;
+        setProgress(progressValue);
+        if (progressValue >= 100) clearInterval(interval);
+      }, 100);
+      return () => clearInterval(interval);
+    }
+  }, [showPreloader]);
+
+  // Normal Google Sign-in + JWT logic (unchanged)
+  useEffect(() => {
+    const stored = localStorage.getItem("user");
+    if (stored) {
+      try {
+        setUser(JSON.parse(stored));
+      } catch {
+        localStorage.removeItem("user");
+      }
+    } else {
+      setLoading(false);
+    }
   }, []);
 
-  // ✅ On mount, preload both videos and store them in cache
-  useEffect(() => {
-    async function loadAssets() {
-      try {
-        await preloadVideos(["/og.mp4", "/final.mp4"]);
-        setVideosLoaded(true);
-      } catch (e) {
-        console.error("Failed to preload videos:", e);
-        setError("Video loading failed. Please refresh.");
-      } finally {
-        setLoading(false);
-      }
-    }
-    loadAssets();
-  }, [preloadVideos]);
+  const handleLogout = useCallback(() => {
+    localStorage.removeItem("user");
+    localStorage.removeItem("jwt");
+    setUser(null);
+  }, []);
 
-  // ✅ Handle Start Game button
+  // ✅ When Start Game is clicked → show preloader → navigate after short delay
   const handleStartGame = useCallback(() => {
-    if (videosLoaded) navigate("/crossword", { state: { videoSrc: "/final.mp4" } });
-  }, [navigate, videosLoaded]);
+    setShowPreloader(true);
 
-  // ✅ Return preloader if loading videos
-  if (loading || preloadProgress < 100) {
-    return <Preloader progress={preloadProgress} />;
+    // optional fake delay (for visible animation)
+    setTimeout(() => {
+      navigate("/crossword");
+    }, 1000);
+  }, [navigate]);
+
+  // ✅ Show preloader overlay while navigating
+  if (showPreloader) {
+    return <Preloader progress={progress} />;
   }
 
-  // ✅ Main UI (unchanged below this)
   return (
     <div className="start-root">
       <video autoPlay loop muted playsInline className="bg-video">
@@ -114,14 +115,10 @@ export default function StartPage({ videoSrc = "/og.mp4" }) {
               <>
                 <p className="username">Hi, {user.username}</p>
                 <div className="row">
-                  <button
-                    className="btn primary"
-                    onClick={handleStartGame}
-                    disabled={!videosLoaded}
-                  >
+                  <button className="btn primary" onClick={handleStartGame}>
                     Start Game
                   </button>
-                  <button className="btn muted" onClick={() => console.log("logout")}>
+                  <button className="btn muted" onClick={handleLogout}>
                     Log Out
                   </button>
                 </div>
