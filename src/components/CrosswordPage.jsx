@@ -112,88 +112,81 @@ if (!isNaN(savedTime) && savedTime > 0) {
   }, [grid]);
    
   const handleSubmit = useCallback(async () => {
-    if (!crossword || submitted) return;
+  if (!crossword || submitted) return;
 
-    const clues = [
-      ...(crossword.Clues?.Across || []).map(c => ({ ...c, dir: "across" })),
-      ...(crossword.Clues?.Down || []).map(c => ({ ...c, dir: "down" })),
-    ];
-    console.log("🧩 Example clue keys:", Object.keys(crossword.Clues.Across[0]));
-    const answers = clues.map(clue => {
-      let word = "";
-      if (clue.dir === "across") {
-        for (let i = 0; i < clue.ClueLength; i++) {
-          const row = clue.ClueRow -1;
-          const col = clue.ClueCol -1 + i;
-          word += (grid[row]?.[col] || "").toUpperCase();
-        }
-      } else {
-        for (let i = 0; i < clue.ClueLength; i++) {
-          const row = clue.ClueRow -1 + i;
-          const col = clue.ClueCol -1;
-          word += (grid[row]?.[col] || "").toUpperCase();
-        }
+  const clues = [
+    ...(crossword.Clues?.Across || []).map(c => ({ ...c, dir: "across" })),
+    ...(crossword.Clues?.Down || []).map(c => ({ ...c, dir: "down" })),
+  ];
+
+  const answers = clues.map(clue => {
+    let word = "";
+    const startRow = clue.ClueRow - 1; // zero-based
+    const startCol = clue.ClueCol - 1; // zero-based
+
+    if (clue.dir === "across") {
+      for (let i = 0; i < clue.ClueLength; i++) {
+        word += (grid[startRow]?.[startCol + i] || "").toUpperCase();
       }
-      return { clueID: clue.ClueID, clueText: word.trim() };
+    } else { // down
+      for (let i = 0; i < clue.ClueLength; i++) {
+        word += (grid[startRow + i]?.[startCol] || "").toUpperCase();
+      }
+    }
+
+    return {
+      clueID: clue.ClueID,       // ensure it matches backend
+      answerText: word.trim(),   // <-- changed from clueText to answerText if backend expects
+    };
+  });
+
+  const payload = {
+    crossword_id: crossword.CrosswordID,
+    answers: answers.filter(a => a.answerText !== ""), // remove empty answers
+  };
+
+  const jwt = localStorage.getItem("jwt");
+
+  try {
+    const res = await fetch("https://crosswordbackend.onrender.com/submitcrossword", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${jwt}`,
+      },
+      body: JSON.stringify(payload),
     });
 
-    console.log("👉 DEBUG: crossword object:", crossword);
-console.log("👉 DEBUG: grid state:", grid);
-console.log("👉 DEBUG: computed answers before filter:", answers);
+    const result = await res.json();
 
-    const payload = {
-  crossword_id: crossword.CrosswordID, // ensure this matches backend field name
-  answers: answers
-    .filter(a => a.clueText.trim() !== "") // optional: remove empty answers
-    .map(a => ({
-      clueID: a.clueID,     // lowercase as backend expects
-      clueText: a.clueText
-    })),
-};
-console.log("✅ FINAL PAYLOAD:", JSON.stringify(payload, null, 2));
-
-    const jwt = localStorage.getItem("jwt");
-
-    try {
-      const res = await fetch("https://crosswordbackend.onrender.com/submitcrossword", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${jwt}`,
-        },
-        body: JSON.stringify(payload),
-      });
-
-      const result = await res.json();
-      console.log("📦 Server response:", result);
-
-      if (res.ok) {
-        setPopup({
-          open: true,
-          title: "✅ Submission Successful!",
-          message: result.message || "Your answers have been submitted successfully.",
-          success: true,
-        });
-      } else {
-        setPopup({
-          open: true,
-          title: "❌ Submission Failed",
-          message: result.message || "Something went wrong. Please try again.",
-          success: false,
-        });
-      }
-      
-      setSubmitted(true);
-    } catch (err) {
+    if (res.ok) {
       setPopup({
         open: true,
-        title: "⚠️ Network Error",
-        message: "Unable to connect to the server. Please try again later.",
+        title: "✅ Submission Successful!",
+        message: result.message || "Your answers have been submitted successfully.",
+        success: true,
+      });
+    } else {
+      setPopup({
+        open: true,
+        title: "❌ Submission Failed",
+        message: result.message || "Something went wrong. Please try again.",
         success: false,
       });
-      console.error(err);
     }
-  }, [crossword, grid, submitted]);
+
+    setSubmitted(true);
+  } catch (err) {
+    setPopup({
+      open: true,
+      title: "⚠️ Network Error",
+      message: "Unable to connect to the server. Please try again later.",
+      success: false,
+    });
+    console.error(err);
+  }
+}, [crossword, grid, submitted]);
+
 
   // Timer countdown with auto submit on end
  useEffect(() => {
