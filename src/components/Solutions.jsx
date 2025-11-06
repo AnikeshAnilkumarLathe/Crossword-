@@ -23,7 +23,7 @@ export default function SolutionPage() {
           clues: data.crossword?.Clues || { Across: [], Down: [] },
           solution: data.solution?.sol || [],
         });
-      } catch{
+      } catch {
         setSolution(null);
       }
       setLoading(false);
@@ -31,7 +31,7 @@ export default function SolutionPage() {
     fetchSolution();
   }, [day]);
 
-  // Map answers by ClueID
+  // Answers mapped by ClueID
   const answersMap = useMemo(() => {
     const map = {};
     if (solution?.solution && Array.isArray(solution.solution)) {
@@ -42,68 +42,52 @@ export default function SolutionPage() {
     return map;
   }, [solution?.solution]);
 
-  // Fill grid with answers mapped to appropriate clue positions
+  // Fill grid using clue numbers and direction
   const filledGrid = useMemo(() => {
     if (!solution || !solution.grid.length) return [];
-
     const baseGrid = solution.grid.map(row =>
       row.map(cell => (cell.IsBlank ? null : ""))
     );
-
+    // Fill Across clues
     (solution.clues?.Across || []).forEach(clue => {
-      const answer = answersMap[clue.ClueID] || "";
-      const row = (clue.ClueRow || 1) - 1;
-      const col = (clue.ClueCol || 1) - 1;
-
-      for (let i = 0; i < answer.length && col + i < baseGrid[0].length; i++) {
-        if (baseGrid[row][col + i] !== null) {
-          baseGrid[row][col + i] = answer[i];
+      for (let r = 0; r < solution.grid.length; r++) {
+        for (let c = 0; c < solution.grid[r].length; c++) {
+          const cell = solution.grid[r][c];
+          if (!cell.IsBlank && cell.NumberAssociated > 0 && cell.NumberAssociated === clue.ClueID) {
+            const answer = answersMap[clue.ClueID] || "";
+            for (let k = 0; k < answer.length; k++) {
+              if (c + k < baseGrid[r].length && baseGrid[r][c + k] !== null) {
+                baseGrid[r][c + k] = answer[k];
+              } else {
+                break;
+              }
+            }
+            return;
+          }
         }
       }
     });
-
+    // Fill Down clues
     (solution.clues?.Down || []).forEach(clue => {
-      const answer = answersMap[clue.ClueID] || "";
-      const row = (clue.ClueRow || 1) - 1;
-      const col = (clue.ClueCol || 1) - 1;
-
-      for (let i = 0; i < answer.length && row + i < baseGrid.length; i++) {
-        if (baseGrid[row + i][col] !== null) {
-          baseGrid[row + i][col] = answer[i];
+      for (let r = 0; r < solution.grid.length; r++) {
+        for (let c = 0; c < solution.grid[r].length; c++) {
+          const cell = solution.grid[r][c];
+          if (!cell.IsBlank && cell.NumberAssociated > 0 && cell.NumberAssociated === clue.ClueID) {
+            const answer = answersMap[clue.ClueID] || "";
+            for (let k = 0; k < answer.length; k++) {
+              if (r + k < baseGrid.length && baseGrid[r + k][c] !== null) {
+                baseGrid[r + k][c] = answer[k];
+              } else {
+                break;
+              }
+            }
+            return;
+          }
         }
       }
     });
-
     return baseGrid;
   }, [solution, answersMap]);
-
-  // Generate numbering map for clue starts
-  const getNumberingMap = useMemo(() => {
-    const map = {};
-    if (!solution?.grid || !solution.grid.length) return map;
-    let num = 1;
-
-    for (let r = 0; r < solution.grid.length; r++) {
-      for (let c = 0; c < solution.grid[r].length; c++) {
-        if (solution.grid[r][c].IsBlank) continue;
-
-        const startAcross =
-          (c === 0 || solution.grid[r][c - 1].IsBlank) &&
-          c + 1 < solution.grid[r].length &&
-          !solution.grid[r][c + 1].IsBlank;
-
-        const startDown =
-          (r === 0 || solution.grid[r - 1][c].IsBlank) &&
-          r + 1 < solution.grid.length &&
-          !solution.grid[r + 1][c].IsBlank;
-
-        if (startAcross || startDown) {
-          map[`${r}-${c}`] = num++;
-        }
-      }
-    }
-    return map;
-  }, [solution]);
 
   return (
     <div className="solution-root">
@@ -117,14 +101,12 @@ export default function SolutionPage() {
           <button className="home-btn" onClick={() => navigate("/leaderboard")}>Leaderboard</button>
         </div>
       </nav>
-
       <main className="solution-main">
         <div className="solution-controls">
           <button onClick={() => setDay(d => Math.max(1, d - 1))}>Prev Day</button>
           <span style={{ margin: "0 10px" }}>Day {day} Solution</span>
           <button onClick={() => setDay(d => d + 1)}>Next Day</button>
         </div>
-
         {loading ? (
           <div>Loading…</div>
         ) : !solution ? (
@@ -138,12 +120,23 @@ export default function SolutionPage() {
                   {filledGrid.map((row, r) => (
                     <tr key={r}>
                       {row.map((cell, c) => {
-                        const originalCell = solution.grid[r][c];
-                        const number = getNumberingMap[`${r}-${c}`];
-
+                        const origCell = solution.grid[r][c];
                         return (
-                          <td key={c} className={originalCell.IsBlank ? "cell-black" : "cell-white"}>
-                            {number && <span className="cell-number">{number}</span>}
+                          <td
+                            key={c}
+                            className={
+                              origCell.IsBlank
+                                ? "cell-black"
+                                : cell
+                                ? "cell-white-filled"
+                                : "cell-white"
+                            }
+                          >
+                            {origCell.NumberAssociated > 0 && (
+                              <span className="cell-number">
+                                {origCell.NumberAssociated}
+                              </span>
+                            )}
                             {cell || ""}
                           </td>
                         );
