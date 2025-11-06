@@ -194,15 +194,12 @@ export default function CrosswordPage() {
     }
     // Send answer only if all expected slots are filled with letters
     let answerText;
-    if (
-      word &&
-      word.length === clue.ClueLength &&
-      /^[A-Z]+$/.test(word)
-    ) {
-      answerText = word;
-    } else {
-      answerText = "";
-    }
+    if (word && word.length === clue.ClueLength) {
+  answerText = word.toLowerCase();
+} else {
+  answerText = "";
+}
+
     console.log(
       `ClueID ${clue.ClueID} (${clue.dir}) extracted answer: "${word}", (sent: ${answerText})`
     );
