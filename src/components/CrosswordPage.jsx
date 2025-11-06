@@ -185,11 +185,11 @@ export default function CrosswordPage() {
     const startCol = clue.ClueCol - 1;
     if (clue.dir === "across") {
       for (let i = 0; i < clue.ClueLength; i++) {
-        word += (grid[startRow]?.[startCol + i] || "").toUpperCase();
+        word += (grid[startRow]?.[startCol + i] || "").toLowerCase();
       }
     } else {
       for (let i = 0; i < clue.ClueLength; i++) {
-        word += (grid[startRow + i]?.[startCol] || "").toUpperCase();
+        word += (grid[startRow + i]?.[startCol] || "").toLowerCase();
       }
     }
     // Send answer only if all expected slots are filled with letters
