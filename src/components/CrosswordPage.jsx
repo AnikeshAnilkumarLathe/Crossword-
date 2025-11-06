@@ -98,7 +98,12 @@ export default function CrosswordPage() {
       clueText: a.clueText
     })),
 };
+
+
     const jwt = localStorage.getItem("jwt");
+console.log("Payload:", JSON.stringify(payload, null, 2));
+console.log("hello");
+
 
     try {
       const res = await fetch("https://crosswordbackend.onrender.com/submitcrossword", {
@@ -278,8 +283,6 @@ export default function CrosswordPage() {
       </div>
     );
   }
-
-  
 
   return (
     <div className="cw-root dark">

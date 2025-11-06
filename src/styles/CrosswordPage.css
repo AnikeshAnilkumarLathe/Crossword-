@@ -355,6 +355,11 @@
   .cw-root {
     padding: 12px;
   }
+  .cw-header {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 6px;
+  }
 
   .cw-board {
     display: block;
