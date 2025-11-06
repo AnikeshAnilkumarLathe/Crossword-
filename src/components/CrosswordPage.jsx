@@ -187,6 +187,7 @@ export default function CrosswordPage() {
       crossword_id: crossword.CrosswordID,
       answers,
     };
+    console.log("Payload",payload)
 
     const jwt = localStorage.getItem("jwt");
 
