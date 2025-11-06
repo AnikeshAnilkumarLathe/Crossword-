@@ -10,7 +10,6 @@ export default function StartPage({ videoSrc = "/og.mp4" }) {
   const [error, setError] = useState(null);
   const [loading, setLoading] = useState(true);
   const [user, setUser] = useState(null);
-
   const googleContainerRef = useRef(null);
   const childDivRef = useRef(null);
   const initializedRef = useRef(false);
