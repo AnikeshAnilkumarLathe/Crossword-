@@ -214,7 +214,7 @@ console.log("✅ FINAL PAYLOAD:", JSON.stringify(payload, null, 2));
   }, 1000);
 
   return () => clearInterval(timer);
-}, [submitted, handleSubmit,remaining]); // ✅ keep submitted + handleSubmit only
+}, [submitted, handleSubmit, remaining]); // ✅ keep submitted + handleSubmit only
 
 
   const formatTime = (seconds) => {
@@ -349,7 +349,7 @@ console.log("✅ FINAL PAYLOAD:", JSON.stringify(payload, null, 2));
             Player: <strong>{user?.username || "Guest"}</strong>
           </div>
           <div className="cw-timer">
-            ⏳ Time Left: <strong>{formatTime(remaining)}</strong>
+            Time Left: <strong>{formatTime(remaining)}</strong>
           </div>
         </div>
       </header>
