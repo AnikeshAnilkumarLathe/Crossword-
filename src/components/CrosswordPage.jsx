@@ -191,7 +191,7 @@ export default function CrosswordPage() {
     const jwt = localStorage.getItem("jwt");
 
     try {
-      const res = await fetch("https://crosswordbackend.onrender.com/submitcrossword", {
+      const res = await fetch("https://crosswordbackend.onrender.com/crossword/submit", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
