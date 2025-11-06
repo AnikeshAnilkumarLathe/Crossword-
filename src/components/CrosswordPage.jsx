@@ -201,7 +201,7 @@ export default function CrosswordPage() {
     ) {
       answerText = word;
     } else {
-      answerText = null;
+      answerText = "";
     }
     console.log(
       `ClueID ${clue.ClueID} (${clue.dir}) extracted answer: "${word}", (sent: ${answerText})`
