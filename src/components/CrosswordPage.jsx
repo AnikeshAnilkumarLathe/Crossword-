@@ -49,10 +49,26 @@ export default function CrosswordPage() {
       }
 
       // ⏳ Restore timer safely
-      const savedTime = parseInt(localStorage.getItem("cw-time"), 10);
-      if (!isNaN(savedTime) && savedTime > 0) {
-        setRemaining(savedTime);
-      }
+      // ⏳ Restore timer with real-time sync
+const savedTime = parseInt(localStorage.getItem("cw-time"), 10);
+const lastTimestamp = parseInt(localStorage.getItem("cw-timestamp"), 10);
+const now = Date.now();
+
+if (!isNaN(savedTime) && savedTime > 0) {
+  if (!isNaN(lastTimestamp)) {
+    const elapsed = Math.floor((now - lastTimestamp) / 1000);
+    const newRemaining = Math.max(0, savedTime - elapsed);
+    setRemaining(newRemaining);
+    localStorage.setItem("cw-time", newRemaining.toString());
+    localStorage.setItem("cw-timestamp", now.toString());
+  } else {
+    setRemaining(savedTime);
+    localStorage.setItem("cw-timestamp", now.toString());
+  }
+} else {
+  localStorage.setItem("cw-timestamp", now.toString());
+}
+
 
     } catch (e) {
       console.error("Error fetching crossword:", e);
@@ -187,6 +203,7 @@ console.log("✅ FINAL PAYLOAD:", JSON.stringify(payload, null, 2));
     setRemaining((prev) => {
       const newTime = prev - 1;
       localStorage.setItem("cw-time", newTime.toString());
+      localStorage.setItem("cw-timestamp", Date.now().toString());
       if (newTime <= 0) {
         clearInterval(timer);
         handleSubmit();
@@ -197,7 +214,7 @@ console.log("✅ FINAL PAYLOAD:", JSON.stringify(payload, null, 2));
   }, 1000);
 
   return () => clearInterval(timer);
-}, [submitted, handleSubmit]); // ✅ keep submitted + handleSubmit only
+}, [submitted, handleSubmit,remaining]); // ✅ keep submitted + handleSubmit only
 
 
   const formatTime = (seconds) => {
