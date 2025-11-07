@@ -306,27 +306,24 @@ export default function CrosswordPage() {
   };
 
   const handleInput = (r, c, e) => {
-  const raw = e.target.value || "";
-  const char = raw.slice(-1).toUpperCase();
-
-  // Reject non-alphabetic input but allow clearing
-  if (!/^[A-Z]$/.test(char) && char !== "") return;
-
-  setGrid((prev) => {
-    const next = prev.map((row) => [...row]);
-    next[r][c] = char;
-    return next;
-  });
-
-  // Automatically move cursor after short delay
-  if (char) {
-    const next = findNextCell(r, c);
-    if (next) {
-      setTimeout(() => focusCell(next[0], next[1]), 10);
+    const raw = e.target.value || "";
+    const char = raw.slice(-1).toUpperCase();
+    if (!/^[A-Z]$/.test(char)) {
+      setGrid((prev) => {
+        const next = prev.map((row) => [...row]);
+        next[r][c] = char === "" ? "" : prev[r][c];
+        return next;
+      });
+      return;
     }
-  }
-};
-
+    setGrid((prev) => {
+      const next = prev.map((row) => [...row]);
+      next[r][c] = char;
+      return next;
+    });
+    const next = findNextCell(r, c);
+    if (next) focusCell(next[0], next[1]);
+  };
 
   const handleKeyDown = (r, c, e) => {
     if (e.key === "ArrowRight") {
