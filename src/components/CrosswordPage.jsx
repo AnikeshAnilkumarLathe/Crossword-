@@ -19,7 +19,6 @@ export default function CrosswordPage() {
   const TOTAL_TIME = 180;
   const [remaining, setRemaining] = useState(TOTAL_TIME);
 
-  // Fetch crossword and restore state
   useEffect(() => {
     const fetchCrossword = async () => {
       setLoading(true);
@@ -28,7 +27,6 @@ export default function CrosswordPage() {
         const data = await res.json();
         setCrossword(data);
 
-        // Restore grid
         let savedGrid = null;
         try {
           const raw = localStorage.getItem("cw-grid");
@@ -49,11 +47,9 @@ export default function CrosswordPage() {
           setGrid(g);
         }
 
-        // Restore timer
         const savedTime = parseInt(localStorage.getItem("cw-time"), 10);
         const lastTimestamp = parseInt(localStorage.getItem("cw-timestamp"), 10);
         const now = Date.now();
-
         if (!isNaN(savedTime) && savedTime > 0) {
           if (!isNaN(lastTimestamp)) {
             const elapsed = Math.floor((now - lastTimestamp) / 1000);
@@ -77,20 +73,28 @@ export default function CrosswordPage() {
     fetchCrossword();
   }, []);
 
-  // Save grid on change
   useEffect(() => {
     if (grid.length > 0) {
       localStorage.setItem("cw-grid", JSON.stringify(grid));
     }
   }, [grid]);
 
-  // Helper: clue length
   function getClueLength(grid, row, col, dir) {
-    if (!Array.isArray(grid) || grid[row] === undefined || grid[row][col] === null)
+    if (
+      !Array.isArray(grid) ||
+      typeof row !== "number" ||
+      typeof col !== "number" ||
+      grid[row] === undefined ||
+      grid[row][col] === null
+    )
       return 0;
     let len = 0;
     if (dir === "across") {
-      while (col + len < grid[row].length && grid[row][col + len] !== null) len++;
+      while (
+        col + len < grid[row].length &&
+        grid[row][col + len] !== null
+      )
+        len++;
     } else if (dir === "down") {
       while (
         row + len < grid.length &&
@@ -102,7 +106,6 @@ export default function CrosswordPage() {
     return len;
   }
 
-  // Clue numbering
   const getNumberingMap = useMemo(() => {
     const map = {};
     if (!grid.length) return map;
@@ -118,24 +121,28 @@ export default function CrosswordPage() {
           (r === 0 || grid[r - 1][c] === null) &&
           r + 1 < grid.length &&
           grid[r + 1][c] !== null;
-        if (startAcross || startDown) map[`${r}-${c}`] = num++;
+        if (startAcross || startDown) {
+          map[`${r}-${c}`] = num++;
+        }
       }
     }
     return map;
   }, [grid]);
 
-  // Submit handler (uses localStorage-synced time)
-  const handleSubmit = useCallback(async () => {
-    if (!crossword || submitted) return;
+    const handleSubmit = useCallback(async () => {
+    if (!crossword) {
+      console.warn("handleSubmit called but crossword is null");
+      return;
+    }
+    if (submitted) {
+      console.warn("handleSubmit called but already submitted");
+      return;
+    }
 
-    // Save current time to ensure sync
-    localStorage.setItem("cw-time", remaining.toString());
-    localStorage.setItem("cw-timestamp", Date.now().toString());
-
-    // Get most accurate remaining time
-    const savedRemaining = parseInt(localStorage.getItem("cw-time"), 10);
-    const timeTaken =
-      TOTAL_TIME - (isNaN(savedRemaining) ? remaining : savedRemaining);
+    localStorage.removeItem("cw-grid");
+    localStorage.removeItem("cw-time");
+    localStorage.removeItem("cw-timestamp");
+    localStorage.setItem("cw-submitted", crossword.CrosswordID.toString());
 
     const clueIdToGridCoordinates = {};
     Object.entries(getNumberingMap).forEach(([key, clueNum]) => {
@@ -180,8 +187,12 @@ export default function CrosswordPage() {
         }
       }
 
-      const clueText =
-        word && word.length === clue.ClueLength ? word.toUpperCase() : "";
+      let clueText;
+      if (word && word.length === clue.ClueLength) {
+        clueText = word.toUpperCase();
+      } else {
+        clueText = "";
+      }
 
       return {
         clueID: clue.ClueID,
@@ -189,29 +200,29 @@ export default function CrosswordPage() {
       };
     });
 
+    // ✅ Include time taken in payload
+    const timeTaken = TOTAL_TIME - remaining; // in seconds
+
     const payload = {
       crossword_id: crossword.CrosswordID,
       answers,
       time_taken: timeTaken,
     };
 
-    console.log("Payload to submit:", payload);
+    console.log("Payload to submit", payload);
 
     const jwt = localStorage.getItem("jwt");
     if (!jwt) console.warn("JWT token missing!");
 
     try {
-      const res = await fetch(
-        "https://crosswordbackend.onrender.com/submitcrossword",
-        {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-            Authorization: `Bearer ${jwt}`,
-          },
-          body: JSON.stringify(payload),
-        }
-      );
+      const res = await fetch("https://crosswordbackend.onrender.com/submitcrossword", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${jwt}`,
+        },
+        body: JSON.stringify(payload),
+      });
 
       const result = await res.json();
 
@@ -223,8 +234,7 @@ export default function CrosswordPage() {
         setPopup({
           open: true,
           title: "✅ Submission Successful!",
-          message:
-            result.message || "Your answers have been submitted successfully.",
+          message: result.message || "Your answers have been submitted successfully.",
           success: true,
         });
       } else {
@@ -249,7 +259,7 @@ export default function CrosswordPage() {
     }
   }, [crossword, grid, submitted, getNumberingMap, remaining]);
 
-  // Timer logic
+
   useEffect(() => {
     if (submitted || remaining <= 0) return;
     const timer = setInterval(() => {
@@ -271,10 +281,9 @@ export default function CrosswordPage() {
   const formatTime = (seconds) => {
     const mins = Math.floor(seconds / 60);
     const secs = seconds % 60;
-    return `${mins}:${secs.toString().padStart(2, "0")}`;
+    return `${mins}:${secs.toString().padStart(2, '0')}`;
   };
 
-  // Navigation, inputs, etc.
   const inputRefs = useRef({});
   const keyFor = (r, c) => `${r}-${c}`;
   const focusCell = (r, c) => {
@@ -299,36 +308,43 @@ export default function CrosswordPage() {
     const cols = grid[0]?.length || 0;
     for (let cc = c - 1; cc >= 0; cc--) if (grid[r][cc] !== null) return [r, cc];
     for (let rr = r - 1; rr >= 0; rr--)
-      for (let cc = cols - 1; cc >= 0; cc--)
-        if (grid[rr][cc] !== null) return [rr, cc];
+      for (let cc = cols - 1; cc >= 0; cc--) if (grid[rr][cc] !== null) return [rr, cc];
     return null;
   };
 
-  // Reliable handleInput: update grid, then focus next after DOM updates
+  const moveToNearestRightOrDown = (r, c) => {
+    const rows = grid.length;
+    const cols = grid[0]?.length || 0;
+    for (let offset = 1; offset <= Math.max(rows, cols); offset++) {
+      if (c + offset < cols && grid[r][c + offset] !== null) {
+        focusCell(r, c + offset);
+        return true;
+      }
+      if (r + offset < rows && grid[r + offset][c] !== null) {
+        focusCell(r + offset, c);
+        return true;
+      }
+    }
+    return false;
+  };
+
   const handleInput = (r, c, e) => {
     const raw = e.target.value || "";
     const char = raw.slice(-1).toUpperCase();
-
-    // allow clearing (empty string) or single A-Z
-    if (char !== "" && !/^[A-Z]$/.test(char)) return;
-
+    if (!/^[A-Z]$/.test(char)) {
+      setGrid((prev) => {
+        const next = prev.map((row) => [...row]);
+        next[r][c] = char === "" ? "" : prev[r][c];
+        return next;
+      });
+      return;
+    }
     setGrid((prev) => {
       const next = prev.map((row) => [...row]);
       next[r][c] = char;
       return next;
     });
-
-    if (char) {
-      const next = findNextCell(r, c);
-      if (next) {
-        // ensure DOM has updated and ref attached before focusing
-        requestAnimationFrame(() => {
-          setTimeout(() => {
-            focusCell(next[0], next[1]);
-          }, 0);
-        });
-      }
-    }
+    moveToNearestRightOrDown(r, c);
   };
 
   const handleKeyDown = (r, c, e) => {
@@ -403,21 +419,17 @@ export default function CrosswordPage() {
           </div>
         </div>
       </header>
-
       <main className="cw-main">
         <section className="cw-board">
           <div className="board-scroll">
             <div className="board-grid large" role="grid">
               {grid.map((row, r) => (
-                <div className="board-row" key={`row-${r}`}>
+                <div className="board-row" key={r}>
                   {row.map((cell, c) => {
                     const key = keyFor(r, c);
                     const number = getNumberingMap[key];
                     return (
-                      <div
-                        key={key} // use stable unique key
-                        className={`cell ${cell !== null ? "white" : "black"}`}
-                      >
+                      <div key={c} className={`cell ${cell !== null ? "white" : "black"}`}>
                         {cell !== null && number && (
                           <span className="cell-number">{number}</span>
                         )}
@@ -425,14 +437,12 @@ export default function CrosswordPage() {
                           <input
                             ref={(el) => (inputRefs.current[key] = el)}
                             className="cell-input"
-                            inputMode="text"
                             maxLength={1}
                             value={grid[r][c] || ""}
                             onChange={(e) => handleInput(r, c, e)}
                             onKeyDown={(e) => handleKeyDown(r, c, e)}
                             disabled={submitted}
                             autoComplete="off"
-                            aria-label={`cell ${r + 1}-${c + 1}`}
                           />
                         )}
                       </div>
@@ -443,7 +453,6 @@ export default function CrosswordPage() {
             </div>
           </div>
         </section>
-
         <aside className="cw-side">
           <h3 className="clue">Clues</h3>
           <div className="clue-group">
@@ -473,24 +482,24 @@ export default function CrosswordPage() {
           </div>
         </aside>
       </main>
-
       {popup.open && (
-        <div className="popup-overlay">
-          <div className="popup-box">
-            <h2>{popup.title}</h2>
-            <p>{popup.message}</p>
-            <button
-              className="btn primary"
-              onClick={() => {
-                setPopup({ open: false });
-                navigate("/leaderboard");
-              }}
-            >
-              Go to Leaderboard
-            </button>
-          </div>
-        </div>
-      )}
+  <div className="popup-overlay">
+    <div className="popup-box">
+      <h2>{popup.title}</h2>
+      <p>{popup.message}</p>
+      <button
+        className="btn primary"
+        onClick={() => {
+          setPopup({ open: false });
+          navigate("/leaderboard");
+        }}
+      >
+        Go to Leaderboard
+      </button>
+    </div>
+  </div>
+)}
+
     </div>
   );
 }
