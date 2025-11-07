@@ -113,7 +113,7 @@ export default function SolutionPage() {
           </div>
         ) : (
           <div className="solution-card">
-            <h3>Day {day} Solution</h3>
+            <h3>Day {day - 1} Solution</h3>
             {filledGrid.length > 0 && (
               <table className="grid-table">
                 <tbody>
