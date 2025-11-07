@@ -341,7 +341,6 @@ useEffect(() => {
             ) : (
               <>
                 <p className="username">Hi, {user.username}</p>
-                <p className="userscore">Score: {user.score}</p>
                 <div className="row">
                 <button
                 className="btn primary"
