@@ -100,15 +100,19 @@
   </style>
 
   <script>
-    // ✅ Fade-out when everything (React + assets) has loaded
-    window.addEventListener("load", () => {
-      const preloader = document.getElementById("preloader");
-      if (preloader) {
+  // ✅ Keep preloader visible for 8 seconds, then fade + remove
+  window.addEventListener("load", () => {
+    const preloader = document.getElementById("preloader");
+    if (preloader) {
+      setTimeout(() => {
         preloader.style.opacity = "0";
-        setTimeout(() => preloader.remove(), 8000);
-      }
-    });
-  </script>
+        preloader.style.pointerEvents = "none"; // allow interaction during fade
+        setTimeout(() => preloader.remove(), 600); // matches CSS fade duration
+      }, 8000); // ⏳ stay for 8 seconds
+    }
+  });
+</script>
+
 </body>
 
 </html>
