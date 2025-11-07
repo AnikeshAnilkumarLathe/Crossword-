@@ -34,10 +34,29 @@ export default function LeaderboardPage() {
   // Top-10 only
   const topList = list.slice(0, 10);
 
+  // Debug: Output information for troubleshooting
+  console.log("LocalStorage 'last':", last);
+  console.log("username (from localStorage):", username);
+  console.log("Fetched leaderboard data:", list);
+  list.forEach((u, i) => {
+    console.log(
+      `API user #${i + 1}:`,
+      "Username:", norm(u.Username),
+      "Name:", norm(u.name),
+      "| Comparing to:", norm(username)
+    );
+  });
+
   // Find this user's entry in leaderboard (normalized)
   const userEntry = username &&
-    list.find(u => norm(u.Username || u.name) === norm(username));
+    list.find(u =>
+      norm(u.Username) === norm(username) ||
+      norm(u.name) === norm(username)
+    );
+  console.log("Matched userEntry:", userEntry);
+
   const userRank = userEntry ? (list.indexOf(userEntry) + 1) : null;
+  console.log("userRank:", userRank);
 
   return (
     <div className="lb-root">
