@@ -140,6 +140,36 @@ export default function StartPage({ videoSrc = "/og.mp4" }) {
 
   // On mount, load user from localStorage if exists
   // Preload and cache videos on first load
+useEffect(() => {
+  const videoUrls = ["/og.mp4", "/final.mp4"];
+
+  async function cacheVideo(url) {
+    try {
+      const cache = await caches.open("video-cache-v1");
+      const response = await fetch(url);
+      if (response.ok) {
+        await cache.put(url, response.clone());
+        console.log(`${url} cached for future use`);
+      } else {
+        console.warn(`Failed to fetch ${url}:`, response.status);
+      }
+    } catch (err) {
+      console.error(`Error caching ${url}:`, err);
+    }
+  }
+
+  // Cache videos *after* they’ve started loading/playing
+  const videoEl = document.getElementById("bgVideo");
+  if (videoEl) {
+    videoEl.addEventListener("loadeddata", () => {
+      console.log("Video started — caching in background...");
+      videoUrls.forEach((url) => cacheVideo(url));
+    });
+  } else {
+    // Fallback: cache in background after small delay
+    setTimeout(() => videoUrls.forEach((url) => cacheVideo(url)), 5000);
+  }
+}, []);
 
 
   useEffect(() => {
