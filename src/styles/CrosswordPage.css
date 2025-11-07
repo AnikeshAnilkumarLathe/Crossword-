@@ -379,7 +379,7 @@
   .cw-main {
     flex-direction: column;
     align-items: center;
-    gap: 8px; /* keep tight but safe spacing */
+    gap: 5px; /* keep tight but safe spacing */
   }
 
   .board-scroll {
