@@ -90,7 +90,7 @@ background-blend-mode: screen;
   position: absolute;
   top: 2px;
   left: 4px;
-  font-size: 14px; /* increase this value */
+  font-size: 1rem; /* increase this value */
   font-weight: 600; /* optional, makes it bolder */
   color: #e0e0e0; /* adjust for contrast */
   pointer-events: none;
