@@ -11,6 +11,7 @@ export default function StartPage({ videoSrc = "/og.mp4" }) {
   const [loading, setLoading] = useState(true);
   const [user, setUser] = useState(null);
   const googleContainerRef = useRef(null);
+  const [submittedToday, setSubmittedToday] = useState(false);
   const childDivRef = useRef(null);
   const initializedRef = useRef(false);
 
@@ -269,7 +270,26 @@ useEffect(() => {
     removeChildDivIfExists();
   }, [removeChildDivIfExists]);
 
-  const handleStartGame = useCallback(() => navigate("/crossword"), [navigate]);
+    // Check if user already submitted today's crossword
+  useEffect(() => {
+    async function checkCrosswordStatus() {
+      try {
+        const res = await fetch("https://crosswordbackend.onrender.com/crossword");
+        const data = await res.json();
+
+        const submittedId = localStorage.getItem("cw-submitted");
+        if (submittedId && submittedId === data.CrosswordID.toString()) {
+          setSubmittedToday(true);
+        } else {
+          setSubmittedToday(false);
+        }
+      } catch (err) {
+        console.error("Error checking crossword status:", err);
+      }
+    }
+    checkCrosswordStatus();
+  }, []);
+
 
   return (
     <div className="start-root">
@@ -323,13 +343,19 @@ useEffect(() => {
                 <p className="username">Hi, {user.username}</p>
                 <p className="userscore">Score: {user.score}</p>
                 <div className="row">
-                  <button className="btn primary" onClick={handleStartGame}>
-                    Start Game
-                  </button>
-                  <button className="btn muted" onClick={handleLogout}>
-                    Log Out
-                  </button>
-                </div>
+                <button
+                className="btn primary"
+                onClick={() =>
+                submittedToday ? navigate("/leaderboard") : navigate("/crossword")
+                        }
+   >
+  {submittedToday ? "Leaderboard" : "Start Game"}
+  </button>
+  <button className="btn muted" onClick={handleLogout}>
+    Log Out
+  </button>
+              </div>
+
               </>
             )}
           </div>

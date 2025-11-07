@@ -138,6 +138,11 @@ export default function CrosswordPage() {
     console.warn("handleSubmit called but already submitted");
     return;
   }
+  
+  localStorage.removeItem("cw-grid");
+  localStorage.removeItem("cw-time");
+  localStorage.removeItem("cw-timestamp");
+  localStorage.setItem("cw-submitted", crossword.CrosswordID.toString());
 
   console.log("==== SUBMISSION DEBUG START ====");
   console.log("Grid state before submission:", grid);
