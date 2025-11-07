@@ -379,7 +379,7 @@
   .cw-main {
     flex-direction: column;
     align-items: center;
-    gap: 5px; /* keep tight but safe spacing */
+    gap: 8px; /* keep tight but safe spacing */
   }
 
   .board-scroll {
@@ -388,7 +388,7 @@
   }
 
   .cw-side {
-    margin-top: 12px; /* ensures clues always visible */
+    margin-top: 4px; /* ensures clues always visible */
   }
 
   .cw-title {
