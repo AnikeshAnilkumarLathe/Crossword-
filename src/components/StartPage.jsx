@@ -140,7 +140,39 @@ export default function StartPage({ videoSrc = "/og.mp4" }) {
 
   // On mount, load user from localStorage if exists
   // Preload and cache videos on first load
+useEffect(() => {
+  async function preloadVideos() {
+  const cache = await caches.open("video-cache-v1");
+  const videos = [
+    { key: "ogVideo", url: "/og.mp4" },
+    { key: "finalVideo", url: "/final.mp4" },
+  ];
 
+  for (const { key, url } of videos) {
+    try {
+      const match = await cache.match(url);
+      if (match) {
+        console.log(`${key} already cached`);
+        continue;
+      }
+
+      console.log(`Fetching and caching ${url}`);
+      const response = await fetch(url);
+      if (response.ok) {
+        await cache.put(url, response.clone());
+        console.log(`${key} cached successfully`);
+      } else {
+        console.warn(`Failed to fetch ${url}:`, response.status);
+      }
+    } catch (err) {
+      console.error(`Error caching ${url}:`, err);
+    }
+  }
+}
+
+preloadVideos();
+
+}, []);
 
   useEffect(() => {
     const stored = localStorage.getItem("user");
