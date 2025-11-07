@@ -62,12 +62,14 @@ export default function LeaderboardPage() {
       </nav>
 
       <main className="lb-main">
-        {/* User specific score display */}
         <div className="last-card">
           {localDisplayName
-            ? <div className="hi-user">
-                Hi, <span className="user-name">{localDisplayName}</span> your score is <span className="user-score">{apiScore}</span>
-              </div>
+            ? <>
+                <div className="score-top">Your Score: <span className="user-score">{apiScore}</span></div>
+                <div className="hi-user">
+                  Hi, <span className="user-name">{localDisplayName}</span>
+                </div>
+              </>
             : <div className="hi-user">Hi! Please log in or play to see your score.</div>
           }
         </div>
