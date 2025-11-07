@@ -7,9 +7,14 @@ export default function LeaderboardPage() {
   const [list, setList] = useState([]);
   const [loading, setLoading] = useState(true);
 
-  // Try to get the logged in user from localStorage (change as per your auth)
+  // Try to get the logged in user from localStorage (adjust as per your auth)
   const last = JSON.parse(localStorage.getItem("lastResult") || "null");
   const username = last?.Username || last?.name || "";
+
+  // Normalize username helper
+  function norm(str) {
+    return (str || "").trim().toLowerCase();
+  }
 
   useEffect(() => {
     async function fetchLeaderboard() {
@@ -29,9 +34,9 @@ export default function LeaderboardPage() {
   // Top-10 only
   const topList = list.slice(0, 10);
 
-  // Find this user's entry in leaderboard
+  // Find this user's entry in leaderboard (normalized)
   const userEntry = username &&
-    list.find(u => (u.Username || u.name) === username);
+    list.find(u => norm(u.Username || u.name) === norm(username));
   const userRank = userEntry ? (list.indexOf(userEntry) + 1) : null;
 
   return (
@@ -57,12 +62,12 @@ export default function LeaderboardPage() {
       </nav>
 
       <main className="lb-main">
-        {/* Score card for current user, styled like the old last player card */}
+        {/* User specific score and rank display */}
         <div className="last-card">
-          <strong>Your Score:</strong>
+          <strong>Your Score & Rank:</strong>
           {userEntry ? (
             <div>
-              {userEntry.Username} — {userEntry.Score} pts
+              {userEntry.Username || userEntry.name} — {userEntry.Score} pts
               <span style={{ marginLeft: "0.8em", color: "#77204b", fontWeight: 500 }}>
                 {userRank ? `Rank #${userRank}` : null}
               </span>
@@ -77,6 +82,7 @@ export default function LeaderboardPage() {
           )}
         </div>
 
+        {/* Leaderboard table showing only the top 10 scorers */}
         <table className="lb-table" aria-label="Leaderboard">
           <thead>
             <tr>
@@ -94,7 +100,7 @@ export default function LeaderboardPage() {
               topList.map((user, i) => (
                 <tr key={user.id || i} className={i < 3 ? "top" : ""}>
                   <td>{i + 1}</td>
-                  <td>{user.Username}</td>
+                  <td>{user.Username || user.name}</td>
                   <td>{user.Score}</td>
                 </tr>
               ))
