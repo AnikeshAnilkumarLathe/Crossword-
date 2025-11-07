@@ -9,6 +9,7 @@ export default function CrosswordPage() {
   const [grid, setGrid] = useState([]);
   const [loading, setLoading] = useState(false);
   const [submitted, setSubmitted] = useState(false);
+  const [typingDir, setTypingDir] = useState("across"); 
   const [popup, setPopup] = useState({
     open: false,
     title: "",
@@ -201,7 +202,7 @@ export default function CrosswordPage() {
     });
 
     // ✅ Include time taken in payload
-    const timeTaken = TOTAL_TIME - remaining; // in seconds
+    const timeTaken = remaining; // in seconds
 
     const payload = {
       crossword_id: crossword.CrosswordID,
