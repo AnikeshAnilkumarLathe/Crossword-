@@ -112,6 +112,11 @@
   font-weight: 600;
 }
 
+.score-top{
+  font-size: 1rem;
+  color: #713153;
+  font-weight: 600;
+}
 
 
 .last-card strong {
