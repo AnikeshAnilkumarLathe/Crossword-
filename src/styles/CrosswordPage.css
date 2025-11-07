@@ -87,7 +87,7 @@ background-blend-mode: screen;
   justify-content: flex-start;
 }
 .cell-number{
-  font-size : 2px;
+  font-size : 10px;
 }
 .cw-board {
   display: flex;
