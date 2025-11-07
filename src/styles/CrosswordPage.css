@@ -86,15 +86,17 @@ background-blend-mode: screen;
   overflow: auto;
   justify-content: flex-start;
 }
-.cell-number {
+.board-grid .cell-number {
   position: absolute;
-  top: 2px;
+  top: 3px;
   left: 4px;
-  font-size: 1rem; /* increase this value */
-  font-weight: 600; /* optional, makes it bolder */
-  color: #e0e0e0; /* adjust for contrast */
+  font-size: 20px !important;  /* force larger size */
+  font-weight: bold;
+  color: #fff;
+  z-index: 2;
   pointer-events: none;
 }
+
 
 .cw-board {
   display: flex;
