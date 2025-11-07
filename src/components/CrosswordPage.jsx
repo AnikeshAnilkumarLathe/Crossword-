@@ -259,6 +259,23 @@ export default function CrosswordPage() {
     }
   }, [crossword, grid, submitted, getNumberingMap, remaining]);
 
+  useEffect(() => {
+    if (submitted || remaining <= 0) return;
+    const timer = setInterval(() => {
+      setRemaining((prev) => {
+        const newTime = prev - 1;
+        localStorage.setItem("cw-time", newTime.toString());
+        localStorage.setItem("cw-timestamp", Date.now().toString());
+        if (newTime <= 0) {
+          clearInterval(timer);
+          handleSubmit();
+          return 0;
+        }
+        return newTime;
+      });
+    }, 1000);
+    return () => clearInterval(timer);
+  }, [submitted, handleSubmit, remaining]);
 
   const formatTime = (seconds) => {
     const mins = Math.floor(seconds / 60);
