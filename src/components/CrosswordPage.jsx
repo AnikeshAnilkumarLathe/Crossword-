@@ -201,13 +201,10 @@ export default function CrosswordPage() {
     clueText
   };
 });
-
-  const timeTaken = TOTAL_TIME - remaining;
  
   const payload = {
     crossword_id: crossword.CrosswordID,
     answers,
-    time_taken: timeTaken  // send time taken in seconds
   };
 
   console.log("Payload to submit", payload);
