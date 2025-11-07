@@ -202,10 +202,14 @@ export default function CrosswordPage() {
   };
 });
 
+  const timeTaken = TOTAL_TIME - remaining;
+ 
   const payload = {
     crossword_id: crossword.CrosswordID,
-    answers
+    answers,
+    time_taken: timeTaken  // send time taken in seconds
   };
+
 
   const jwt = localStorage.getItem("jwt");
   if (!jwt) console.warn("JWT token missing!");
