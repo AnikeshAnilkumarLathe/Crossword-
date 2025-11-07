@@ -65,10 +65,10 @@ export default function LeaderboardPage() {
         <div className="last-card">
           {localDisplayName
             ? <>
-                <div className="score-top">Your Score: <span className="user-score">{apiScore}</span></div>
-                <div className="hi-user">
+                  <div className="hi-user">
                   Hi, <span className="user-name">{localDisplayName}</span>
                 </div>
+                <div className="score-top">Your Score: <span className="user-score">{apiScore}</span></div>
               </>
             : <div className="hi-user">Hi! Please log in or play to see your score.</div>
           }
