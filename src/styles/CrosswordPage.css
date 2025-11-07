@@ -1,7 +1,7 @@
 .cw-root {
   min-height: 100vh;
   padding: 20px 28px;
-  background-image: url("https://images.unsplash.com/photo-1503264116251-35a269479413?auto=format&fit=crop&w=1600&q=80");
+  background: linear-gradient(180deg, #1b1b1b 0%, #111 100%);
   background-size: cover;
   background-position: center;
   background-attachment: fixed;
@@ -10,6 +10,7 @@
   position: relative;
   margin-top: 10px;
 }
+
 
 .cw-root::before {
   content: "";
