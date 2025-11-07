@@ -1,14 +1,13 @@
 .cw-root {
   min-height: 100vh;
   padding: 20px 28px;
-  background: radial-gradient(circle at center, #2b2b2b 0%, #111 80%);
+  background: radial-gradient(circle at center, #6c6969 0%, #111 80%);
   background-size: cover;
   background-position: center;
   background-attachment: fixed;
   font-family: "Poppins", sans-serif;
   color: #e4e8ef;
   position: relative;
-  margin-top: 10px;
 }
 .cw-root::before {
   content: "";
