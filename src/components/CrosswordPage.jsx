@@ -129,150 +129,136 @@ export default function CrosswordPage() {
     return map;
   }, [grid]);
 
-  const handleSubmit = useCallback(async () => {
-  if (!crossword) {
-    console.warn("handleSubmit called but crossword is null");
-    return;
-  }
-  if (submitted) {
-    console.warn("handleSubmit called but already submitted");
-    return;
-  }
-  
-  localStorage.removeItem("cw-grid");
-  localStorage.removeItem("cw-time");
-  localStorage.removeItem("cw-timestamp");
-  localStorage.setItem("cw-submitted", crossword.CrosswordID.toString());
-
-  const clueIdToGridCoordinates = {};
-  Object.entries(getNumberingMap).forEach(([key, clueNum]) => {
-    clueIdToGridCoordinates[clueNum] = key.split('-').map(Number);
-  });
-  console.log("ClueID to grid position map:", clueIdToGridCoordinates);
-
-  // Attach position for each clue by ClueID and check
-  const cluesRaw = [
-    ...(crossword.Clues?.Across || []).map(c => ({
-      ...c,
-      dir: "across",
-      gridCoordinates: clueIdToGridCoordinates[c.ClueID]
-    })),
-    ...(crossword.Clues?.Down || []).map(c => ({
-      ...c,
-      dir: "down",
-      gridCoordinates: clueIdToGridCoordinates[c.ClueID]
-    }))
-  ];
-
-  // Only clues with found coordinates
-  const validClues = cluesRaw.filter(clue => Array.isArray(clue.gridCoordinates));
-
-  const clues = validClues.map(clue => {
-    const [row, col] = clue.gridCoordinates;
-    const length = getClueLength(grid, row, col, clue.dir);
-    return { ...clue, ClueRow: row + 1, ClueCol: col + 1, ClueLength: length };
-  });
-
-  // Extract word for each clue and validate by expected length
-  const answers = clues.map(clue => {
-  let word = "";
-  const startRow = clue.ClueRow - 1;
-  const startCol = clue.ClueCol - 1;
-
-  if (clue.dir === "across") {
-    for (let i = 0; i < clue.ClueLength; i++) {
-      word += (grid[startRow]?.[startCol + i] || "").toUpperCase();
+    const handleSubmit = useCallback(async () => {
+    if (!crossword) {
+      console.warn("handleSubmit called but crossword is null");
+      return;
     }
-  } else {
-    for (let i = 0; i < clue.ClueLength; i++) {
-      word += (grid[startRow + i]?.[startCol] || "").toUpperCase();
+    if (submitted) {
+      console.warn("handleSubmit called but already submitted");
+      return;
     }
-  }
 
-  let clueText;
-  if (word && word.length === clue.ClueLength) {
-    clueText = word.toUpperCase();
-  } else {
-    clueText = "";
-  }
-
-  return {
-    clueID: clue.ClueID,
-    clueText
-  };
-});
- 
-  const payload = {
-    crossword_id: crossword.CrosswordID,
-    answers,
-  };
-
-  console.log("Payload to submit", payload);
-
-
-  const jwt = localStorage.getItem("jwt");
-  if (!jwt) console.warn("JWT token missing!");
-
-  try {
-    const res = await fetch("https://crosswordbackend.onrender.com/submitcrossword", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        Authorization: `Bearer ${jwt}`,
-      },
-      body: JSON.stringify(payload),
-    });
-
-    const result = await res.json();
-
-  if (res.ok) {
     localStorage.removeItem("cw-grid");
     localStorage.removeItem("cw-time");
     localStorage.removeItem("cw-timestamp");
-    
-    setPopup({
-      open: true,
-      title: "✅ Submission Successful!",
-      message: result.message || "Your answers have been submitted successfully.",
-      success: true,
+    localStorage.setItem("cw-submitted", crossword.CrosswordID.toString());
+
+    const clueIdToGridCoordinates = {};
+    Object.entries(getNumberingMap).forEach(([key, clueNum]) => {
+      clueIdToGridCoordinates[clueNum] = key.split("-").map(Number);
     });
-    } else {
+
+    const cluesRaw = [
+      ...(crossword.Clues?.Across || []).map((c) => ({
+        ...c,
+        dir: "across",
+        gridCoordinates: clueIdToGridCoordinates[c.ClueID],
+      })),
+      ...(crossword.Clues?.Down || []).map((c) => ({
+        ...c,
+        dir: "down",
+        gridCoordinates: clueIdToGridCoordinates[c.ClueID],
+      })),
+    ];
+
+    const validClues = cluesRaw.filter((clue) =>
+      Array.isArray(clue.gridCoordinates)
+    );
+
+    const clues = validClues.map((clue) => {
+      const [row, col] = clue.gridCoordinates;
+      const length = getClueLength(grid, row, col, clue.dir);
+      return { ...clue, ClueRow: row + 1, ClueCol: col + 1, ClueLength: length };
+    });
+
+    const answers = clues.map((clue) => {
+      let word = "";
+      const startRow = clue.ClueRow - 1;
+      const startCol = clue.ClueCol - 1;
+
+      if (clue.dir === "across") {
+        for (let i = 0; i < clue.ClueLength; i++) {
+          word += (grid[startRow]?.[startCol + i] || "").toUpperCase();
+        }
+      } else {
+        for (let i = 0; i < clue.ClueLength; i++) {
+          word += (grid[startRow + i]?.[startCol] || "").toUpperCase();
+        }
+      }
+
+      let clueText;
+      if (word && word.length === clue.ClueLength) {
+        clueText = word.toUpperCase();
+      } else {
+        clueText = "";
+      }
+
+      return {
+        clueID: clue.ClueID,
+        clueText,
+      };
+    });
+
+    // ✅ Include time taken in payload
+    const timeTaken = TOTAL_TIME - remaining; // in seconds
+
+    const payload = {
+      crossword_id: crossword.CrosswordID,
+      answers,
+      time_taken: timeTaken,
+    };
+
+    console.log("Payload to submit", payload);
+
+    const jwt = localStorage.getItem("jwt");
+    if (!jwt) console.warn("JWT token missing!");
+
+    try {
+      const res = await fetch("https://crosswordbackend.onrender.com/submitcrossword", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${jwt}`,
+        },
+        body: JSON.stringify(payload),
+      });
+
+      const result = await res.json();
+
+      if (res.ok) {
+        localStorage.removeItem("cw-grid");
+        localStorage.removeItem("cw-time");
+        localStorage.removeItem("cw-timestamp");
+
+        setPopup({
+          open: true,
+          title: "✅ Submission Successful!",
+          message: result.message || "Your answers have been submitted successfully.",
+          success: true,
+        });
+      } else {
+        setPopup({
+          open: true,
+          title: "❌ Multiple Submissions Detected",
+          message:
+            result.message ||
+            "You have already submitted answers for this crossword.",
+          success: false,
+        });
+      }
+      setSubmitted(true);
+    } catch (err) {
       setPopup({
         open: true,
-        title: "❌ Multiple Submissions Detected",
-        message: result.message || "You have already submitted answers for this crossword.",
+        title: "⚠️ Network Error",
+        message: "Unable to connect to the server. Please try again later.",
         success: false,
       });
+      console.error("Submission error:", err);
     }
-    setSubmitted(true);
-  } catch (err) {
-    setPopup({
-      open: true,
-      title: "⚠️ Network Error",
-      message: "Unable to connect to the server. Please try again later.",
-      success: false,
-    });
-    console.error("Submission error:", err);
-  }
-}, [crossword, grid, submitted, getNumberingMap]);
+  }, [crossword, grid, submitted, getNumberingMap, remaining]);
 
-  useEffect(() => {
-    if (submitted || remaining <= 0) return;
-    const timer = setInterval(() => {
-      setRemaining((prev) => {
-        const newTime = prev - 1;
-        localStorage.setItem("cw-time", newTime.toString());
-        localStorage.setItem("cw-timestamp", Date.now().toString());
-        if (newTime <= 0) {
-          clearInterval(timer);
-          handleSubmit();
-          return 0;
-        }
-        return newTime;
-      });
-    }, 1000);
-    return () => clearInterval(timer);
-  }, [submitted, handleSubmit, remaining]);
 
   const formatTime = (seconds) => {
     const mins = Math.floor(seconds / 60);
