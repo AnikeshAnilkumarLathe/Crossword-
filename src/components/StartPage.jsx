@@ -295,7 +295,7 @@ useEffect(() => {
           <div className="auth-card">
             {!user ? (
               <>
-                <p className="auth-title">Sign in with your Email</p>
+                <p className="auth-title">Welcome to the Challenge!</p>
                 <div
                   id="googleSignInDiv"
                   ref={googleContainerRef}
