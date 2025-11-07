@@ -341,7 +341,6 @@ useEffect(() => {
             ) : (
               <>
                 <p className="username">Hi, {user.username}</p>
-                <p className="userscore">Score: {user.score}</p>
                 <div className="row">
                 <button
                 className="btn primary"
@@ -349,11 +348,11 @@ useEffect(() => {
                 submittedToday ? navigate("/leaderboard") : navigate("/crossword")
                         }
    >
-  {submittedToday ? "Leaderboard" : "Start Game"}
-  </button>
-  <button className="btn muted" onClick={handleLogout}>
-    Log Out
-  </button>
+              {submittedToday ? "Leaderboard" : "Start Game"}
+            </button>
+              <button className="btn muted" onClick={handleLogout}>
+                  Log Out
+              </button>
               </div>
 
               </>

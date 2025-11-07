@@ -4,18 +4,16 @@
   background: radial-gradient(
   circle at center,
   #1e2a3a 0%,
-  #121c29 40%,
-  #0a0f16 70%,
-  #000 100%
-),
-radial-gradient(
+  #131f2d 40%,
+  #0f2a50 70%,
+  #03105cf9 100%
+  ),
+  radial-gradient(
   circle at 70% 30%,
-  rgba(255, 200, 100, 0.15),
+  rgba(61, 2, 50, 0.905),
   transparent 70%
-);
+  );
 background-blend-mode: screen;
-
-
   background-size: cover;
   background-position: center;
   background-attachment: fixed;
@@ -30,19 +28,17 @@ background-blend-mode: screen;
   inset: 0;
   background: radial-gradient(
   circle at center,
-  #2f4159dd 0%,
-  #274163e1 40%,
-  #0a0f16 70%,
-  #000 100%
-),
-radial-gradient(
+  #1e2a3a 0%,
+  #131f2d 40%,
+  #0f2a50 70%,
+  #03105cf9 100%
+  ),
+  radial-gradient(
   circle at 70% 30%,
-  rgba(31, 2, 61, 0.653),
+  rgba(61, 2, 50, 0.905),
   transparent 70%
-);
-background-blend-mode: screen;
-
-
+  );
+  background-blend-mode: screen;
   z-index: 0;
 }
 
@@ -54,7 +50,7 @@ background-blend-mode: screen;
   margin-bottom: 18px;
   position: relative;
   z-index: 1;
-  margin-top:10px;
+  margin-top: 30px;
 }
 
 .cw-root .cw-title {
@@ -431,7 +427,7 @@ background-blend-mode: screen;
   cursor: pointer;
   font-size: 1rem;
   transition: all 0.2s ease-in-out;
-  margin-bottom: 20px;
+  margin-bottom: 30px;
 }
 
 }
