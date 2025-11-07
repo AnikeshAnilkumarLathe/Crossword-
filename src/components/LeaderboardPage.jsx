@@ -10,7 +10,6 @@ export default function LeaderboardPage() {
   // Get user details directly from localStorage (most common keys)
   const last = JSON.parse(localStorage.getItem("lastResult") || localStorage.getItem("user") || "null");
   const localDisplayName = last?.username || last?.Username || last?.name || "";
-  const localScore = last?.score || last?.Score || "";
 
   useEffect(() => {
     async function fetchLeaderboard() {
@@ -27,12 +26,18 @@ export default function LeaderboardPage() {
     fetchLeaderboard();
   }, []);
 
-  // Top-10 leaderboard entries
+  // Top-10 leaderboard entries for table
   const topList = list.slice(0, 10);
 
-  // -- Debugging only --
-  console.log("LocalStorage user object:", last);
-  console.log("Local name:", localDisplayName, "Local score:", localScore);
+  // Find user's entry in leaderboard using raw name (case-sensitive)
+  const userEntry = localDisplayName &&
+    list.find(u =>
+      u.Username === localDisplayName ||
+      u.name === localDisplayName
+    );
+
+  // Get score from API leaderboard
+  const apiScore = userEntry ? userEntry.Score : "";
 
   return (
     <div className="lb-root">
@@ -60,8 +65,10 @@ export default function LeaderboardPage() {
         {/* User specific score display */}
         <div className="last-card">
           {localDisplayName
-            ? <div>Hi, {localDisplayName} your score is {localScore}</div>
-            : <div>Hi! Please log in or play to see your score.</div>
+            ? <div className="hi-user">
+                Hi, <span className="user-name">{localDisplayName}</span> your score is <span className="user-score">{apiScore}</span>
+              </div>
+            : <div className="hi-user">Hi! Please log in or play to see your score.</div>
           }
         </div>
 
