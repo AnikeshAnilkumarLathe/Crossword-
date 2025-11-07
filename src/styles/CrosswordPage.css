@@ -372,7 +372,7 @@
     overflow-x: auto;
     overflow-y: auto;
     width: 100%;
-    margin-bottom: -200px;
+    margin-bottom: 200px;
   }
 
   .board-scroll {
@@ -386,7 +386,7 @@
   .cw-side {
     width: 100%;
     max-width: 100%;
-    margin-top: -100px;
+    margin-top: 100px;
   }
 }
 
