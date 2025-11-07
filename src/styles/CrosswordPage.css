@@ -353,7 +353,14 @@
   .cw-root {
     padding: 12px;
   }
-
+  .cw-board {
+    display: block;
+    overflow-x: auto;
+    overflow-y: auto;
+    width: 100%;
+    margin-bottom: -200px;
+    max-height: 500px; 
+  }
   .cw-header {
     flex-direction: column;
     align-items: flex-start;
@@ -373,6 +380,7 @@
     transform: scale(0.85);
     transform-origin: top left;
     min-width: max-content;
+    vertical-align: top;
   }
 
   .cw-side {
