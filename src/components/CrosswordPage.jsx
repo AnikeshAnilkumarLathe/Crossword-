@@ -460,7 +460,7 @@ export default function CrosswordPage() {
           </div>
         </section>
         <aside className="cw-side">
-          <h3>Clues</h3>
+          <h3 className="clue">Clues</h3>
           <div className="clue-group">
             <h4>Across</h4>
             <ul>

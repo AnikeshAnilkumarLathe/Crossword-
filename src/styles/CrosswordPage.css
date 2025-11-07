@@ -167,6 +167,10 @@
   max-height: 600px;
   overflow-y: auto;
 }
+.clue{
+  font-size: 1.3rem;
+  color:yellow;
+}
 
 .cw-root .clues h3,
 .cw-root .clues h4,
