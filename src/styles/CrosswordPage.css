@@ -8,7 +8,6 @@
   font-family: "Poppins", sans-serif;
   color: #e4e8ef;
   position: relative;
-  margin-top: 10px;
 }
 
 
@@ -28,6 +27,7 @@
   margin-bottom: 18px;
   position: relative;
   z-index: 1;
+  margin-top:10px;
 }
 
 .cw-root .cw-title {
