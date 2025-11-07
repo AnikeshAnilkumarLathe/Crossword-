@@ -204,7 +204,7 @@ export default function CrosswordPage() {
     const payload = {
       crossword_id: crossword.CrosswordID,
       answers,
-      time_remaining: remaining,
+      time_left: remaining,
     };
 
     console.log("Payload to submit", payload);
