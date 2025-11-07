@@ -210,6 +210,8 @@ export default function CrosswordPage() {
     time_taken: timeTaken  // send time taken in seconds
   };
 
+  console.log("Payload to submit", payload);
+
 
   const jwt = localStorage.getItem("jwt");
   if (!jwt) console.warn("JWT token missing!");
