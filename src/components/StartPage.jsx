@@ -348,9 +348,9 @@ useEffect(() => {
                 onClick={() =>
                 submittedToday ? navigate("/leaderboard") : navigate("/crossword")
                         }
-   >
-  {submittedToday ? "Leaderboard" : "Start Game"}
-  </button>
+                >
+                  {submittedToday ? "Leaderboard" : "Start Game"}
+                </button>
   <button className="btn muted" onClick={handleLogout}>
     Log Out
   </button>
