@@ -8,6 +8,7 @@
   font-family: "Poppins", sans-serif;
   color: #e4e8ef;
   position: relative;
+  margin-top: 4px;
 }
 
 .cw-root::before {
