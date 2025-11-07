@@ -338,7 +338,7 @@
 
 @media (max-width: 768px) {
   .cw-root {
-    padding: 3px;
+    padding: 12px;
   }
 
   .cw-header {
@@ -388,7 +388,7 @@
   }
 
   .cw-side {
-    margin-top: 4px; /* ensures clues always visible */
+    margin-top: 12px; /* ensures clues always visible */
   }
 
   .cw-title {
