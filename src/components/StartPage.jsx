@@ -141,44 +141,36 @@ export default function StartPage({ videoSrc = "/og.mp4" }) {
   // On mount, load user from localStorage if exists
   // Preload and cache videos on first load
 useEffect(() => {
-  async function preloadVideos() {
-  const videos = [
-    { key: "ogVideo", url: "/og.mp4" },
-    { key: "finalVideo", url: "/final.mp4" },
-  ];
+  const videoUrls = ["/og.mp4", "/final.mp4"];
 
-  // Open the same cache your service worker uses
-  const cache = await caches.open("video-cache-v1");
-
-  for (const { key, url } of videos) {
+  async function cacheVideo(url) {
     try {
-      const match = await cache.match(url);
-      if (match) {
-        console.log(`${key} already cached`);
-        continue;
+      const cache = await caches.open("video-cache-v1");
+      const response = await fetch(url);
+      if (response.ok) {
+        await cache.put(url, response.clone());
+        console.log(`${url} cached for future use`);
+      } else {
+        console.warn(`Failed to fetch ${url}:`, response.status);
       }
-
-      // Fetch and cache in the background — don’t block playback
-      console.log(`Caching ${url} in background...`);
-      fetch(url).then(async (response) => {
-        if (response.ok) {
-          await cache.put(url, response.clone());
-          console.log(`${key} cached successfully`);
-        } else {
-          console.warn(`Failed to fetch ${url}:`, response.status);
-        }
-      });
     } catch (err) {
       console.error(`Error caching ${url}:`, err);
     }
   }
-}
 
-// Call once (e.g. inside useEffect or on page load)
-preloadVideos();
-
-
+  // Cache videos *after* they’ve started loading/playing
+  const videoEl = document.getElementById("bgVideo");
+  if (videoEl) {
+    videoEl.addEventListener("loadeddata", () => {
+      console.log("Video started — caching in background...");
+      videoUrls.forEach((url) => cacheVideo(url));
+    });
+  } else {
+    // Fallback: cache in background after small delay
+    setTimeout(() => videoUrls.forEach((url) => cacheVideo(url)), 5000);
+  }
 }, []);
+
 
   useEffect(() => {
     const stored = localStorage.getItem("user");
