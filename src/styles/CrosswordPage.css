@@ -1,7 +1,13 @@
 .cw-root {
   min-height: 100vh;
   padding: 20px 28px;
-  background: radial-gradient(circle at center, #6c6969 0%, #111 80%);
+  background: radial-gradient(
+    circle at center,
+    #a0a0a0 0%,
+    #777 30%,
+    #333 70%,
+    #0a0a0a 100%
+  );
   background-size: cover;
   background-position: center;
   background-attachment: fixed;
@@ -9,6 +15,7 @@
   color: #e4e8ef;
   position: relative;
 }
+
 .cw-root::before {
   content: "";
   position: absolute;
