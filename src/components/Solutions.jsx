@@ -31,7 +31,7 @@ export default function SolutionPage() {
     fetchSolution();
   }, [day]);
 
-  // Answers mapped by ClueID
+  // Map answers by ClueID
   const answersMap = useMemo(() => {
     const map = {};
     if (solution?.solution && Array.isArray(solution.solution)) {
@@ -42,13 +42,13 @@ export default function SolutionPage() {
     return map;
   }, [solution?.solution]);
 
-  // Fill grid using clue numbers and direction
+  // Fill grid
   const filledGrid = useMemo(() => {
     if (!solution || !solution.grid.length) return [];
     const baseGrid = solution.grid.map(row =>
       row.map(cell => (cell.IsBlank ? null : ""))
     );
-    // Fill Across clues
+
     (solution.clues?.Across || []).forEach(clue => {
       for (let r = 0; r < solution.grid.length; r++) {
         for (let c = 0; c < solution.grid[r].length; c++) {
@@ -58,16 +58,14 @@ export default function SolutionPage() {
             for (let k = 0; k < answer.length; k++) {
               if (c + k < baseGrid[r].length && baseGrid[r][c + k] !== null) {
                 baseGrid[r][c + k] = answer[k];
-              } else {
-                break;
-              }
+              } else break;
             }
             return;
           }
         }
       }
     });
-    // Fill Down clues
+
     (solution.clues?.Down || []).forEach(clue => {
       for (let r = 0; r < solution.grid.length; r++) {
         for (let c = 0; c < solution.grid[r].length; c++) {
@@ -77,15 +75,14 @@ export default function SolutionPage() {
             for (let k = 0; k < answer.length; k++) {
               if (r + k < baseGrid.length && baseGrid[r + k][c] !== null) {
                 baseGrid[r + k][c] = answer[k];
-              } else {
-                break;
-              }
+              } else break;
             }
             return;
           }
         }
       }
     });
+
     return baseGrid;
   }, [solution, answersMap]);
 
@@ -104,13 +101,16 @@ export default function SolutionPage() {
       <main className="solution-main">
         <div className="solution-controls">
           <button onClick={() => setDay(d => Math.max(1, d - 1))}>Prev Day</button>
-          <span style={{ margin: "0 10px" }}>Day {day} Solution</span>
+          <span style={{ margin: "0 10px" }}>Day {day-1} Solution</span>
           <button onClick={() => setDay(d => d + 1)}>Next Day</button>
         </div>
+
         {loading ? (
           <div>Loading…</div>
-        ) : !solution ? (
-          <div>No solution available for day {day}</div>
+        ) : !solution || !solution.grid.length ? (
+          <div className="no-solution">
+            The solutions will be posted on Day:{day}
+          </div>
         ) : (
           <div className="solution-card">
             <h3>Day {day} Solution</h3>
