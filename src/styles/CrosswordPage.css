@@ -10,7 +10,7 @@
   ),
   radial-gradient(
   circle at 70% 30%,
-  rgba(61, 2, 50, 0.905),
+  rgba(33, 2, 51, 0.905),
   transparent 70%
   );
 background-blend-mode: screen;
@@ -35,7 +35,7 @@ background-blend-mode: screen;
   ),
   radial-gradient(
   circle at 70% 30%,
-  rgba(61, 2, 50, 0.905),
+  rgba(33, 2, 51, 0.905),
   transparent 70%
   );
   background-blend-mode: screen;
@@ -50,7 +50,7 @@ background-blend-mode: screen;
   margin-bottom: 18px;
   position: relative;
   z-index: 1;
-  margin-top: 30px;
+  margin-top: 20px;
 }
 
 .cw-root .cw-title {
