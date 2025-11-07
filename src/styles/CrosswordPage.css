@@ -1,7 +1,13 @@
 .cw-root {
   min-height: 100vh;
   padding: 20px 28px;
-  background-image: url("https://images.unsplash.com/photo-1503264116251-35a269479413?auto=format&fit=crop&w=1600&q=80");
+   background: radial-gradient(
+    circle at center,
+    #716d6d6b 0%,
+    #77777736 30%,
+    #3333334a 70%,
+    #0a0a0a 100%
+  );
   background-size: cover;
   background-position: center;
   background-attachment: fixed;
@@ -14,7 +20,13 @@
   content: "";
   position: absolute;
   inset: 0;
-  background: rgba(8, 12, 20, 0.88);
+  background: radial-gradient(
+    circle at center,
+    #716d6d6b 0%,
+    #77777736 30%,
+    #3333334a 70%,
+    #0a0a0a 100%
+  );
   z-index: 0;
 }
 
@@ -26,6 +38,7 @@
   margin-bottom: 18px;
   position: relative;
   z-index: 1;
+  margin-top:10px;
 }
 
 .cw-root .cw-title {
