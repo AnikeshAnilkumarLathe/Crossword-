@@ -86,9 +86,16 @@ background-blend-mode: screen;
   overflow: auto;
   justify-content: flex-start;
 }
-.cell-number{
-  font-size : 10px;
+.cell-number {
+  position: absolute;
+  top: 2px;
+  left: 4px;
+  font-size: 14px; /* increase this value */
+  font-weight: 600; /* optional, makes it bolder */
+  color: #e0e0e0; /* adjust for contrast */
+  pointer-events: none;
 }
+
 .cw-board {
   display: flex;
   justify-content: center;
