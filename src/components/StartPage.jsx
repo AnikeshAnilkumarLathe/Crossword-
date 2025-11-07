@@ -142,11 +142,13 @@ export default function StartPage({ videoSrc = "/og.mp4" }) {
   // Preload and cache videos on first load
 useEffect(() => {
   async function preloadVideos() {
-  const cache = await caches.open("video-cache-v1");
   const videos = [
     { key: "ogVideo", url: "/og.mp4" },
     { key: "finalVideo", url: "/final.mp4" },
   ];
+
+  // Open the same cache your service worker uses
+  const cache = await caches.open("video-cache-v1");
 
   for (const { key, url } of videos) {
     try {
@@ -156,21 +158,25 @@ useEffect(() => {
         continue;
       }
 
-      console.log(`Fetching and caching ${url}`);
-      const response = await fetch(url);
-      if (response.ok) {
-        await cache.put(url, response.clone());
-        console.log(`${key} cached successfully`);
-      } else {
-        console.warn(`Failed to fetch ${url}:`, response.status);
-      }
+      // Fetch and cache in the background — don’t block playback
+      console.log(`Caching ${url} in background...`);
+      fetch(url).then(async (response) => {
+        if (response.ok) {
+          await cache.put(url, response.clone());
+          console.log(`${key} cached successfully`);
+        } else {
+          console.warn(`Failed to fetch ${url}:`, response.status);
+        }
+      });
     } catch (err) {
       console.error(`Error caching ${url}:`, err);
     }
   }
 }
 
+// Call once (e.g. inside useEffect or on page load)
 preloadVideos();
+
 
 }, []);
 
