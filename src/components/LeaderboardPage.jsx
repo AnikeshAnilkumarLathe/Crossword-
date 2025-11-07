@@ -7,11 +7,15 @@ export default function LeaderboardPage() {
   const [list, setList] = useState([]);
   const [loading, setLoading] = useState(true);
 
-  // Try to get the logged in user from localStorage (adjust as per your auth)
-  const last = JSON.parse(localStorage.getItem("lastResult") || "null");
-  const username = last?.Username || last?.name || "";
+  // Retrieve logged in user from localStorage, try all key variants
+  const last = JSON.parse(localStorage.getItem("lastResult") || localStorage.getItem("user") || "null");
+  const username =
+    last?.username ||
+    last?.Username ||
+    last?.name ||
+    "";
 
-  // Normalize username helper
+  // Helper to normalize string comparisons
   function norm(str) {
     return (str || "").trim().toLowerCase();
   }
@@ -31,13 +35,13 @@ export default function LeaderboardPage() {
     fetchLeaderboard();
   }, []);
 
-  // Top-10 only
+  // Top-10 list
   const topList = list.slice(0, 10);
 
-  // Debug: Output information for troubleshooting
-  console.log("LocalStorage 'last':", last);
-  console.log("username (from localStorage):", username);
-  console.log("Fetched leaderboard data:", list);
+  // Debugging output
+  console.log("LocalStorage last:", last);
+  console.log("Extracted username:", username);
+  console.log("Leaderboard from API:", list);
   list.forEach((u, i) => {
     console.log(
       `API user #${i + 1}:`,
@@ -47,7 +51,7 @@ export default function LeaderboardPage() {
     );
   });
 
-  // Find this user's entry in leaderboard (normalized)
+  // Find and display user's own entry
   const userEntry = username &&
     list.find(u =>
       norm(u.Username) === norm(username) ||
