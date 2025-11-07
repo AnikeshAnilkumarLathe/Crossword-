@@ -1,11 +1,11 @@
 .cw-root {
   min-height: 100vh;
   padding: 20px 28px;
-  background: radial-gradient(
+   background: radial-gradient(
     circle at center,
-    #716d6dd4 0%,
-    #7777776b 30%,
-    #333 70%,
+    #716d6d6b 0%,
+    #77777736 30%,
+    #3333334a 70%,
     #0a0a0a 100%
   );
   background-size: cover;
