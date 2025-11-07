@@ -359,7 +359,7 @@
     overflow-y: auto;
     width: 100%;
     margin-bottom: 0;
-    max-height: 500px; 
+    max-height: 450px; 
   }
   .cw-header {
     flex-direction: column;
