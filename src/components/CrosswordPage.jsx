@@ -5,7 +5,6 @@ import "../styles/CrosswordPage.css";
 export default function CrosswordPage() {
   const navigate = useNavigate();
   const user = JSON.parse(localStorage.getItem("user"));
-  const [activeDir, setActiveDir] = useState("across"); // or "down"
   const [crossword, setCrossword] = useState(null);
   const [grid, setGrid] = useState([]);
   const [loading, setLoading] = useState(false);
@@ -338,85 +337,59 @@ export default function CrosswordPage() {
       next[r][c] = char;
       return next;
     });
-    if (activeDir === "across") {
-  const next = findNextCell(r, c);
-  if (next) focusCell(next[0], next[1]);
-} else {
-  const next = findNextCellDown(r, c);
-  if (next) focusCell(next[0], next[1]);
-}
-
+    moveToNearestRightOrDown(r, c);
   };
 
   const handleKeyDown = (r, c, e) => {
-  if (e.key === "ArrowRight") {
-    e.preventDefault();
-    setActiveDir("across");
-    const next = findNextCell(r, c);
-    if (next) focusCell(next[0], next[1]);
-  }
-  if (e.key === "ArrowLeft") {
-    e.preventDefault();
-    setActiveDir("across");
-    const prev = findPrevCell(r, c);
-    if (prev) focusCell(prev[0], prev[1]);
-  }
-  if (e.key === "ArrowDown") {
-    e.preventDefault();
-    setActiveDir("down");
-    for (let rr = r + 1; rr < grid.length; rr++) {
-      if (grid[rr][c] !== null) {
-        focusCell(rr, c);
-        break;
+    if (e.key === "ArrowRight") {
+      e.preventDefault();
+      const next = findNextCell(r, c);
+      if (next) focusCell(next[0], next[1]);
+    }
+    if (e.key === "ArrowLeft") {
+      e.preventDefault();
+      const prev = findPrevCell(r, c);
+      if (prev) focusCell(prev[0], prev[1]);
+    }
+    if (e.key === "ArrowDown") {
+      e.preventDefault();
+      for (let rr = r + 1; rr < grid.length; rr++) {
+        if (grid[rr][c] !== null) {
+          focusCell(rr, c);
+          break;
+        }
       }
     }
-  }
-  if (e.key === "ArrowUp") {
-    e.preventDefault();
-    setActiveDir("down");
-    for (let rr = r - 1; rr >= 0; rr--) {
-      if (grid[rr][c] !== null) {
-        focusCell(rr, c);
-        break;
+    if (e.key === "ArrowUp") {
+      e.preventDefault();
+      for (let rr = r - 1; rr >= 0; rr--) {
+        if (grid[rr][c] !== null) {
+          focusCell(rr, c);
+          break;
+        }
       }
     }
-  }
-
-  if (e.key === "Backspace") {
-    if (!grid[r][c]) {
-      const prev =
-        activeDir === "across" ? findPrevCell(r, c) : findPrevCellDown(r, c);
-      if (prev) {
-        focusCell(prev[0], prev[1]);
+    if (e.key === "Backspace") {
+      if (!grid[r][c]) {
+        const prev = findPrevCell(r, c);
+        if (prev) {
+          focusCell(prev[0], prev[1]);
+          setGrid((prevGrid) => {
+            const next = prevGrid.map((row) => [...row]);
+            next[prev[0]][prev[1]] = "";
+            return next;
+          });
+        }
+      } else {
         setGrid((prevGrid) => {
           const next = prevGrid.map((row) => [...row]);
-          next[prev[0]][prev[1]] = "";
+          next[r][c] = "";
           return next;
         });
       }
-    } else {
-      setGrid((prevGrid) => {
-        const next = prevGrid.map((row) => [...row]);
-        next[r][c] = "";
-        return next;
-      });
+      e.preventDefault();
     }
-    e.preventDefault();
-  }
-};
-  const findNextCellDown = (r, c) => {
-  for (let rr = r + 1; rr < grid.length; rr++) {
-    if (grid[rr][c] !== null) return [rr, c];
-  }
-  return null;
-};
-
-const findPrevCellDown = (r, c) => {
-  for (let rr = r - 1; rr >= 0; rr--) {
-    if (grid[rr][c] !== null) return [rr, c];
-  }
-  return null;
-};
+  };
 
   if (loading || !crossword) {
     return (
