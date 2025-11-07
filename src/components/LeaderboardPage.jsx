@@ -7,18 +7,10 @@ export default function LeaderboardPage() {
   const [list, setList] = useState([]);
   const [loading, setLoading] = useState(true);
 
-  // Retrieve logged in user from localStorage, try all key variants
+  // Get user details directly from localStorage (most common keys)
   const last = JSON.parse(localStorage.getItem("lastResult") || localStorage.getItem("user") || "null");
-  const username =
-    last?.username ||
-    last?.Username ||
-    last?.name ||
-    "";
-
-  // Helper to normalize string comparisons
-  function norm(str) {
-    return (str || "").trim().toLowerCase();
-  }
+  const localDisplayName = last?.username || last?.Username || last?.name || "";
+  const localScore = last?.score || last?.Score || "";
 
   useEffect(() => {
     async function fetchLeaderboard() {
@@ -35,32 +27,12 @@ export default function LeaderboardPage() {
     fetchLeaderboard();
   }, []);
 
-  // Top-10 list
+  // Top-10 leaderboard entries
   const topList = list.slice(0, 10);
 
-  // Debugging output
-  console.log("LocalStorage last:", last);
-  console.log("Extracted username:", username);
-  console.log("Leaderboard from API:", list);
-  list.forEach((u, i) => {
-    console.log(
-      `API user #${i + 1}:`,
-      "Username:", norm(u.Username),
-      "Name:", norm(u.name),
-      "| Comparing to:", norm(username)
-    );
-  });
-
-  // Find and display user's own entry
-  const userEntry = username &&
-    list.find(u =>
-      norm(u.Username) === norm(username) ||
-      norm(u.name) === norm(username)
-    );
-  console.log("Matched userEntry:", userEntry);
-
-  const userRank = userEntry ? (list.indexOf(userEntry) + 1) : null;
-  console.log("userRank:", userRank);
+  // -- Debugging only --
+  console.log("LocalStorage user object:", last);
+  console.log("Local name:", localDisplayName, "Local score:", localScore);
 
   return (
     <div className="lb-root">
@@ -85,27 +57,15 @@ export default function LeaderboardPage() {
       </nav>
 
       <main className="lb-main">
-        {/* User specific score and rank display */}
+        {/* User specific score display */}
         <div className="last-card">
-          <strong>Your Score & Rank:</strong>
-          {userEntry ? (
-            <div>
-              {userEntry.Username || userEntry.name} — {userEntry.Score} pts
-              <span style={{ marginLeft: "0.8em", color: "#77204b", fontWeight: 500 }}>
-                {userRank ? `Rank #${userRank}` : null}
-              </span>
-            </div>
-          ) : (
-            <div>
-              {username
-                ? <>{username} — not ranked yet</>
-                : <>Not ranked yet</>
-              }
-            </div>
-          )}
+          {localDisplayName
+            ? <div>Hi, {localDisplayName} your score is {localScore}</div>
+            : <div>Hi! Please log in or play to see your score.</div>
+          }
         </div>
 
-        {/* Leaderboard table showing only the top 10 scorers */}
+        {/* Leaderboard table showing top 10 scorers */}
         <table className="lb-table" aria-label="Leaderboard">
           <thead>
             <tr>
