@@ -3,10 +3,10 @@
   padding: 20px 28px;
    background: radial-gradient(
     circle at center,
-    #716d6d6b 0%,
-    #77777736 30%,
-    #3333334a 70%,
-    #0a0a0a 100%
+    #b1b1b1 0%,
+    #808080 35%,
+    #2a2a2a 75%,
+    #000 100%
   );
   background-size: cover;
   background-position: center;
@@ -22,10 +22,10 @@
   inset: 0;
   background: radial-gradient(
     circle at center,
-    #716d6d6b 0%,
-    #77777736 30%,
-    #3333334a 70%,
-    #0a0a0a 100%
+    #b1b1b1 0%,
+    #808080 35%,
+    #2a2a2a 75%,
+    #000 100%
   );
   z-index: 0;
 }
