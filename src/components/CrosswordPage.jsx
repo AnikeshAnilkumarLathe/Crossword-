@@ -144,10 +144,6 @@ export default function CrosswordPage() {
   localStorage.removeItem("cw-timestamp");
   localStorage.setItem("cw-submitted", crossword.CrosswordID.toString());
 
-  console.log("==== SUBMISSION DEBUG START ====");
-  console.log("Grid state before submission:", grid);
-
-  // Build map from clue ID to grid cell position using numbering
   const clueIdToGridCoordinates = {};
   Object.entries(getNumberingMap).forEach(([key, clueNum]) => {
     clueIdToGridCoordinates[clueNum] = key.split('-').map(Number);
@@ -167,19 +163,13 @@ export default function CrosswordPage() {
       gridCoordinates: clueIdToGridCoordinates[c.ClueID]
     }))
   ];
-  console.log("Clues with coordinates:", cluesRaw);
 
   // Only clues with found coordinates
   const validClues = cluesRaw.filter(clue => Array.isArray(clue.gridCoordinates));
-  console.log("Valid clues after filtering:", validClues);
 
-  // Fill clue lengths and prep extraction
   const clues = validClues.map(clue => {
     const [row, col] = clue.gridCoordinates;
     const length = getClueLength(grid, row, col, clue.dir);
-    console.log(
-      `ClueID ${clue.ClueID}, dir ${clue.dir}, start (${row},${col}), expected length: ${length}`
-    );
     return { ...clue, ClueRow: row + 1, ClueCol: col + 1, ClueLength: length };
   });
 
@@ -212,14 +202,10 @@ export default function CrosswordPage() {
   };
 });
 
-  // No filtering, always send all clues
-  console.log("Answers to submit:", answers);
-
   const payload = {
     crossword_id: crossword.CrosswordID,
     answers
   };
-  console.log("Payload to submit:", payload);
 
   const jwt = localStorage.getItem("jwt");
   if (!jwt) console.warn("JWT token missing!");
@@ -234,10 +220,7 @@ export default function CrosswordPage() {
       body: JSON.stringify(payload),
     });
 
-    console.log("Raw response:", res);
-
     const result = await res.json();
-    console.log("Parsed response JSON:", result);
 
   if (res.ok) {
     localStorage.removeItem("cw-grid");
@@ -268,7 +251,6 @@ export default function CrosswordPage() {
     });
     console.error("Submission error:", err);
   }
-  console.log("==== SUBMISSION DEBUG END ====");
 }, [crossword, grid, submitted, getNumberingMap]);
 
   useEffect(() => {

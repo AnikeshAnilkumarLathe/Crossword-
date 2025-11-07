@@ -129,7 +129,6 @@ export default function StartPage({ videoSrc = "/og.mp4" }) {
 
         setError(null);
       } catch (err) {
-        console.error("auth error", err, err?.body);
         setError(err?.body?.message || err.message || "Authentication failed.");
       } finally {
         setLoading(false);
