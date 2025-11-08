@@ -1,6 +1,7 @@
 import React, { useEffect, useState, useCallback, useRef } from "react";
 import { useNavigate } from "react-router-dom";
 import "../styles/StartPage.css";
+import Preloader from "./Preloader";
 
 // backend base URL
 const BACKEND_BASE = "https://crosswordbackend.onrender.com";
@@ -14,6 +15,22 @@ export default function StartPage({ videoSrc = "/og.mp4" }) {
   const [submittedToday, setSubmittedToday] = useState(false);
   const childDivRef = useRef(null);
   const initializedRef = useRef(false);
+
+  useEffect(() => {
+    const preloader = document.getElementById("preloader");
+    const video = document.getElementById("bg-video");
+
+    if (video) {
+      video.addEventListener("canplaythrough", () => {
+        preloader.style.opacity = "0";
+        preloader.style.pointerEvents = "none";
+        setTimeout(() => preloader.remove(), 600);
+      });
+    } else {
+      preloader.style.opacity = "0";
+      setTimeout(() => preloader.remove(), 600);
+    }
+  }, []);
 
   const CLIENT_ID =
     "919062485527-9hno8iqrqs35samoaub3reobf03pq3du.apps.googleusercontent.com";
