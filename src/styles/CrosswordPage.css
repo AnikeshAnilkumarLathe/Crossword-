@@ -463,8 +463,8 @@ background-blend-mode: screen;
 }
 @media (min-width: 1400px) {
   .cw-root .cw-main {
-    justify-content: flex-start; /* aligns crossword closer to left */
+    justify-content: flex-start; 
     padding-left: 80px;
-    gap: 50px; /* keep nice spacing between crossword and clues */
+    gap: 50px; 
   }
 }
