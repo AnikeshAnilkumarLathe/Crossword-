@@ -83,8 +83,7 @@ background-blend-mode: screen;
 .cw-root .cw-board {
   flex: 0 1 720px;
   display: flex;
-  overflow-x: auto;
-  overflow-y:visible;
+  overflow: auto;
   justify-content: flex-start;
 }
 .board-grid .cell-number {
@@ -378,8 +377,7 @@ background-blend-mode: screen;
 
   .cw-board {
     justify-content: center;
-    overflow-x: visible;
-    overflow-y:visible;
+    overflow-x: auto;
   }
 
   .board-scroll {
@@ -399,10 +397,11 @@ background-blend-mode: screen;
   }
   .cw-board {
     display: block;
-    overflow-x: visible;
+    overflow-x: auto;
     overflow-y: visible;
+    width: 100%;
     margin-bottom: 0;
-
+    max-height: 450px; 
   }
   .cw-header {
     flex-direction: column;
@@ -410,7 +409,21 @@ background-blend-mode: screen;
     gap: 30px;
   }
 
+  .cw-board {
+    display: block;
+    overflow-x: auto;
+    overflow-y: visible;
+    width: 100%;
+    margin-bottom: 0;
+  }
 
+  .board-scroll {
+    display: inline-block;
+    transform: scale(0.85);
+    transform-origin: top left;
+    min-width: max-content;
+    vertical-align: top;
+  }
 
   .cw-side {
     width: 100%;
