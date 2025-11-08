@@ -83,7 +83,8 @@ background-blend-mode: screen;
 .cw-root .cw-board {
   flex: 0 1 720px;
   display: flex;
-  overflow: auto;
+  overflow-x: auto;
+  overflow-y:visible;
   justify-content: flex-start;
 }
 .board-grid .cell-number {
@@ -378,6 +379,7 @@ background-blend-mode: screen;
   .cw-board {
     justify-content: center;
     overflow-x: auto;
+    overflow-y:visible;
   }
 
   .board-scroll {
@@ -398,6 +400,7 @@ background-blend-mode: screen;
   .cw-board {
     display: block;
     overflow-x: auto;
+    overflow-y: visible;
     width: 100%;
     margin-bottom: 0;
     max-height: 450px; 
