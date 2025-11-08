@@ -101,16 +101,14 @@
     }
   </style>
 
-  <script>
-  // ✅ Keep preloader visible for 8 seconds, then fade + remove
+<script>
+  // Remove preloader as soon as the page and React app are ready
   window.addEventListener("load", () => {
     const preloader = document.getElementById("preloader");
     if (preloader) {
-      setTimeout(() => {
-        preloader.style.opacity = "0";
-        preloader.style.pointerEvents = "none"; // allow interaction during fade
-        setTimeout(() => preloader.remove(), 1000); // matches CSS fade duration
-      }, 4000); 
+      preloader.style.opacity = "0";
+      preloader.style.pointerEvents = "none";
+      setTimeout(() => preloader.remove(), 600); // matches fade-out
     }
   });
 </script>
