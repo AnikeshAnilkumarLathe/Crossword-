@@ -399,7 +399,7 @@ background-blend-mode: screen;
     display: block;
     overflow-x: scroll;
     overflow-y: visible;
-    width: 100vw;
+    width: fit-content;
     margin-bottom: 0;
   }
   .cw-header {
