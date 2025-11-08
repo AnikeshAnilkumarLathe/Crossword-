@@ -412,8 +412,11 @@ background-blend-mode: screen;
     display: block;
     overflow-x: scroll;
     overflow-y: visible;
-    width: 60%;
+    width: 100%;
     margin-bottom: 0;
+    margin-right:0;
+    padding-right:0;
+    
   }
 
   .board-scroll {
