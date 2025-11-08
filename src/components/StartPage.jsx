@@ -270,25 +270,6 @@ export default function StartPage({ videoSrc = "/og.mp4" }) {
     checkCrosswordStatus();
   }, []);
 
-  // ✅ Preloader fade-out after video is ready
-  useEffect(() => {
-    const preloader = document.getElementById("preloader");
-    const video = document.getElementById("bg-video");
-
-    if (video) {
-      video.addEventListener("canplaythrough", () => {
-        if (preloader) {
-          preloader.style.opacity = "0";
-          preloader.style.pointerEvents = "none";
-          setTimeout(() => preloader.remove(), 600);
-        }
-      });
-    } else if (preloader) {
-      preloader.style.opacity = "0";
-      setTimeout(() => preloader.remove(), 600);
-    }
-  }, []);
-
   return (
     <div className="start-root">
       <video

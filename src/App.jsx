@@ -13,7 +13,7 @@ export default function App() {
   useEffect(() => {
     // Show loader on route change
     setLoading(true);
-    const timer = setTimeout(() => setLoading(false), 1200); // 1.2s fade duration
+    const timer = setTimeout(() => setLoading(false), 600); 
     return () => clearTimeout(timer);
   }, [location]);
 
