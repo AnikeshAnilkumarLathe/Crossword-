@@ -410,13 +410,7 @@ background-blend-mode: screen;
     gap: 30px;
   }
 
-  .board-scroll {
-    display: inline-block;
-    transform: scale(0.85);
-    transform-origin: top left;
-    min-width: max-content;
-    vertical-align: top;
-  }
+
 
   .cw-side {
     width: 100%;
