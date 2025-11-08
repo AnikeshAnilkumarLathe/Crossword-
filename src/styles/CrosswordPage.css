@@ -399,7 +399,7 @@ background-blend-mode: screen;
   }
   .cw-board {
     display: block;
-    overflow-x: auto;
+    overflow-x: visible;
     overflow-y: visible;
     margin-bottom: 0;
 
@@ -408,13 +408,6 @@ background-blend-mode: screen;
     flex-direction: column;
     align-items: flex-start;
     gap: 30px;
-  }
-
-  .cw-board {
-    display: block;
-    overflow-x: auto;
-    overflow-y: auto;
-    margin-bottom: 0;
   }
 
   .board-scroll {
