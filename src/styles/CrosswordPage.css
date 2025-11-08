@@ -376,7 +376,7 @@ background-blend-mode: screen;
   }
 
   .cw-board {
-    
+    justify-content:center;
     overflow-x: auto;
   }
 
@@ -412,7 +412,7 @@ background-blend-mode: screen;
     display: block;
     overflow-x: auto;
     overflow-y: visible;
-    width: 100vw;
+    width: fit-content;
     margin-bottom: 0;
   }
 
