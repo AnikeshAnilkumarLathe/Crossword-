@@ -378,7 +378,7 @@ background-blend-mode: screen;
 
   .cw-board {
     justify-content: center;
-    overflow-x: auto;
+    overflow-x: visible;
     overflow-y:visible;
   }
 
