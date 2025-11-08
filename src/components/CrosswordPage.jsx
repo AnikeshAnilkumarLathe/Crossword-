@@ -428,7 +428,7 @@ export default function CrosswordPage() {
                     const isBlank = cellData?.IsBlank;
                     const number = cellData?.NumberAssociated;
                     return (
-                      <div key={c} className={`cell ${isBlank == null ? "white" : "black"}`}>
+                      <div key={c} className={`cell ${isBlank === true ? "white" : "black"}`}>
                         {cellData !== null && number>0  && (
                           <span className="cell-number"> {number} </span>
                         )}
