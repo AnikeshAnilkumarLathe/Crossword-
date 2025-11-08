@@ -401,7 +401,6 @@ background-blend-mode: screen;
     display: block;
     overflow-x: auto;
     overflow-y: visible;
-    width: 100%;
     margin-bottom: 0;
 
   }
@@ -415,7 +414,6 @@ background-blend-mode: screen;
     display: block;
     overflow-x: auto;
     overflow-y: auto;
-    width: 100%;
     margin-bottom: 0;
   }
 
