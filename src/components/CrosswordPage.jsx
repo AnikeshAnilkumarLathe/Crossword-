@@ -424,13 +424,14 @@ export default function CrosswordPage() {
                 <div className="board-row" key={r}>
                   {row.map((cell, c) => {
                     const key = keyFor(r, c);
-                    const number = getNumberingMap[key];
+                    const cellData = crossword.Grid[r][c]
+                    const number = cellData?.NumberAssociated;
                     return (
-                      <div key={c} className={`cell ${cell !== null ? "white" : "black"}`}>
-                        {cell !== null && number && (
-                          <span className="cell-number">{number}</span>
+                      <div key={c} className={`cell ${cellData !== null ? "white" : "black"}`}>
+                        {cellData !== null && number>0  && (
+                          <span className="cell-number"> {number} </span>
                         )}
-                        {cell !== null && (
+                        {cellData !== null && (
                           <input
                             ref={(el) => (inputRefs.current[key] = el)}
                             className="cell-input"
