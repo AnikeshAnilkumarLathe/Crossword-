@@ -418,8 +418,9 @@ export default function CrosswordPage() {
       </header>
       <main className="cw-main">
         <section className="cw-board">
-          <div className="board-scroll">
+          
             <div className="board-grid large" role="grid">
+              <div className="board-scroll">
               {grid.map((row, r) => (
                 <div className="board-row" key={r}>
                   {row.map((cell, c) => {
@@ -449,8 +450,9 @@ export default function CrosswordPage() {
                   })}
                 </div>
               ))}
+              </div>
             </div>
-          </div>
+          
         </section>
         <aside className="cw-side">
           <h3 className="clue">Clues</h3>
