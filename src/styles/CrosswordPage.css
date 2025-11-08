@@ -2,18 +2,18 @@
   min-height: 100vh;
   padding: 20px 28px;
   background: radial-gradient(
-      circle at center,
-      #1e2a3a 0%,
-      #131f2d 40%,
-      #0f2a50 70%,
-      #03105cf9 100%
-    ),
-    radial-gradient(
-      circle at 70% 30%,
-      rgba(33, 2, 51, 0.905),
-      transparent 70%
-    );
-  background-blend-mode: screen;
+  circle at center,
+  #1e2a3a 0%,
+  #131f2d 40%,
+  #0f2a50 70%,
+  #03105cf9 100%
+  ),
+  radial-gradient(
+  circle at 70% 30%,
+  rgba(33, 2, 51, 0.905),
+  transparent 70%
+  );
+background-blend-mode: screen;
   background-size: cover;
   background-position: center;
   background-attachment: fixed;
@@ -26,7 +26,19 @@
   content: "";
   position: absolute;
   inset: 0;
-  background: inherit;
+  background: radial-gradient(
+  circle at center,
+  #1e2a3a 0%,
+  #131f2d 40%,
+  #0f2a50 70%,
+  #03105cf9 100%
+  ),
+  radial-gradient(
+  circle at 70% 30%,
+  rgba(33, 2, 51, 0.905),
+  transparent 70%
+  );
+  background-blend-mode: screen;
   z-index: 0;
 }
 
@@ -61,36 +73,61 @@
   display: flex;
   justify-content: center;
   align-items: flex-start;
-  gap: 16px; /* reduced gap */
+  gap: 24px;
   position: relative;
   z-index: 1;
   min-height: calc(100vh - 100px);
-  overflow-x: hidden;
 }
 
 /* ✅ BOARD STYLING */
 .cw-root .cw-board {
-  flex: 0 1 auto;
+  flex: 0 1 720px;
+  display: flex;
+  overflow: auto;
+  justify-content: flex-start;
+}
+.board-grid .cell-number {
+  position: absolute;
+  top: 1px;
+  left: 1px;
+  font-size: 16px !important;  
+  font-weight: bold;
+  color: #121010f2;
+  z-index: 2;
+  pointer-events: none;
+}
+
+
+.cw-board {
   display: flex;
   justify-content: center;
-  overflow: hidden;
   width: fit-content;
+  overflow: visible;
 }
 
 .board-scroll {
   display: inline-block;
   width: fit-content;
   overflow-x: auto;
-  scrollbar-width: thin;
 }
 
 .cw-root .board-grid {
   background: #141a24;
   padding: 20px;
   border-radius: 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
   border: 2px solid #2c384a;
+}
+
+.board-grid {
   display: inline-block;
   min-width: max-content;
+  background: #141a24;
+  padding: 20px;
+  border-radius: 16px;
+  border: 2px solid #2c384a;
 }
 
 /* Each Row */
@@ -112,22 +149,13 @@
   box-sizing: border-box;
 }
 
-.cell-number {
-  position: absolute;
-  top: 1px;
-  left: 1px;
-  font-size: 16px !important;
-  font-weight: bold;
-  color: #121010f2;
-  z-index: 2;
-  pointer-events: none;
-}
-
+/* Black (Blocked) Cell */
 .cw-root .cell.black {
   background: #0b0f16;
   border: 1px solid #1a2230;
 }
 
+/* White (Active) Cell */
 .cw-root .cell.white {
   background: #dbe2ec;
   color: #0b0f16;
@@ -165,10 +193,10 @@
 
 /* ✅ SIDEBAR */
 .cw-root .cw-side {
-  width: 420px;
+  width: 460px;
   display: flex;
   flex-direction: column;
-  gap: 16px;
+  gap: 18px;
 }
 
 .cw-root .clues {
@@ -179,10 +207,9 @@
   max-height: 600px;
   overflow-y: auto;
 }
-
-.clue {
+.clue{
   font-size: 1.3rem;
-  color: yellow;
+  color:yellow;
 }
 
 .cw-root .clues h3,
@@ -248,17 +275,116 @@
   color: #e5e9f2;
 }
 
-/* ✅ RESPONSIVE */
+/* ✅ PROGRESS CARD */
+.cw-root .progress-card {
+  padding: 16px;
+  background: #1c2330;
+  border-radius: 10px;
+  box-shadow: 0 8px 25px rgba(0, 0, 0, 0.45);
+  color: #f0f4fa;
+  font-size: 1.05rem;
+}
+
+/* === Dark Mode Popup === */
+.popup-overlay {
+  position: fixed;
+  inset: 0;
+  width: 100vw;
+  height: 100vh;
+  background: rgba(5, 8, 12, 0.7);
+  backdrop-filter: blur(6px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 2000;
+  animation: fadeIn 0.3s ease-in-out;
+}
+
+.popup-box {
+  background: linear-gradient(145deg, #0f131b, #1b222f);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  padding: 30px 40px;
+  border-radius: 18px;
+  box-shadow: 0 4px 25px rgba(0, 0, 0, 0.5),
+              0 0 15px rgba(100, 150, 255, 0.1);
+  text-align: center;
+  color: #f5f5f5;
+  max-width: 420px;
+  width: 90%;
+  animation: popupFade 0.3s ease;
+}
+
+.popup-box h2 {
+  margin-bottom: 12px;
+  font-size: 1.6rem;
+  color: #e7ecf7;
+  font-weight: 600;
+}
+
+.popup-box p {
+  margin-bottom: 25px;
+  font-size: 1rem;
+  color: #b0b8c4;
+  line-height: 1.5;
+}
+
+.popup-actions .btn.primary {
+  background: linear-gradient(90deg, #2563eb, #38bdf8);
+  color: #fff;
+  box-shadow: 0 0 10px rgba(59, 130, 246, 0.4);
+}
+
+.popup-actions .btn.primary:hover {
+  transform: scale(1.05);
+  box-shadow: 0 0 18px rgba(96, 165, 250, 0.6);
+}
+
+.popup-actions .btn.secondary {
+  background: rgba(255, 255, 255, 0.1);
+  color: #c7d2e0;
+  margin-left: 10px;
+}
+
+.popup-actions .btn.secondary:hover {
+  background: rgba(255, 255, 255, 0.2);
+}
+
+/* Animations */
+@keyframes popupFade {
+  from {
+    opacity: 0;
+    transform: scale(0.9);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+/* ✅ RESPONSIVE (unchanged except color refs kept consistent) */
 @media (max-width: 1024px) {
   .cw-main {
     flex-direction: column;
     align-items: center;
-    gap: 20px;
   }
 
   .cw-board {
-    overflow-x: auto;
     justify-content: center;
+    overflow-x: auto;
+  }
+
+  .board-scroll {
+    transform: scale(0.95);
+    transform-origin: top center;
   }
 
   .cw-side {
@@ -268,43 +394,70 @@
 }
 
 @media (max-width: 768px) {
-  .cw-main {
+  .cw-root {
+    padding: 12px;
+  }
+  .cw-board {
+    display: block;
+    overflow-x: auto;
+    overflow-y: visible;
+    width: fit-content;
+    margin-bottom: 0;
+  }
+  .cw-header {
     flex-direction: column;
     align-items: flex-start;
-    overflow-x: auto;
+    gap: 30px;
   }
 
   .cw-board {
     display: block;
-    width: 100%;
-    overflow-x: auto; /* ✅ Scroll when needed */
+    overflow-x: auto;
     overflow-y: visible;
+    width: fit-content;
     margin-bottom: 0;
   }
 
   .board-scroll {
-    transform: scale(0.9);
+    display: inline-block;
+    transform: scale(0.85);
     transform-origin: top left;
     min-width: max-content;
+    vertical-align: top;
   }
 
   .cw-side {
     width: 100%;
-    margin-top: 10px;
+    max-width: 100%;
+    margin-top: 0;
   }
+  .cw-root .btn {
+  padding: 10px 14px;
+  border-radius: 8px;
+  border: none;
+  font-weight: 600;
+  cursor: pointer;
+  font-size: 1rem;
+  transition: all 0.2s ease-in-out;
+  margin-bottom: 30px;
+}
+
 }
 
 @media (max-width: 480px) {
   .board-scroll {
-    transform: scale(0.75);
+    transform: scale(0.6);
+    transform-origin: top left;
   }
 
   .cw-title {
-    font-size: 1.3rem;
+    font-size: 1.2rem;
+    color: #9abaff;
   }
 
   .cell.white:focus-within {
     transform: scale(1.08);
     box-shadow: 0 0 8px rgba(148, 189, 255, 0.7);
+    background: #e9eef9;
   }
 }
