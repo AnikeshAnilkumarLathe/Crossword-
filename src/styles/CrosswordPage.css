@@ -398,7 +398,6 @@ background-blend-mode: screen;
   .cw-board {
     display: block;
     overflow-x: auto;
-    overflow-y: hidden;
     width: 100%;
     margin-bottom: 0;
     max-height: 450px; 
