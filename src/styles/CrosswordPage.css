@@ -403,7 +403,7 @@ background-blend-mode: screen;
     overflow-y: visible;
     width: 100%;
     margin-bottom: 0;
-    max-height: 450px; 
+
   }
   .cw-header {
     flex-direction: column;
