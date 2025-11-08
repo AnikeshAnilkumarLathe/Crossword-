@@ -101,14 +101,12 @@ background-blend-mode: screen;
 .cw-board {
   display: flex;
   justify-content: center;
-  width: fit-content;
+  width: 100%;
   overflow: visible;
 }
 
 .board-scroll {
   display: inline-block;
-  width: fit-content;
-  overflow-x: auto;
 }
 
 .cw-root .board-grid {
@@ -378,7 +376,7 @@ background-blend-mode: screen;
   }
 
   .cw-board {
-    justify-content: center;
+    
     overflow-x: auto;
   }
 
@@ -401,7 +399,7 @@ background-blend-mode: screen;
     display: block;
     overflow-x: auto;
     overflow-y: visible;
-    width: fit-content;
+    width: 100vw;
     margin-bottom: 0;
   }
   .cw-header {
@@ -414,7 +412,7 @@ background-blend-mode: screen;
     display: block;
     overflow-x: auto;
     overflow-y: visible;
-    width: fit-content;
+    width: 100vw;
     margin-bottom: 0;
   }
 
