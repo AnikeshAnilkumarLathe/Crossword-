@@ -109,7 +109,7 @@ export default function SolutionPage() {
           <div>Loading…</div>
         ) : !solution || !solution.grid.length ? (
           <div className="no-solution">
-            The solutions will be posted at the end of day: {day}
+            The solutions will be posted soon! Please check back later.
           </div>
         ) : (
           <div className="solution-card">
