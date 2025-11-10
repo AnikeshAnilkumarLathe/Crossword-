@@ -19,6 +19,11 @@ export default function CrosswordPage() {
 
   const TOTAL_TIME = 180;
   const [remaining, setRemaining] = useState(TOTAL_TIME);
+  const remainingRef = useRef(remaining);
+
+  useEffect(() => {
+    remainingRef.current = remaining;
+  }, [remaining]);
 
   useEffect(() => {
     const fetchCrossword = async () => {
@@ -130,7 +135,8 @@ export default function CrosswordPage() {
     return map;
   }, [grid]);
 
-    const handleSubmit = useCallback(async () => {
+    const handleSubmit = useCallback(async (finalTime) => {
+      const timeToSubmit = typeof finalTime === "number" ? finalTime : remaining;
     if (!crossword) {
       console.warn("handleSubmit called but crossword is null");
       return;
@@ -204,7 +210,7 @@ export default function CrosswordPage() {
     const payload = {
       crossword_id: crossword.CrosswordID,
       answers,
-      time_left: remaining,
+      time_left: timeToSubmit,
     };
 
     console.log("Payload to submit", payload);
@@ -266,7 +272,7 @@ export default function CrosswordPage() {
         localStorage.setItem("cw-timestamp", Date.now().toString());
         if (newTime <= 0) {
           clearInterval(timer);
-          handleSubmit();
+          handleSubmit(remainingRef.current);
           return 0;
         }
         return newTime;
