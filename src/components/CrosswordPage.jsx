@@ -272,7 +272,7 @@ export default function CrosswordPage() {
         localStorage.setItem("cw-timestamp", Date.now().toString());
         if (newTime <= 0) {
           clearInterval(timer);
-          handleSubmit(remainingRef.current);
+          handleSubmit(0);
           return 0;
         }
         return newTime;
